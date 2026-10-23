@@ -13,8 +13,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Project foundation | done |
 | BA API client | done |
 | Daily snapshot (bronze) | done |
-| Daily schedule | next |
-| Silver layer, history tracking | planned |
+| Daily schedule | done |
+| Silver layer, history tracking | next |
 | LLM skill extraction + eval | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -32,6 +32,9 @@ src/skillradar/         Python package
     bronze.py           raw data on disk, one folder per day
     snapshot.py         one daily run: search, then details for new postings
     cli.py              command line entry point
+  schedule/             daily job on macOS (launchd)
+  lock.py               stops two runs at the same time
+  notify.py             desktop alert when a run fails
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -64,6 +67,19 @@ runs/run_<id>.json                                counts, errors and status of t
 
 A run is `ok`, `partial` (some requests failed) or `failed` (no search worked). Failed
 details are not saved, so the next run tries them again.
+
+## Daily schedule (macOS)
+
+```sh
+uv run skillradar-schedule install            # every day at 06:00
+uv run skillradar-schedule install --hour 7   # another time
+uv run skillradar-schedule run-now            # start the job once, now
+uv run skillradar-schedule uninstall
+```
+
+The log is in `data/logs/snapshot.log`. You get a desktop alert when a run is not `ok`.
+If the Mac sleeps at 06:00, the run starts when it wakes up. If it is off, that day is
+skipped.
 
 ## Data source
 

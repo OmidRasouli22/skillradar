@@ -1,13 +1,15 @@
-"""Command line: uv run skillradar-snapshot [--city ...] [--term ...]"""
+"""Command line: uv run skillradar-snapshot [--city ...] [--term ...] [--notify]"""
 
 import argparse
 import logging
 from pathlib import Path
 
-from skillradar.config import DATA_DIR, DEFAULT_CONFIG_PATH, load_config
+from skillradar.config import DATA_DIR, DEFAULT_CONFIG_PATH, SearchConfig, load_config
 from skillradar.ingestion.bronze import BronzeStore
 from skillradar.ingestion.client import JobsucheClient
-from skillradar.ingestion.snapshot import run_snapshot
+from skillradar.ingestion.snapshot import RunSummary, run_snapshot
+from skillradar.lock import AlreadyRunning, run_lock
+from skillradar.notify import notify
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--city", action="append", help="only this city (repeatable)")
     parser.add_argument("--term", action="append", help="only this search term (repeatable)")
+    parser.add_argument("--notify", action="store_true", help="desktop alert if the run has errors")
     return parser.parse_args(argv)
 
 
@@ -32,10 +35,30 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("bad config: %s", error)
         return 2
 
-    store = BronzeStore(args.data_dir / "bronze")
-    with JobsucheClient(config.api) as client:
-        summary = run_snapshot(config, client, store)
+    try:
+        with run_lock(args.data_dir / ".snapshot.lock"):
+            summary = _run(config, args.data_dir)
+    except AlreadyRunning as error:
+        logger.error("%s", error)
+        return 3
+    except Exception:
+        if args.notify:
+            notify("SkillRadar run crashed", "See data/logs/snapshot.log")
+        raise
 
+    _log_summary(summary)
+    if args.notify and summary.status != "ok":
+        notify(f"SkillRadar run {summary.status}", f"{len(summary.errors)} errors, see run log")
+    return 1 if summary.status == "failed" else 0
+
+
+def _run(config: SearchConfig, data_dir: Path) -> RunSummary:
+    store = BronzeStore(data_dir / "bronze")
+    with JobsucheClient(config.api) as client:
+        return run_snapshot(config, client, store)
+
+
+def _log_summary(summary: RunSummary) -> None:
     logger.info(
         "run %s %s: %d unique postings, %d new, %d details saved, %d errors",
         summary.run_id,
@@ -45,7 +68,6 @@ def main(argv: list[str] | None = None) -> int:
         summary.details_saved,
         len(summary.errors),
     )
-    return 1 if summary.status == "failed" else 0
 
 
 if __name__ == "__main__":
