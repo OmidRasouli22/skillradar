@@ -128,3 +128,38 @@ def test_waits_between_requests(make_client, api_config, sleeps):
     client.search_page("Java", "Hamburg", 25, page=2)
 
     assert sleeps == [api_config.request_delay_seconds]
+
+
+@pytest.mark.parametrize("bad_refnr", ["", "../x", "a/b", "a b", "x?y=1", "x" * 65])
+def test_details_rejects_unsafe_refnr_without_request(make_client, bad_refnr):
+    calls = []
+    client = make_client(lambda request: calls.append(request) or httpx.Response(200, json={}))
+
+    with pytest.raises(ValueError, match="invalid refnr"):
+        client.details(bad_refnr)
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        httpx.Response(200, text="<html>maintenance</html>"),
+        httpx.Response(200, json=[1, 2]),
+        httpx.Response(200, json={"ergebnisliste": "not a list"}),
+    ],
+)
+def test_unexpected_search_response_raises(make_client, response):
+    with pytest.raises(JobsucheError, match="unexpected|JSON"):
+        make_client(lambda request: response).search_page("Java", "Hamburg", 25, page=1)
+
+
+def test_redirects_are_not_followed(make_client):
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(302, headers={"Location": "https://example.com/"})
+
+    with pytest.raises(JobsucheError):
+        make_client(handler).details(REFNR)
+    assert len(calls) == 1

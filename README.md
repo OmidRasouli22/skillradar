@@ -12,7 +12,8 @@ region. A CV gap analyser compares your CV with that demand.
 |---|---|
 | Project foundation | done |
 | BA API client | done |
-| Daily snapshot (bronze) | next |
+| Daily snapshot (bronze) | done |
+| Daily schedule | next |
 | Silver layer, history tracking | planned |
 | LLM skill extraction + eval | planned |
 | Gold tables, Postgres export | planned |
@@ -27,7 +28,10 @@ src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
     client.py           Jobsuche API client (search, details, retries)
-    models.py           API response shapes
+    models.py           API response shapes and refnr checks
+    bronze.py           raw data on disk, one folder per day
+    snapshot.py         one daily run: search, then details for new postings
+    cli.py              command line entry point
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -42,6 +46,24 @@ uv sync
 uv run pytest
 uv run ruff check .
 ```
+
+## Daily snapshot
+
+```sh
+uv run skillradar-snapshot                                  # all terms and cities
+uv run skillradar-snapshot --city Stuttgart --term Python   # a small test run
+```
+
+Data goes to `data/bronze/`:
+
+```
+search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl    every search result, with term and city
+details/snapshot_date=YYYY-MM-DD/run_<id>.jsonl   full posting, fetched once per refnr
+runs/run_<id>.json                                counts, errors and status of the run
+```
+
+A run is `ok`, `partial` (some requests failed) or `failed` (no search worked). Failed
+details are not saved, so the next run tries them again.
 
 ## Data source
 

@@ -4,11 +4,13 @@ import base64
 import time
 from collections.abc import Callable, Iterator
 from typing import Any
+from urllib.parse import quote
 
 import httpx
+from pydantic import ValidationError
 
 from skillradar.config import ApiConfig
-from skillradar.ingestion.models import Posting, SearchPage
+from skillradar.ingestion.models import Posting, SearchPage, is_valid_refnr
 
 SEARCH_PATH = "/pc/v6/jobs"
 DETAILS_PATH = "/pc/v4/jobdetails/{key}"
@@ -22,6 +24,16 @@ class JobsucheError(Exception):
 def encode_refnr(refnr: str) -> str:
     """The details endpoint expects the refnr as base64."""
     return base64.b64encode(refnr.encode()).decode()
+
+
+def _json_object(response: httpx.Response) -> dict[str, Any]:
+    try:
+        data = response.json()
+    except ValueError as error:
+        raise JobsucheError("response is not valid JSON") from error
+    if not isinstance(data, dict):
+        raise JobsucheError("response is not a JSON object")
+    return data
 
 
 class JobsucheClient:
@@ -59,7 +71,10 @@ class JobsucheClient:
             "size": self._config.page_size,
         }
         response = self._get(SEARCH_PATH, params=params)
-        return SearchPage.model_validate(response.json())
+        try:
+            return SearchPage.model_validate(_json_object(response))
+        except ValidationError as error:
+            raise JobsucheError(f"unexpected search response: {error}") from error
 
     def search(self, term: str, city: str, radius_km: int) -> Iterator[Posting]:
         """Yield all postings for a search, page by page."""
@@ -73,8 +88,11 @@ class JobsucheClient:
 
     def details(self, refnr: str) -> Posting | None:
         """Full posting with description, or None if it is gone."""
-        response = self._get(DETAILS_PATH.format(key=encode_refnr(refnr)), not_found_ok=True)
-        return None if response is None else response.json()
+        if not is_valid_refnr(refnr):
+            raise ValueError(f"invalid refnr: {refnr!r}")
+        key = quote(encode_refnr(refnr), safe="")
+        response = self._get(DETAILS_PATH.format(key=key), not_found_ok=True)
+        return None if response is None else _json_object(response)
 
     def _get(
         self, path: str, params: dict[str, Any] | None = None, not_found_ok: bool = False

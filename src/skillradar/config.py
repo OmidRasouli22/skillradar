@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "search.yaml"
@@ -18,6 +18,13 @@ class ApiConfig(BaseModel):
     timeout_seconds: float = Field(gt=0)
     max_retries: int = Field(ge=0)
 
+    @field_validator("base_url")
+    @classmethod
+    def require_https(cls, url: HttpUrl) -> HttpUrl:
+        if url.scheme != "https":
+            raise ValueError("base_url must use https")
+        return url
+
 
 class SearchConfig(BaseModel):
     api: ApiConfig
@@ -28,6 +35,19 @@ class SearchConfig(BaseModel):
     def queries(self) -> list[tuple[str, str]]:
         """All (term, city) pairs to search."""
         return [(term, city) for city in self.cities for term in self.terms]
+
+    def only(
+        self, cities: list[str] | None = None, terms: list[str] | None = None
+    ) -> "SearchConfig":
+        """Copy limited to some of the configured cities and terms."""
+        unknown_cities = set(cities or []) - set(self.cities)
+        unknown_terms = set(terms or []) - set(self.terms)
+        unknown = unknown_cities | unknown_terms
+        if unknown:
+            raise ValueError(f"not in config: {', '.join(sorted(unknown))}")
+        return self.model_copy(
+            update={"cities": cities or self.cities, "terms": terms or self.terms}
+        )
 
 
 def load_config(path: Path = DEFAULT_CONFIG_PATH) -> SearchConfig:

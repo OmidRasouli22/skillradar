@@ -1,0 +1,122 @@
+"""Raw API data on local disk, one folder per day.
+
+Layout under the root folder:
+    search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl    search results
+    details/snapshot_date=YYYY-MM-DD/run_<id>.jsonl   full postings
+    runs/run_<id>.json                                run summary
+"""
+
+import json
+import logging
+import os
+import tempfile
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+Record = dict[str, Any]
+
+
+@dataclass(frozen=True)
+class RunKey:
+    """Names files of one run. Built from a UTC time, so names are always safe."""
+
+    started_at: datetime
+
+    def __post_init__(self) -> None:
+        if self.started_at.utcoffset() != timedelta(0):
+            raise ValueError("started_at must be a UTC time")
+
+    @property
+    def run_id(self) -> str:
+        return self.started_at.strftime("%Y%m%dT%H%M%SZ")
+
+    @property
+    def snapshot_date(self) -> str:
+        return self.started_at.date().isoformat()
+
+
+class BronzeStore:
+    def __init__(self, root: Path) -> None:
+        self.root = root
+
+    def write_search(self, run: RunKey, records: Iterable[Record]) -> Path:
+        path = self._run_file("search", run)
+        _atomic_write(path, "".join(_json_line(record) for record in records))
+        return path
+
+    @contextmanager
+    def details_writer(self, run: RunKey) -> Iterator[Callable[[Record], None]]:
+        """Write details one by one. The file gets its final name even if the run fails,
+        so work done before an error is kept."""
+        path = self._run_file("details", run)
+        part = path.with_name(path.name + ".part")
+        _make_private_dir(part.parent)
+        fd = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        file = os.fdopen(fd, "w", encoding="utf-8")
+
+        def write(record: Record) -> None:
+            file.write(_json_line(record))
+            file.flush()
+
+        try:
+            yield write
+        finally:
+            file.close()
+            os.replace(part, path)
+
+    def known_refnrs(self) -> set[str]:
+        """Refnrs that already have a details record from an earlier run."""
+        known: set[str] = set()
+        for path in sorted(self.root.glob("details/snapshot_date=*/run_*.jsonl")):
+            for record in _read_json_lines(path):
+                refnr = record.get("refnr")
+                if isinstance(refnr, str):
+                    known.add(refnr)
+        return known
+
+    def write_run_log(self, run: RunKey, summary: Record) -> Path:
+        path = self.root / "runs" / f"run_{run.run_id}.json"
+        _atomic_write(path, json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+        return path
+
+    def _run_file(self, kind: str, run: RunKey) -> Path:
+        return self.root / kind / f"snapshot_date={run.snapshot_date}" / f"run_{run.run_id}.jsonl"
+
+
+def _json_line(record: Record) -> str:
+    return json.dumps(record, ensure_ascii=False) + "\n"
+
+
+def _read_json_lines(path: Path) -> Iterator[Record]:
+    with path.open(encoding="utf-8") as file:
+        for number, line in enumerate(file, start=1):
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                logger.warning("skipping broken line %d in %s", number, path)
+                continue
+            if isinstance(record, dict):
+                yield record
+
+
+def _make_private_dir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    """Write to a temp file, then rename, so readers never see half a file."""
+    _make_private_dir(path.parent)
+    fd, temp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            file.write(text)
+        os.replace(temp, path)
+    except BaseException:
+        Path(temp).unlink(missing_ok=True)
+        raise
