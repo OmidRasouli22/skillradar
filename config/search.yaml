@@ -18,6 +18,10 @@ cities:
   - Berlin
   - Hamburg
   - Frankfurt am Main
+  - Düsseldorf
+  - Köln
+  - Nürnberg
+  - Dresden
 
 terms:
   - Data Engineer
