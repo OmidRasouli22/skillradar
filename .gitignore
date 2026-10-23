@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Local data (bronze/silver snapshots never go into git)
+data/
+
+# Private notes
+docs/
+
+# Secrets
+.env
+.env.local
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

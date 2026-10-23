@@ -1,0 +1,37 @@
+# Search terms and cities for the daily run.
+# Terms are broad on purpose. The role of a posting is set later from its text.
+
+api:
+  base_url: https://rest.arbeitsagentur.de/jobboerse/jobsuche-service
+  api_key: jobboerse-jobsuche   # public key, not a secret
+  page_size: 100
+  request_delay_seconds: 0.5
+  timeout_seconds: 30
+  max_retries: 3
+
+radius_km: 25
+
+cities:
+  - Freiburg im Breisgau
+  - Stuttgart
+  - München
+  - Berlin
+  - Hamburg
+  - Frankfurt am Main
+
+terms:
+  - Data Engineer
+  - Data Scientist
+  - Data Analyst
+  - Machine Learning
+  - Künstliche Intelligenz
+  - Softwareentwickler
+  - Software Engineer
+  - Backend
+  - Frontend
+  - Fullstack
+  - DevOps
+  - Cloud Engineer
+  - Informatiker
+  - Python
+  - Java

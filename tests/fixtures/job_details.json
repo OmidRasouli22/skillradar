@@ -1,0 +1,37 @@
+{
+  "stellenangebotsart": "ARBEIT",
+  "stellenangebotsTitel": "Intermediate Data Engineer (m/w/d)",
+  "stellenangebotsBeschreibung": "Arbeiten bei der BCM Solutions bedeutet beim besten Arbeitgeber mitzugestalten. Mit unseren Kolleginnen und Kollegen gestalten wir seit 2010 aktiv die BCM Solutions GmbH. Jährlich werden wir für unsere phänomenale Arbeit durch unsere BCM Community als bester Arbeitgeber ausgezeichnet. Als Marktführe",
+  "arbeitszeitVollzeit": true,
+  "eintrittszeitraum": {
+    "von": "2026-10-23"
+  },
+  "verguetungsangabe": "KEINE_ANGABEN",
+  "vertragsdauer": "KEINE_ANGABE",
+  "stellenlokationen": [
+    {
+      "adresse": {
+        "strasse": "Tübinger Straße",
+        "hausnummer": "26",
+        "plz": "70178",
+        "ort": "Stuttgart",
+        "region": "BADEN_WUERTTEMBERG",
+        "land": "DEUTSCHLAND"
+      },
+      "breite": 48.77128871700006,
+      "laenge": 9.173125764000076
+    }
+  ],
+  "veroeffentlichungszeitraum": {
+    "von": "2026-10-23"
+  },
+  "datumErsteVeroeffentlichung": "2026-06-18",
+  "aenderungsdatum": "2026-10-23T09:01:07.045",
+  "istBetreut": false,
+  "hauptberuf": "Data Engineer",
+  "firma": "BCM Solutions GmbH",
+  "arbeitgeberKundennummerHash": "FpNFGl1uS74N8WclbpozcW-0dDpPaakUKOla5-N1U3o=",
+  "allianzpartnerUrl": "http://www.arbeitsagentur.de",
+  "allianzpartnerName": "arbeitsagentur.de",
+  "referenznummer": "10001-1003252000-S"
+}

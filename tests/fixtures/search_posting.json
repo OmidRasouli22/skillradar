@@ -1,0 +1,37 @@
+{
+  "stellenangebotsart": "ARBEIT",
+  "stellenangebotsTitel": "Intermediate Data Engineer (m/w/d)",
+  "arbeitszeitVollzeit": true,
+  "eintrittszeitraum": {
+    "von": "2026-10-23"
+  },
+  "verguetungsangabe": "KEINE_ANGABEN",
+  "vertragsdauer": "KEINE_ANGABE",
+  "stellenlokationen": [
+    {
+      "adresse": {
+        "strasse": "Tübinger Straße",
+        "hausnummer": "26",
+        "plz": "70178",
+        "ort": "Stuttgart",
+        "region": "BADEN_WUERTTEMBERG",
+        "land": "DEUTSCHLAND"
+      },
+      "breite": 48.77128871700006,
+      "laenge": 9.173125764000076
+    }
+  ],
+  "veroeffentlichungszeitraum": {
+    "von": "2026-10-23"
+  },
+  "datumErsteVeroeffentlichung": "2026-06-18",
+  "aenderungsdatum": "2026-10-23T09:01:07.045",
+  "hauptberuf": "Data Engineer",
+  "firma": "BCM Solutions GmbH",
+  "arbeitgeberKundennummerHash": "FpNFGl1uS74N8WclbpozcW-0dDpPaakUKOla5-N1U3o=",
+  "referenznummer": "10001-1003252000-S",
+  "entfernung": 0,
+  "alleBerufe": [
+    "Data Engineer"
+  ]
+}
