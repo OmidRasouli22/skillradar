@@ -47,7 +47,7 @@ class FakeSource:
 
     def search(self, term, city, radius_km):
         result = self.searches.get((term, city), [])
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             raise result
         return iter(result)
 
@@ -55,6 +55,6 @@ class FakeSource:
         self.details_calls.append(refnr)
         default = {"referenznummer": refnr, "stellenangebotsBeschreibung": "SQL, Python"}
         result = self.details_map.get(refnr, default)
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             raise result
         return result

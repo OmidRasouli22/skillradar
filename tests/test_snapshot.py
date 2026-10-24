@@ -147,3 +147,40 @@ def test_crash_still_writes_run_log(config, store, clock):
     assert run_log["status"] == "failed"
     assert "bug" in run_log["errors"][-1]
     assert store.known_refnrs() == set()
+
+
+def test_details_from_killed_run_are_not_fetched_again(config, store, clock):
+    folder = store.root / "details/snapshot_date=2026-10-22"
+    folder.mkdir(parents=True)
+    (folder / "run_20261022T060000Z.jsonl.part").write_text('{"refnr": "a", "details": {}}\n')
+    source = FakeSource({BERLIN_DE: [posting("a"), posting("b")]})
+
+    summary = run(config, source, store, clock)
+
+    assert summary.recovered_files == 1
+    assert source.details_calls == ["b"]
+
+
+@pytest.mark.parametrize("stop", [KeyboardInterrupt(), SystemExit("stopped by signal 15")])
+def test_stopped_run_keeps_details_and_writes_log(config, store, clock, stop):
+    searches = {BERLIN_DE: [posting("a"), posting("b")]}
+    source = FakeSource(searches, details={"b": stop})
+
+    with pytest.raises(type(stop)):
+        run(config, source, store, clock)
+
+    run_log = json.loads(only_file(store, "runs").read_text())
+    assert run_log["status"] == "failed"
+    assert store.known_refnrs() == {"a"}
+    assert not list(store.root.rglob("*.part"))
+
+
+def test_progress_is_logged(config, store, clock, caplog, monkeypatch):
+    monkeypatch.setattr("skillradar.ingestion.snapshot.PROGRESS_EVERY", 2)
+    source = FakeSource({BERLIN_DE: [posting(str(i)) for i in range(5)]})
+
+    with caplog.at_level("INFO"):
+        run(config, source, store, clock)
+
+    assert "fetching details for 5 new postings" in caplog.text
+    assert "details 2/5" in caplog.text and "details 4/5" in caplog.text

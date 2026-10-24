@@ -118,3 +118,18 @@ def test_run_log(store):
     assert path.name == "run_20261023T060005Z.json"
     assert '"status": "ok"' in path.read_text()
     assert mode(path) == 0o600
+
+
+class TestRecover:
+    def test_nothing_to_recover(self, store):
+        assert store.recover_unfinished() == 0
+
+    def test_killed_run_is_kept(self, store):
+        folder = store.root / "details/snapshot_date=2026-10-23"
+        folder.mkdir(parents=True)
+        # The last line was cut off when the process was killed.
+        (folder / "run_1.jsonl.part").write_text('{"refnr": "a"}\n{"refnr": "b"}\n{"refnr": "c')
+
+        assert store.recover_unfinished() == 1
+        assert [p.name for p in folder.iterdir()] == ["run_1.jsonl"]
+        assert store.known_refnrs() == {"a", "b"}

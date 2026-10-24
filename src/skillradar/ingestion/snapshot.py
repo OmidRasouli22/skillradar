@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 Clock = Callable[[], datetime]
 
+PROGRESS_EVERY = 250
+
 
 class JobSource(Protocol):
     def search(self, term: str, city: str, radius_km: int) -> Iterator[Posting]: ...
@@ -28,6 +30,7 @@ class RunSummary:
     started_at: str
     finished_at: str | None = None
     status: str = "running"
+    recovered_files: int = 0
     queries: int = 0
     failed_queries: int = 0
     postings_seen: int = 0
@@ -54,12 +57,14 @@ def run_snapshot(
     run = RunKey(clock())
     summary = RunSummary(run_id=run.run_id, started_at=run.started_at.isoformat())
     try:
+        summary.recovered_files = store.recover_unfinished()
         refnrs = _search_all(config, source, store, run, summary)
         _fetch_new_details(source, store, run, refnrs, summary)
         summary.status = _status(summary)
-    except Exception as error:
+    except BaseException as error:
+        # BaseException also covers Ctrl+C and the stop signal at shutdown.
         summary.status = "failed"
-        summary.add_error(f"run stopped: {error}")
+        summary.add_error(f"run stopped: {error!r}")
         raise
     finally:
         summary.finished_at = clock().isoformat()
@@ -106,8 +111,11 @@ def _fetch_new_details(
     if not new_refnrs:
         return
 
+    logger.info("fetching details for %d new postings", len(new_refnrs))
     with store.details_writer(run) as write:
-        for refnr in new_refnrs:
+        for done, refnr in enumerate(new_refnrs, start=1):
+            if done % PROGRESS_EVERY == 0:
+                logger.info("details %d/%d", done, len(new_refnrs))
             try:
                 details = source.details(refnr)
             except JobsucheError as error:

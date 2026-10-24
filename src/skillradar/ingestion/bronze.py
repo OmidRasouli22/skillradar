@@ -70,6 +70,14 @@ class BronzeStore:
             file.close()
             os.replace(part, path)
 
+    def recover_unfinished(self) -> int:
+        """Keep details from runs that were killed, e.g. when the Mac shut down.
+        Only call this while holding the run lock. A broken last line is skipped on read."""
+        parts = sorted(self.root.glob("details/snapshot_date=*/run_*.jsonl.part"))
+        for part in parts:
+            os.replace(part, part.with_suffix(""))
+        return len(parts)
+
     def known_refnrs(self) -> set[str]:
         """Refnrs that already have a details record from an earlier run."""
         known: set[str] = set()

@@ -1,9 +1,18 @@
+import signal
+
 import pytest
 
 from skillradar.ingestion import cli
 from skillradar.ingestion.client import JobsucheError
 from skillradar.lock import run_lock
 from tests.helpers import FakeSource, posting
+
+
+@pytest.fixture(autouse=True)
+def restore_sigterm():
+    original = signal.getsignal(signal.SIGTERM)
+    yield
+    signal.signal(signal.SIGTERM, original)
 
 
 @pytest.fixture
@@ -90,3 +99,11 @@ def test_second_run_at_the_same_time_is_refused(tmp_path, use_source):
 
     assert code == 3
     assert not tmp_path.joinpath("bronze").exists()
+
+
+def test_sigterm_becomes_an_exception():
+    cli.stop_on_sigterm()
+    handler = signal.getsignal(signal.SIGTERM)
+
+    with pytest.raises(SystemExit, match="signal 15"):
+        handler(signal.SIGTERM, None)

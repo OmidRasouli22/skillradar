@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import signal
 from pathlib import Path
 
 from skillradar.config import DATA_DIR, DEFAULT_CONFIG_PATH, SearchConfig, load_config
@@ -35,6 +36,7 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("bad config: %s", error)
         return 2
 
+    stop_on_sigterm()
     try:
         with run_lock(args.data_dir / ".snapshot.lock"):
             summary = _run(config, args.data_dir)
@@ -50,6 +52,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.notify and summary.status != "ok":
         notify(f"SkillRadar run {summary.status}", f"{len(summary.errors)} errors, see run log")
     return 1 if summary.status == "failed" else 0
+
+
+def stop_on_sigterm() -> None:
+    """macOS sends SIGTERM at shutdown. Turn it into an exception so cleanup code runs."""
+
+    def handler(signum: int, _frame: object) -> None:
+        raise SystemExit(f"stopped by signal {signum}")
+
+    signal.signal(signal.SIGTERM, handler)
 
 
 def _run(config: SearchConfig, data_dir: Path) -> RunSummary:
