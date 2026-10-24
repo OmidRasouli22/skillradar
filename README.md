@@ -15,8 +15,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Daily snapshot (bronze) | done |
 | Daily schedule | done |
 | Silver postings (dbt + DuckDB) | done |
-| History: first/last seen | next |
-| Remove personal data | planned |
+| History: first/last seen | done |
+| Remove personal data | next |
 | LLM skill extraction + eval | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -39,8 +39,8 @@ src/skillradar/         Python package
   notify.py             desktop alert when a run fails
   transform/            runs dbt (bronze → silver)
 transform/              dbt project
-  models/staging/       read bronze JSON, newest record per posting
-  models/silver/        silver_postings, silver_posting_locations
+  models/staging/       read bronze JSON and run logs
+  models/silver/        postings, locations, daily open postings, history
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -88,6 +88,12 @@ the data tests in `transform/`, so a broken table stops the build.
 |---|---|
 | `silver_postings` | posting: title, employer, type, salary, home office, first published date, description |
 | `silver_posting_locations` | posting and place (a posting can list up to 10 places) |
+| `silver_posting_days` | posting and day it was open in our snapshots |
+| `silver_posting_history` | posting: first seen, last seen, days seen, closed on |
+
+A posting counts as closed on the first *complete* day it is missing. A day is complete when
+it has an `ok` run over all cities and terms. Partial runs and test runs with `--city` or
+`--term` never close postings, because a missing posting may only have been missed.
 
 ## Daily schedule (macOS)
 

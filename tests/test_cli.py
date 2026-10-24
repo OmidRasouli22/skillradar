@@ -1,7 +1,9 @@
+import json
 import signal
 
 import pytest
 
+from skillradar.config import load_config
 from skillradar.ingestion import cli
 from skillradar.ingestion.client import JobsucheError
 from skillradar.lock import run_lock
@@ -107,3 +109,16 @@ def test_sigterm_becomes_an_exception():
 
     with pytest.raises(SystemExit, match="signal 15"):
         handler(signal.SIGTERM, None)
+
+
+@pytest.mark.parametrize(
+    "extra, full_scope", [([], True), (["--city", "Berlin"], False), (["--term", "Java"], False)]
+)
+def test_filtered_runs_are_marked(tmp_path, use_source, monkeypatch, extra, full_scope):
+    monkeypatch.setattr(cli, "load_config", lambda path: load_config().only(["Berlin"], ["Java"]))
+    use_source(FakeSource())
+
+    cli.main(["--data-dir", str(tmp_path), *extra])
+
+    [log] = tmp_path.glob("bronze/runs/*.json")
+    assert json.loads(log.read_text())["full_scope"] is full_scope

@@ -30,6 +30,8 @@ class RunSummary:
     started_at: str
     finished_at: str | None = None
     status: str = "running"
+    # False when only some cities or terms were searched. Such runs never close postings.
+    full_scope: bool = True
     recovered_files: int = 0
     queries: int = 0
     failed_queries: int = 0
@@ -52,10 +54,16 @@ def utc_now() -> datetime:
 
 
 def run_snapshot(
-    config: SearchConfig, source: JobSource, store: BronzeStore, clock: Clock = utc_now
+    config: SearchConfig,
+    source: JobSource,
+    store: BronzeStore,
+    clock: Clock = utc_now,
+    full_scope: bool = True,
 ) -> RunSummary:
     run = RunKey(clock())
-    summary = RunSummary(run_id=run.run_id, started_at=run.started_at.isoformat())
+    summary = RunSummary(
+        run_id=run.run_id, started_at=run.started_at.isoformat(), full_scope=full_scope
+    )
     try:
         summary.recovered_files = store.recover_unfinished()
         refnrs = _search_all(config, source, store, run, summary)

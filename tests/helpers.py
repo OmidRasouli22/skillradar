@@ -58,3 +58,16 @@ class FakeSource:
         if isinstance(result, BaseException):
             raise result
         return result
+
+
+def write_jsonl(path: Path, records: list[dict], tail: str = "") -> None:
+    """Write records as JSON lines. `tail` adds raw text, e.g. a cut-off line."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records)
+    path.write_text(lines + tail, encoding="utf-8")
+
+
+def write_run_log(bronze: Path, run_id: str, **fields) -> None:
+    path = bronze / "runs" / f"run_{run_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"run_id": run_id, **fields}), encoding="utf-8")

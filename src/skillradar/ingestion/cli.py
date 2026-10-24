@@ -39,7 +39,8 @@ def main(argv: list[str] | None = None) -> int:
     stop_on_sigterm()
     try:
         with run_lock(args.data_dir / ".snapshot.lock"):
-            summary = _run(config, args.data_dir)
+            full_scope = not (args.city or args.term)
+            summary = _run(config, args.data_dir, full_scope)
     except AlreadyRunning as error:
         logger.error("%s", error)
         return 3
@@ -63,10 +64,10 @@ def stop_on_sigterm() -> None:
     signal.signal(signal.SIGTERM, handler)
 
 
-def _run(config: SearchConfig, data_dir: Path) -> RunSummary:
+def _run(config: SearchConfig, data_dir: Path, full_scope: bool) -> RunSummary:
     store = BronzeStore(data_dir / "bronze")
     with JobsucheClient(config.api) as client:
-        return run_snapshot(config, client, store)
+        return run_snapshot(config, client, store, full_scope=full_scope)
 
 
 def _log_summary(summary: RunSummary) -> None:

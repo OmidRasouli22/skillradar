@@ -1,4 +1,3 @@
-import json
 from datetime import date
 
 import duckdb
@@ -6,6 +5,7 @@ import pytest
 
 from skillradar.transform import cli
 from skillradar.transform.runner import TransformError, build, warehouse_path
+from tests.helpers import write_jsonl, write_run_log
 
 
 def details(refnr, **fields):
@@ -20,12 +20,6 @@ def details(refnr, **fields):
         "stellenlokationen": [{"adresse": {"ort": "Stuttgart"}, "breite": 48.7, "laenge": 9.1}],
     }
     return base | fields
-
-
-def write_jsonl(path, records, tail=""):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    lines = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records)
-    path.write_text(lines + tail, encoding="utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -67,6 +61,9 @@ def data_dir(tmp_path_factory):
         ],
     )
     write_jsonl(day2 / "run_20261024T070000Z.jsonl.part", [{"run_id": "p", "refnr": "unfinished"}])
+    write_run_log(data / "bronze", run2, status="ok", full_scope=True)
+    search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl"
+    write_jsonl(search, [{"run_id": run2, "posting": {"referenznummer": "b"}}])
 
     build(data)
     return data
@@ -128,7 +125,15 @@ class TestSilverLocations:
 
 
 def test_build_needs_bronze_files(tmp_path):
-    with pytest.raises(TransformError, match="no details files"):
+    with pytest.raises(TransformError, match="search"):
+        build(tmp_path)
+
+
+def test_build_needs_run_logs(tmp_path):
+    write_jsonl(tmp_path / "bronze/search/snapshot_date=2026-10-23/run_1.jsonl", [])
+    write_jsonl(tmp_path / "bronze/details/snapshot_date=2026-10-23/run_1.jsonl", [])
+
+    with pytest.raises(TransformError, match="runs"):
         build(tmp_path)
 
 
@@ -142,4 +147,4 @@ def test_quote_in_path_is_rejected(tmp_path):
 
 def test_cli_reports_errors(tmp_path, capsys):
     assert cli.main(["--data-dir", str(tmp_path)]) == 1
-    assert "no details files" in capsys.readouterr().err
+    assert "run skillradar-snapshot first" in capsys.readouterr().err

@@ -23,8 +23,13 @@ def build(data_dir: Path, select: str | None = None) -> None:
     data_dir = data_dir.resolve()
     bronze = data_dir / "bronze"
     _check_path(data_dir)
-    if not any(bronze.glob("details/snapshot_date=*/run_*.jsonl")):
-        raise TransformError(f"no details files in {bronze}, run skillradar-snapshot first")
+    for pattern in (
+        "search/snapshot_date=*/run_*.jsonl",
+        "details/snapshot_date=*/run_*.jsonl",
+        "runs/run_*.json",
+    ):
+        if not any(bronze.glob(pattern)):
+            raise TransformError(f"no {pattern} in {bronze}, run skillradar-snapshot first")
 
     # dbt reads these in profiles.yml and in the bronze_files macro.
     os.environ["SKILLRADAR_BRONZE_DIR"] = str(bronze)

@@ -184,3 +184,10 @@ def test_progress_is_logged(config, store, clock, caplog, monkeypatch):
 
     assert "fetching details for 5 new postings" in caplog.text
     assert "details 2/5" in caplog.text and "details 4/5" in caplog.text
+
+
+@pytest.mark.parametrize("full_scope", [True, False])
+def test_run_log_records_scope(config, store, clock, full_scope):
+    run_snapshot(config, FakeSource(), store, clock=clock, full_scope=full_scope)
+
+    assert json.loads(only_file(store, "runs").read_text())["full_scope"] is full_scope

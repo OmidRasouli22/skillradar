@@ -32,3 +32,25 @@ models:
       - name: position
         description: Order of the location in the posting, starting at 1.
         data_tests: [not_null]
+
+  - name: silver_posting_days
+    description: One row per posting and day it was open in our snapshots.
+    columns:
+      - name: snapshot_date
+        data_tests: [not_null]
+      - name: refnr
+        data_tests: [not_null]
+
+  - name: silver_posting_history
+    description: >
+      First and last day each posting was seen, and the first complete day it was gone.
+      closed_on is empty while the posting is still open.
+    columns:
+      - name: refnr
+        data_tests: [unique, not_null]
+      - name: first_seen
+        data_tests: [not_null]
+      - name: last_seen
+        data_tests: [not_null]
+      - name: is_open
+        data_tests: [not_null]
