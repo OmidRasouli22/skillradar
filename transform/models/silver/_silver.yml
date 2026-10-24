@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: silver_postings
+    description: One clean row per posting, from the newest details record.
+    columns:
+      - name: refnr
+        data_tests: [unique, not_null]
+      - name: posting_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [ARBEIT, SELBSTAENDIGKEIT, AUSBILDUNG, PRAKTIKUM_TRAINEE]
+              config:
+                severity: warn
+      - name: first_published
+        description: First publish date from the API. Used for history before our first snapshot.
+        data_tests: [not_null]
+      - name: description
+        data_tests: [not_null]
+
+  - name: silver_posting_locations
+    description: One row per posting and location.
+    columns:
+      - name: refnr
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_postings')
+                field: refnr
+      - name: position
+        description: Order of the location in the posting, starting at 1.
+        data_tests: [not_null]

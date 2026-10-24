@@ -8,6 +8,12 @@ __pycache__/
 # Local data (bronze/silver snapshots never go into git)
 data/
 
+# dbt output
+transform/target/
+transform/logs/
+transform/dbt_packages/
+transform/.user.yml
+
 # Private notes
 docs/
 

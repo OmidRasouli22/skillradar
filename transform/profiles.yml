@@ -1,0 +1,8 @@
+# Paths are set by `skillradar-transform`, so dbt works from any folder.
+skillradar:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('SKILLRADAR_WAREHOUSE') }}"
+      threads: 4

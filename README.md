@@ -14,7 +14,9 @@ region. A CV gap analyser compares your CV with that demand.
 | BA API client | done |
 | Daily snapshot (bronze) | done |
 | Daily schedule | done |
-| Silver layer, history tracking | next |
+| Silver postings (dbt + DuckDB) | done |
+| History: first/last seen | next |
+| Remove personal data | planned |
 | LLM skill extraction + eval | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -35,6 +37,10 @@ src/skillradar/         Python package
   schedule/             daily job on macOS (launchd)
   lock.py               stops two runs at the same time
   notify.py             desktop alert when a run fails
+  transform/            runs dbt (bronze → silver)
+transform/              dbt project
+  models/staging/       read bronze JSON, newest record per posting
+  models/silver/        silver_postings, silver_posting_locations
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -67,6 +73,21 @@ runs/run_<id>.json                                counts, errors and status of t
 
 A run is `ok`, `partial` (some requests failed) or `failed` (no search worked). Failed
 details are not saved, so the next run tries them again.
+
+## Silver tables
+
+```sh
+uv run skillradar-transform                            # build and test all models
+uv run skillradar-transform --select silver_postings   # one model
+```
+
+dbt reads the bronze files and writes tables to `data/warehouse.duckdb`. Each build also runs
+the data tests in `transform/`, so a broken table stops the build.
+
+| Table | One row per |
+|---|---|
+| `silver_postings` | posting: title, employer, type, salary, home office, first published date, description |
+| `silver_posting_locations` | posting and place (a posting can list up to 10 places) |
 
 ## Daily schedule (macOS)
 

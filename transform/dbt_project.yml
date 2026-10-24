@@ -1,0 +1,17 @@
+name: skillradar
+version: "1.0.0"
+profile: skillradar
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+flags:
+  send_anonymous_usage_stats: false
+
+models:
+  skillradar:
+    staging:
+      +materialized: view
+    silver:
+      +materialized: table

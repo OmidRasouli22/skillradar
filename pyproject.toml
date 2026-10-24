@@ -5,6 +5,8 @@ description = "Daily skill-demand radar for German tech job postings"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dbt-core>=1.10",
+    "dbt-duckdb>=1.9",
     "httpx>=0.27",
     "pydantic>=2.8",
     "pyyaml>=6.0",
@@ -13,6 +15,7 @@ dependencies = [
 [project.scripts]
 skillradar-snapshot = "skillradar.ingestion.cli:main"
 skillradar-schedule = "skillradar.schedule.cli:main"
+skillradar-transform = "skillradar.transform.cli:main"
 
 [dependency-groups]
 dev = [
