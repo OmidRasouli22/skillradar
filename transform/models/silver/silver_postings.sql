@@ -1,4 +1,4 @@
--- One clean row per posting.
+-- One clean row per posting. The description is in silver_posting_texts, without personal data.
 
 with details as (
     select * from {{ ref('stg_details') }}
@@ -28,7 +28,6 @@ select
     try_cast(details ->> 'istPrivateArbeitsvermittlung' as boolean) as is_private_recruiter,
     try_cast(details ->> 'datumErsteVeroeffentlichung' as date) as first_published,
     try_cast(details ->> 'aenderungsdatum' as timestamp) as changed_at,
-    details ->> 'stellenangebotsBeschreibung' as description,
     length(details ->> 'stellenangebotsBeschreibung') as description_chars,
     run_id as details_run_id
 from details

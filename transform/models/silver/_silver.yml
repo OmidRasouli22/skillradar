@@ -16,6 +16,20 @@ models:
       - name: first_published
         description: First publish date from the API. Used for history before our first snapshot.
         data_tests: [not_null]
+
+  - name: silver_posting_texts
+    description: >
+      Descriptions with emails, phone numbers, links and contact names replaced by
+      [email], [phone], [link] and [name]. The other columns count the replacements.
+    columns:
+      - name: refnr
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_postings')
+                field: refnr
       - name: description
         data_tests: [not_null]
 

@@ -18,7 +18,9 @@ numbered as (
 select
     refnr,
     position,
-    place ->> '$.adresse.ort' as city,
+    -- "Nürnberg, Mittelfranken" -> "Nürnberg". Brackets stay: "Frankfurt (Oder)" is its own city.
+    nullif(trim(split_part(place ->> '$.adresse.ort', ',', 1)), '') as city,
+    place ->> '$.adresse.ort' as city_raw,
     place ->> '$.adresse.plz' as postal_code,
     place ->> '$.adresse.region' as region,
     place ->> '$.adresse.land' as country,

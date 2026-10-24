@@ -16,7 +16,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Daily schedule | done |
 | Silver postings (dbt + DuckDB) | done |
 | History: first/last seen | done |
-| Remove personal data | next |
+| Remove personal data, clean city names | done |
+| Compress search files, keep Mac awake | next |
 | LLM skill extraction + eval | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -38,6 +39,7 @@ src/skillradar/         Python package
   lock.py               stops two runs at the same time
   notify.py             desktop alert when a run fails
   transform/            runs dbt (bronze → silver)
+  clean/redact.py       removes emails, phones, links and contact names from texts
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history
@@ -86,10 +88,16 @@ the data tests in `transform/`, so a broken table stops the build.
 
 | Table | One row per |
 |---|---|
-| `silver_postings` | posting: title, employer, type, salary, home office, first published date, description |
-| `silver_posting_locations` | posting and place (a posting can list up to 10 places) |
+| `silver_postings` | posting: title, employer, type, salary, home office, first published date |
+| `silver_posting_texts` | posting: description without personal data |
+| `silver_posting_locations` | posting and place, with cleaned city name (a posting can list up to 10 places) |
 | `silver_posting_days` | posting and day it was open in our snapshots |
 | `silver_posting_history` | posting: first seen, last seen, days seen, closed on |
+
+Descriptions often name a contact person with phone and email. `silver_posting_texts`
+replaces these with `[name]`, `[phone]`, `[email]` and `[link]`. The raw text stays only in
+bronze on this machine. The rules do not use a name model, because a name model would also
+remove skills like "Kafka".
 
 A posting counts as closed on the first *complete* day it is missing. A day is complete when
 it has an `ok` run over all cities and terms. Partial runs and test runs with `--city` or

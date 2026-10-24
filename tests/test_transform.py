@@ -33,6 +33,7 @@ def data_dir(tmp_path_factory):
         {"adresse": {"ort": "Stuttgart", "plz": "70173", "region": "BADEN_WUERTTEMBERG"}},
         {"adresse": {"ort": "Esslingen"}, "breite": 48.74, "laenge": 9.31},
     ]
+    contact = "Python und Kafka. Fragen an Frau Anna Weber, Tel. 0711 123456, anna@firma.de"
     posting_a = details(
         "a",
         gehaltsspanneVon="55000",
@@ -51,7 +52,13 @@ def data_dir(tmp_path_factory):
         ],
         tail='{"run_id": "x", "refnr": "cut-off',
     )
-    newer_b = details("b", stellenangebotsTitel="New", festgehalt="48000.0")
+    newer_b = details(
+        "b",
+        stellenangebotsTitel="New",
+        festgehalt="48000.0",
+        stellenangebotsBeschreibung=contact,
+        stellenlokationen=[{"adresse": {"ort": "Nürnberg, Mittelfranken"}}],
+    )
     no_place = details("noplace", stellenlokationen=[])
     write_jsonl(
         day2 / f"run_{run2}.jsonl",
@@ -98,6 +105,9 @@ class TestSilverPostings:
         assert a["home_office_percent"] == 40
         assert a["description_chars"] == len("Wir suchen Erfahrung mit SQL und dbt.")
 
+    def test_raw_description_is_not_in_postings(self, data_dir):
+        assert "description" not in postings(data_dir)["a"]
+
     def test_salary_range_and_fixed_salary(self, data_dir):
         rows = postings(data_dir)
         assert (rows["a"]["salary_min"], rows["a"]["salary_max"]) == (55000, 70000)
@@ -122,6 +132,29 @@ class TestSilverLocations:
         sql = "select count(*) from silver_posting_locations where refnr = 'noplace'"
         rows = query(data_dir, sql)
         assert rows == [(0,)]
+
+
+class TestSilverTexts:
+    def test_contact_data_is_removed(self, data_dir):
+        [(text, emails, phones, names)] = query(
+            data_dir,
+            "select description, emails, phones, names from silver_posting_texts where refnr = 'b'",
+        )
+        assert text == "Python und Kafka. Fragen an Frau [name], Tel. [phone], [email]"
+        assert (emails, phones, names) == (1, 1, 1)
+
+    def test_clean_text_is_unchanged(self, data_dir):
+        sql = "select description from silver_posting_texts where refnr = 'a'"
+        assert query(data_dir, sql) == [("Wir suchen Erfahrung mit SQL und dbt.",)]
+
+    def test_one_row_per_posting(self, data_dir):
+        sql = "select refnr from silver_posting_texts order by refnr"
+        assert query(data_dir, sql) == [("a",), ("b",), ("noplace",)]
+
+
+def test_city_names_are_cleaned(data_dir):
+    sql = "select city, city_raw from silver_posting_locations where refnr = 'b'"
+    assert query(data_dir, sql) == [("Nürnberg", "Nürnberg, Mittelfranken")]
 
 
 def test_build_needs_bronze_files(tmp_path):
