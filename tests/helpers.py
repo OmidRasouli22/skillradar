@@ -1,3 +1,4 @@
+import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -15,8 +16,13 @@ def posting(refnr: object) -> Posting:
     return {"referenznummer": refnr, "stellenangebotsTitel": "Data Engineer"}
 
 
+def read_text(path: Path) -> str:
+    data = path.read_bytes()
+    return (gzip.decompress(data) if path.suffix == ".gz" else data).decode("utf-8")
+
+
 def read_jsonl(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    return [json.loads(line) for line in read_text(path).splitlines()]
 
 
 class FakeClock:
@@ -63,8 +69,8 @@ class FakeSource:
 def write_jsonl(path: Path, records: list[dict], tail: str = "") -> None:
     """Write records as JSON lines. `tail` adds raw text, e.g. a cut-off line."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    lines = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records)
-    path.write_text(lines + tail, encoding="utf-8")
+    data = ("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records) + tail).encode()
+    path.write_bytes(gzip.compress(data) if path.suffix == ".gz" else data)
 
 
 def write_run_log(bronze: Path, run_id: str, **fields) -> None:

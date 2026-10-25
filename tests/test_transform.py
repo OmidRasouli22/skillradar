@@ -69,7 +69,7 @@ def data_dir(tmp_path_factory):
     )
     write_jsonl(day2 / "run_20261024T070000Z.jsonl.part", [{"run_id": "p", "refnr": "unfinished"}])
     write_run_log(data / "bronze", run2, status="ok", full_scope=True)
-    search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl"
+    search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl.gz"
     write_jsonl(search, [{"run_id": run2, "posting": {"referenznummer": "b"}}])
 
     build(data)
@@ -163,7 +163,7 @@ def test_build_needs_bronze_files(tmp_path):
 
 
 def test_build_needs_run_logs(tmp_path):
-    write_jsonl(tmp_path / "bronze/search/snapshot_date=2026-10-23/run_1.jsonl", [])
+    write_jsonl(tmp_path / "bronze/search/snapshot_date=2026-10-23/run_1.jsonl.gz", [])
     write_jsonl(tmp_path / "bronze/details/snapshot_date=2026-10-23/run_1.jsonl", [])
 
     with pytest.raises(TransformError, match="runs"):

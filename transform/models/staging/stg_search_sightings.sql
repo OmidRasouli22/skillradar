@@ -5,7 +5,7 @@ select distinct
     {{ snapshot_date('run_id') }} as snapshot_date,
     posting ->> 'referenznummer' as refnr
 from read_json(
-    {{ bronze_files('search') }},
+    {{ bronze_files('search', 'jsonl.gz') }},
     format = 'newline_delimited',
     columns = {run_id: 'VARCHAR', posting: 'JSON'},
     ignore_errors = true

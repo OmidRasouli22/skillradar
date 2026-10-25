@@ -1,8 +1,9 @@
-"""Command line: uv run skillradar-snapshot [--city ...] [--term ...] [--notify]"""
+"""Command line: uv run skillradar-snapshot [--city ...] [--term ...] [--notify] [--once-per-day]"""
 
 import argparse
 import logging
 import signal
+from datetime import UTC, datetime
 from pathlib import Path
 
 from skillradar.config import DATA_DIR, DEFAULT_CONFIG_PATH, SearchConfig, load_config
@@ -22,6 +23,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--city", action="append", help="only this city (repeatable)")
     parser.add_argument("--term", action="append", help="only this search term (repeatable)")
     parser.add_argument("--notify", action="store_true", help="desktop alert if the run has errors")
+    parser.add_argument(
+        "--once-per-day", action="store_true", help="do nothing if today already has a full run"
+    )
     return parser.parse_args(argv)
 
 
@@ -39,6 +43,10 @@ def main(argv: list[str] | None = None) -> int:
     stop_on_sigterm()
     try:
         with run_lock(args.data_dir / ".snapshot.lock"):
+            today = datetime.now(UTC).date().isoformat()
+            if args.once_per_day and BronzeStore(args.data_dir / "bronze").has_finished_run(today):
+                logger.info("today (%s UTC) already has a full run, nothing to do", today)
+                return 0
             full_scope = not (args.city or args.term)
             summary = _run(config, args.data_dir, full_scope)
     except AlreadyRunning as error:

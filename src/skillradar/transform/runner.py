@@ -24,7 +24,7 @@ def build(data_dir: Path, select: str | None = None) -> None:
     bronze = data_dir / "bronze"
     _check_path(data_dir)
     for pattern in (
-        "search/snapshot_date=*/run_*.jsonl",
+        "search/snapshot_date=*/run_*.jsonl.gz",
         "details/snapshot_date=*/run_*.jsonl",
         "runs/run_*.json",
     ):

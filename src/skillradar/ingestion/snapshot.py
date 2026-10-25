@@ -33,6 +33,7 @@ class RunSummary:
     # False when only some cities or terms were searched. Such runs never close postings.
     full_scope: bool = True
     recovered_files: int = 0
+    compressed_files: int = 0
     queries: int = 0
     failed_queries: int = 0
     postings_seen: int = 0
@@ -66,6 +67,7 @@ def run_snapshot(
     )
     try:
         summary.recovered_files = store.recover_unfinished()
+        summary.compressed_files = store.compress_search_files()
         refnrs = _search_all(config, source, store, run, summary)
         _fetch_new_details(source, store, run, refnrs, summary)
         summary.status = _status(summary)

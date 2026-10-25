@@ -1,9 +1,10 @@
+import json
 from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 
 from skillradar.ingestion.bronze import BronzeStore, RunKey
-from tests.helpers import read_jsonl
+from tests.helpers import read_jsonl, read_text, write_run_log
 
 RUN = RunKey(datetime(2026, 10, 23, 6, 0, 5, tzinfo=UTC))
 NEXT_DAY = RunKey(datetime(2026, 10, 24, 6, 0, 0, tzinfo=UTC))
@@ -39,9 +40,9 @@ class TestSearch:
 
         path = store.write_search(RUN, records)
 
-        assert path == store.root / "search/snapshot_date=2026-10-23/run_20261023T060005Z.jsonl"
+        assert path == store.root / "search/snapshot_date=2026-10-23/run_20261023T060005Z.jsonl.gz"
         assert read_jsonl(path) == records
-        assert "München" in path.read_text(encoding="utf-8")
+        assert "München" in read_text(path)
 
     def test_files_and_folders_are_private(self, store):
         path = store.write_search(RUN, [{"refnr": "a"}])
@@ -133,3 +134,58 @@ class TestRecover:
         assert store.recover_unfinished() == 1
         assert [p.name for p in folder.iterdir()] == ["run_1.jsonl"]
         assert store.known_refnrs() == {"a", "b"}
+
+
+class TestCompress:
+    def test_old_plain_files_are_compressed(self, store):
+        folder = store.root / "search/snapshot_date=2026-10-23"
+        folder.mkdir(parents=True)
+        (folder / "run_1.jsonl").write_text('{"refnr": "a", "city": "München"}\n')
+
+        assert store.compress_search_files() == 1
+        [path] = folder.iterdir()
+        assert path.name == "run_1.jsonl.gz"
+        assert read_jsonl(path) == [{"refnr": "a", "city": "München"}]
+        assert mode(path) == 0o600
+
+    def test_nothing_to_compress(self, store):
+        store.write_search(RUN, [{"refnr": "a"}])
+
+        assert store.compress_search_files() == 0
+
+    def test_compressed_file_is_much_smaller(self, store):
+        records = [
+            {"refnr": str(i), "posting": {"titel": "Data Engineer (m/w/d)"}} for i in range(500)
+        ]
+        path = store.write_search(RUN, records)
+
+        plain = sum(len(json.dumps(r)) + 1 for r in records)
+        assert path.stat().st_size < plain / 5
+
+
+class TestFinishedRun:
+    @pytest.mark.parametrize(
+        "log, expected",
+        [
+            ({"status": "ok", "full_scope": True}, True),
+            ({"status": "partial", "full_scope": True}, True),
+            ({"status": "failed", "full_scope": True}, False),
+            ({"status": "ok", "full_scope": False}, False),
+            ({"status": "ok"}, False),
+        ],
+    )
+    def test_status_and_scope(self, store, log, expected):
+        write_run_log(store.root, "20261023T060000Z", **log)
+
+        assert store.has_finished_run("2026-10-23") is expected
+
+    def test_other_days_do_not_count(self, store):
+        write_run_log(store.root, "20261022T060000Z", status="ok", full_scope=True)
+
+        assert store.has_finished_run("2026-10-23") is False
+
+    def test_broken_log_is_ignored(self, store):
+        (store.root / "runs").mkdir(parents=True)
+        (store.root / "runs/run_20261023T060000Z.json").write_text("{not json")
+
+        assert store.has_finished_run("2026-10-23") is False

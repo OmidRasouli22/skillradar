@@ -17,8 +17,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Silver postings (dbt + DuckDB) | done |
 | History: first/last seen | done |
 | Remove personal data, clean city names | done |
-| Compress search files, keep Mac awake | next |
-| LLM skill extraction + eval | planned |
+| Run once a day when the Mac is on, compress search files | done |
+| LLM skill extraction + eval | next |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
 | Forecasting | planned |
@@ -68,7 +68,7 @@ uv run skillradar-snapshot --city Stuttgart --term Python   # a small test run
 Data goes to `data/bronze/`:
 
 ```
-search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl    every search result, with term and city
+search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl.gz every search result, with term and city (gzip)
 details/snapshot_date=YYYY-MM-DD/run_<id>.jsonl   full posting, fetched once per refnr
 runs/run_<id>.json                                counts, errors and status of the run
 ```
@@ -106,15 +106,18 @@ it has an `ok` run over all cities and terms. Partial runs and test runs with `-
 ## Daily schedule (macOS)
 
 ```sh
-uv run skillradar-schedule install            # every day at 06:00
-uv run skillradar-schedule install --hour 7   # another time
-uv run skillradar-schedule run-now            # start the job once, now
+uv run skillradar-schedule install                   # at login, then every hour
+uv run skillradar-schedule install --check-every 30  # check more often
+uv run skillradar-schedule run-now                   # start a check now
 uv run skillradar-schedule uninstall
 ```
 
+launchd skips a fixed time when the Mac is off, so the job starts at login and then checks
+every hour. With `--once-per-day` the snapshot does nothing when today (UTC) already has a
+full `ok` or `partial` run. A `failed` day is tried again at the next check. While a run is
+going, `caffeinate` keeps the Mac awake.
+
 The log is in `data/logs/snapshot.log`. You get a desktop alert when a run is not `ok`.
-If the Mac sleeps at 06:00, the run starts when it wakes up. If it is off, that day is
-skipped.
 
 ## Data source
 

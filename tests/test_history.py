@@ -39,7 +39,7 @@ def history(tmp_path_factory):
         ]
         # The same posting found by a second search must count once.
         records += [{**records[0], "term": "Java"}]
-        write_jsonl(bronze / f"search/snapshot_date={day}/run_{run_id}.jsonl", records)
+        write_jsonl(bronze / f"search/snapshot_date={day}/run_{run_id}.jsonl.gz", records)
         if run_log:
             write_run_log(bronze, run_id, **run_log)
     write_jsonl(bronze / "details/snapshot_date=2026-10-20/run_x.jsonl", [])

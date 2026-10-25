@@ -32,20 +32,25 @@ class FakeLaunchctl:
 
 class TestJob:
     def test_plist_content(self, tmp_path):
-        job = make_job(tmp_path, hour=7, minute=30)
+        job = make_job(tmp_path, check_every_minutes=30)
 
         plist = plistlib.loads(build_plist(job))
 
         assert plist["Label"] == LABEL
         assert plist["ProgramArguments"] == [
+            "/usr/bin/caffeinate",
+            "-i",
             "/opt/homebrew/bin/uv",
             "run",
             "--project",
             str(job.project_dir),
             "skillradar-snapshot",
             "--notify",
+            "--once-per-day",
         ]
-        assert plist["StartCalendarInterval"] == {"Hour": 7, "Minute": 30}
+        assert plist["RunAtLoad"] is True
+        assert plist["StartInterval"] == 30 * 60
+        assert "StartCalendarInterval" not in plist
         assert plist["StandardOutPath"] == str(job.log_file)
 
     def test_special_characters_in_paths_are_escaped(self, tmp_path):
@@ -55,10 +60,10 @@ class TestJob:
 
         assert plist["WorkingDirectory"].endswith("a&b <c>")
 
-    @pytest.mark.parametrize("hour, minute", [(24, 0), (-1, 0), (6, 60)])
-    def test_rejects_invalid_time(self, tmp_path, hour, minute):
-        with pytest.raises(ValueError, match="invalid time"):
-            make_job(tmp_path, hour=hour, minute=minute)
+    @pytest.mark.parametrize("minutes", [0, 4, 24 * 60 + 1, -60])
+    def test_rejects_invalid_interval(self, tmp_path, minutes):
+        with pytest.raises(ValueError, match="invalid check interval"):
+            make_job(tmp_path, check_every_minutes=minutes)
 
     def test_rejects_relative_paths(self, tmp_path):
         with pytest.raises(ValueError, match="absolute"):
@@ -82,10 +87,10 @@ class TestLaunchAgent:
         launchctl = FakeLaunchctl()
         agent = LaunchAgent(tmp_path / "agents", runner=launchctl)
 
-        agent.install(make_job(tmp_path, hour=6))
-        agent.install(make_job(tmp_path, hour=8))
+        agent.install(make_job(tmp_path, check_every_minutes=60))
+        agent.install(make_job(tmp_path, check_every_minutes=30))
 
-        assert plistlib.loads(agent.plist_path.read_bytes())["StartCalendarInterval"]["Hour"] == 8
+        assert plistlib.loads(agent.plist_path.read_bytes())["StartInterval"] == 30 * 60
         assert launchctl.commands() == ["bootout", "bootstrap", "bootout", "bootstrap"]
 
     def test_install_reports_launchctl_error(self, tmp_path):

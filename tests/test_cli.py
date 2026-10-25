@@ -31,7 +31,7 @@ def test_run_writes_bronze(tmp_path, use_source):
     code = cli.main(["--data-dir", str(tmp_path), "--city", "Berlin", "--term", "Python"])
 
     assert code == 0
-    assert list(tmp_path.glob("bronze/search/*/*.jsonl"))
+    assert list(tmp_path.glob("bronze/search/*/*.jsonl.gz"))
     assert list(tmp_path.glob("bronze/details/*/*.jsonl"))
     assert list(tmp_path.glob("bronze/runs/*.json"))
 
@@ -122,3 +122,49 @@ def test_filtered_runs_are_marked(tmp_path, use_source, monkeypatch, extra, full
 
     [log] = tmp_path.glob("bronze/runs/*.json")
     assert json.loads(log.read_text())["full_scope"] is full_scope
+
+
+class CountingSource(FakeSource):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.searches_done = 0
+
+    def search(self, term, city, radius_km):
+        self.searches_done += 1
+        return super().search(term, city, radius_km)
+
+
+@pytest.fixture
+def one_query(monkeypatch):
+    monkeypatch.setattr(cli, "load_config", lambda path: load_config().only(["Berlin"], ["Java"]))
+
+
+def test_once_per_day_skips_when_today_is_done(tmp_path, use_source, one_query):
+    source = CountingSource({("Java", "Berlin"): [posting("a")]})
+    use_source(source)
+
+    assert cli.main(["--data-dir", str(tmp_path), "--once-per-day"]) == 0
+    assert cli.main(["--data-dir", str(tmp_path), "--once-per-day"]) == 0
+
+    assert source.searches_done == 1
+    assert len(list(tmp_path.glob("bronze/runs/*.json"))) == 1
+
+
+def test_without_flag_every_call_runs(tmp_path, use_source, one_query):
+    source = CountingSource({("Java", "Berlin"): [posting("a")]})
+    use_source(source)
+
+    cli.main(["--data-dir", str(tmp_path)])
+    cli.main(["--data-dir", str(tmp_path)])
+
+    assert source.searches_done == 2
+
+
+def test_failed_day_is_tried_again(tmp_path, use_source, one_query):
+    source = CountingSource({("Java", "Berlin"): JobsucheError("403")})
+    use_source(source)
+
+    assert cli.main(["--data-dir", str(tmp_path), "--once-per-day"]) == 1
+    cli.main(["--data-dir", str(tmp_path), "--once-per-day"])
+
+    assert source.searches_done == 2

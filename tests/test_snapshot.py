@@ -191,3 +191,14 @@ def test_run_log_records_scope(config, store, clock, full_scope):
     run_snapshot(config, FakeSource(), store, clock=clock, full_scope=full_scope)
 
     assert json.loads(only_file(store, "runs").read_text())["full_scope"] is full_scope
+
+
+def test_old_search_files_are_compressed_on_next_run(config, store, clock):
+    folder = store.root / "search/snapshot_date=2026-10-22"
+    folder.mkdir(parents=True)
+    (folder / "run_20261022T060000Z.jsonl").write_text('{"run_id": "x"}\n')
+
+    summary = run(config, FakeSource(), store, clock)
+
+    assert summary.compressed_files == 1
+    assert [p.name for p in folder.iterdir()] == ["run_20261022T060000Z.jsonl.gz"]

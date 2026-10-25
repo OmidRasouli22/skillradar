@@ -1,11 +1,12 @@
 """Raw API data on local disk, one folder per day.
 
 Layout under the root folder:
-    search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl    search results
+    search/snapshot_date=YYYY-MM-DD/run_<id>.jsonl.gz search results, compressed
     details/snapshot_date=YYYY-MM-DD/run_<id>.jsonl   full postings
     runs/run_<id>.json                                run summary
 """
 
+import gzip
 import json
 import logging
 import os
@@ -46,9 +47,20 @@ class BronzeStore:
         self.root = root
 
     def write_search(self, run: RunKey, records: Iterable[Record]) -> Path:
-        path = self._run_file("search", run)
-        _atomic_write(path, "".join(_json_line(record) for record in records))
+        """Search files are large and written once, so they are stored compressed."""
+        path = self._run_file("search", run, suffix=".jsonl.gz")
+        text = "".join(_json_line(record) for record in records)
+        _atomic_write(path, gzip.compress(text.encode("utf-8"), mtime=0))
         return path
+
+    def compress_search_files(self) -> int:
+        """Compress search files written before compression was added."""
+        paths = sorted(self.root.glob("search/snapshot_date=*/run_*.jsonl"))
+        for path in paths:
+            compressed = gzip.compress(path.read_bytes(), mtime=0)
+            _atomic_write(path.with_name(path.name + ".gz"), compressed)
+            path.unlink()
+        return len(paths)
 
     @contextmanager
     def details_writer(self, run: RunKey) -> Iterator[Callable[[Record], None]]:
@@ -90,11 +102,25 @@ class BronzeStore:
 
     def write_run_log(self, run: RunKey, summary: Record) -> Path:
         path = self.root / "runs" / f"run_{run.run_id}.json"
-        _atomic_write(path, json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+        text = json.dumps(summary, ensure_ascii=False, indent=2) + "\n"
+        _atomic_write(path, text.encode("utf-8"))
         return path
 
-    def _run_file(self, kind: str, run: RunKey) -> Path:
-        return self.root / kind / f"snapshot_date={run.snapshot_date}" / f"run_{run.run_id}.jsonl"
+    def has_finished_run(self, snapshot_date: str) -> bool:
+        """True if a full run on this UTC day ended ok or partial. Failed days are retried."""
+        day = snapshot_date.replace("-", "")
+        for path in self.root.glob(f"runs/run_{day}T*.json"):
+            try:
+                log = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if log.get("full_scope") and log.get("status") in ("ok", "partial"):
+                return True
+        return False
+
+    def _run_file(self, kind: str, run: RunKey, suffix: str = ".jsonl") -> Path:
+        folder = self.root / kind / f"snapshot_date={run.snapshot_date}"
+        return folder / f"run_{run.run_id}{suffix}"
 
 
 def _json_line(record: Record) -> str:
@@ -117,13 +143,13 @@ def _make_private_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
 
 
-def _atomic_write(path: Path, text: str) -> None:
+def _atomic_write(path: Path, data: bytes) -> None:
     """Write to a temp file, then rename, so readers never see half a file."""
     _make_private_dir(path.parent)
     fd, temp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as file:
-            file.write(text)
+        with os.fdopen(fd, "wb") as file:
+            file.write(data)
         os.replace(temp, path)
     except BaseException:
         Path(temp).unlink(missing_ok=True)

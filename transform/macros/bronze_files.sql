@@ -1,6 +1,6 @@
 {# Finished bronze files of one kind. Unfinished `.part` files are not matched. #}
-{% macro bronze_files(kind) -%}
-    '{{ env_var("SKILLRADAR_BRONZE_DIR") }}/{{ kind }}/snapshot_date=*/run_*.jsonl'
+{% macro bronze_files(kind, extension='jsonl') -%}
+    '{{ env_var("SKILLRADAR_BRONZE_DIR") }}/{{ kind }}/snapshot_date=*/run_*.{{ extension }}'
 {%- endmacro %}
 
 {% macro bronze_run_logs() -%}

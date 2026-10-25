@@ -1,7 +1,7 @@
 """Daily job for macOS launchd.
 
-If the Mac sleeps at the set time, launchd runs the job when it wakes up.
-If the Mac is off, that day is skipped.
+launchd skips a fixed time when the Mac is off. So the job starts at login and then every
+hour, and the snapshot itself does nothing when today already has a full run.
 """
 
 import os
@@ -22,12 +22,11 @@ class Job:
     uv: Path
     project_dir: Path
     log_file: Path
-    hour: int = 6
-    minute: int = 0
+    check_every_minutes: int = 60
 
     def __post_init__(self) -> None:
-        if not 0 <= self.hour <= 23 or not 0 <= self.minute <= 59:
-            raise ValueError(f"invalid time {self.hour}:{self.minute}")
+        if not 5 <= self.check_every_minutes <= 24 * 60:
+            raise ValueError(f"invalid check interval: {self.check_every_minutes} minutes")
         for path in (self.uv, self.project_dir, self.log_file):
             if not path.is_absolute():
                 raise ValueError(f"path must be absolute: {path}")
@@ -38,15 +37,20 @@ def build_plist(job: Job) -> bytes:
         {
             "Label": LABEL,
             "ProgramArguments": [
+                # Keeps the Mac from going to sleep while the run is going.
+                "/usr/bin/caffeinate",
+                "-i",
                 str(job.uv),
                 "run",
                 "--project",
                 str(job.project_dir),
                 "skillradar-snapshot",
                 "--notify",
+                "--once-per-day",
             ],
             "WorkingDirectory": str(job.project_dir),
-            "StartCalendarInterval": {"Hour": job.hour, "Minute": job.minute},
+            "RunAtLoad": True,
+            "StartInterval": job.check_every_minutes * 60,
             "StandardOutPath": str(job.log_file),
             "StandardErrorPath": str(job.log_file),
             "ProcessType": "Background",
