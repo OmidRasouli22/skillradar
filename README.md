@@ -19,7 +19,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Remove personal data, clean city names | done |
 | Run once a day when the Mac is on, compress search files | done |
 | Skill list (taxonomy) + keyword baseline | done |
-| LLM skill extraction | next |
+| LLM skill extraction (code, tests) | done |
+| First extraction run, dbt models for skills | next |
 | Evaluation (precision, recall) | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -30,6 +31,7 @@ region. A CV gap analyser compares your CV with that demand.
 ```
 config/search.yaml      search terms, cities, API settings
 config/skills.yaml      skill list: one name per skill, with category and other spellings
+config/llm.yaml         model, effort and prices for skill extraction
 src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
@@ -44,6 +46,8 @@ src/skillradar/         Python package
   transform/            runs dbt (bronze → silver)
   clean/redact.py       removes emails, phones, links and contact names from texts
   skills/               skill list loader, name lookup, keyword search, report
+  extract/              skill extraction with Claude: prompt, schema, batches, results
+  storage.py            atomic writes, private folders, JSON lines
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history
@@ -119,6 +123,24 @@ uv run skillradar-skills report --title "Data Engineer"  # only matching titles
 ```
 
 The keyword search is a simple baseline. The LLM extraction has to beat it.
+
+## Skill extraction with Claude
+
+Each cleaned description is sent to Claude, which returns strict JSON: role, seniority,
+remote, required languages and skills (each marked required or nice to have). Requests go
+through the Batch API (half price) with a cached system prompt.
+
+```sh
+uv run skillradar-extract estimate             # postings to do and rough cost (free)
+uv run skillradar-extract try --refnr <refnr>  # one posting now, to check the prompt
+uv run skillradar-extract submit --limit 200   # send a batch
+uv run skillradar-extract collect              # save answers of finished batches
+uv run skillradar-extract status               # free
+```
+
+Put the API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). A batch can take
+hours, so `submit` saves it as pending and `collect` can run later, also after a restart.
+Answers are stored with model and prompt version; changing either sends postings again.
 
 ## Daily schedule (macOS)
 

@@ -8,19 +8,14 @@ Layout under the root folder:
 
 import gzip
 import json
-import logging
 import os
-import tempfile
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
 
-logger = logging.getLogger(__name__)
-
-Record = dict[str, Any]
+from skillradar.storage import Record, atomic_write, json_line, make_private_dir, read_json_lines
 
 
 @dataclass(frozen=True)
@@ -49,8 +44,8 @@ class BronzeStore:
     def write_search(self, run: RunKey, records: Iterable[Record]) -> Path:
         """Search files are large and written once, so they are stored compressed."""
         path = self._run_file("search", run, suffix=".jsonl.gz")
-        text = "".join(_json_line(record) for record in records)
-        _atomic_write(path, gzip.compress(text.encode("utf-8"), mtime=0))
+        text = "".join(json_line(record) for record in records)
+        atomic_write(path, gzip.compress(text.encode("utf-8"), mtime=0))
         return path
 
     def compress_search_files(self) -> int:
@@ -58,7 +53,7 @@ class BronzeStore:
         paths = sorted(self.root.glob("search/snapshot_date=*/run_*.jsonl"))
         for path in paths:
             compressed = gzip.compress(path.read_bytes(), mtime=0)
-            _atomic_write(path.with_name(path.name + ".gz"), compressed)
+            atomic_write(path.with_name(path.name + ".gz"), compressed)
             path.unlink()
         return len(paths)
 
@@ -68,12 +63,12 @@ class BronzeStore:
         so work done before an error is kept."""
         path = self._run_file("details", run)
         part = path.with_name(path.name + ".part")
-        _make_private_dir(part.parent)
+        make_private_dir(part.parent)
         fd = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         file = os.fdopen(fd, "w", encoding="utf-8")
 
         def write(record: Record) -> None:
-            file.write(_json_line(record))
+            file.write(json_line(record))
             file.flush()
 
         try:
@@ -94,7 +89,7 @@ class BronzeStore:
         """Refnrs that already have a details record from an earlier run."""
         known: set[str] = set()
         for path in sorted(self.root.glob("details/snapshot_date=*/run_*.jsonl")):
-            for record in _read_json_lines(path):
+            for record in read_json_lines(path):
                 refnr = record.get("refnr")
                 if isinstance(refnr, str):
                     known.add(refnr)
@@ -103,7 +98,7 @@ class BronzeStore:
     def write_run_log(self, run: RunKey, summary: Record) -> Path:
         path = self.root / "runs" / f"run_{run.run_id}.json"
         text = json.dumps(summary, ensure_ascii=False, indent=2) + "\n"
-        _atomic_write(path, text.encode("utf-8"))
+        atomic_write(path, text.encode("utf-8"))
         return path
 
     def has_finished_run(self, snapshot_date: str) -> bool:
@@ -121,36 +116,3 @@ class BronzeStore:
     def _run_file(self, kind: str, run: RunKey, suffix: str = ".jsonl") -> Path:
         folder = self.root / kind / f"snapshot_date={run.snapshot_date}"
         return folder / f"run_{run.run_id}{suffix}"
-
-
-def _json_line(record: Record) -> str:
-    return json.dumps(record, ensure_ascii=False) + "\n"
-
-
-def _read_json_lines(path: Path) -> Iterator[Record]:
-    with path.open(encoding="utf-8") as file:
-        for number, line in enumerate(file, start=1):
-            try:
-                record = json.loads(line)
-            except json.JSONDecodeError:
-                logger.warning("skipping broken line %d in %s", number, path)
-                continue
-            if isinstance(record, dict):
-                yield record
-
-
-def _make_private_dir(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True, mode=0o700)
-
-
-def _atomic_write(path: Path, data: bytes) -> None:
-    """Write to a temp file, then rename, so readers never see half a file."""
-    _make_private_dir(path.parent)
-    fd, temp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
-    try:
-        with os.fdopen(fd, "wb") as file:
-            file.write(data)
-        os.replace(temp, path)
-    except BaseException:
-        Path(temp).unlink(missing_ok=True)
-        raise
