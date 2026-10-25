@@ -1,0 +1,274 @@
+# Skill list. Every way a posting writes a skill maps to one name.
+#
+#   name:      the name shown in the app
+#   category:  one of the categories below
+#   aliases:   other spellings; case, spaces and hyphens do not matter
+#   ambiguous: true if the name is also a normal word ("REST", "Go"). Keyword search then
+#              only uses the aliases; the LLM decides from context.
+
+categories:
+  language: Programming languages
+  data: Data engineering
+  database: Databases
+  cloud: Cloud
+  devops: DevOps and infrastructure
+  ml: Machine learning and AI
+  analytics: BI and analytics
+  frontend: Frontend
+  backend: Backend frameworks
+  architecture: APIs and architecture
+  mobile: Mobile
+  testing: Testing
+  security: Security
+  enterprise: Enterprise software
+  engineering: Embedded and engineering
+  method: Methods and tools
+
+skills:
+  # Programming languages
+  - {name: Python, category: language}
+  - {name: Java, category: language}
+  - {name: JavaScript, category: language, aliases: [JS, ECMAScript]}
+  - {name: TypeScript, category: language}
+  - {name: "C#", category: language, aliases: [CSharp, "C Sharp"]}
+  - {name: "C++", category: language, aliases: [CPP]}
+  - {name: C, category: language, ambiguous: true, aliases: [ANSI C, Embedded C, C-Programmierung]}
+  - {name: Go, category: language, ambiguous: true, aliases: [Golang]}
+  - {name: Rust, category: language}
+  - {name: Kotlin, category: language}
+  - {name: Scala, category: language}
+  - {name: R, category: language, ambiguous: true, aliases: [RStudio, R-Programmierung, R Shiny]}
+  - {name: PHP, category: language}
+  - {name: Ruby, category: language, ambiguous: true}
+  - {name: Swift, category: language, ambiguous: true}
+  - {name: Bash, category: language, aliases: [Shell Scripting, Shell-Skripte, Shell-Scripting]}
+  - {name: PowerShell, category: language}
+  - {name: SQL, category: language}
+  - {name: MATLAB, category: language, aliases: [Simulink]}
+  - {name: ABAP, category: language, aliases: [ABAP OO]}
+  - {name: COBOL, category: language}
+  - {name: Dart, category: language, ambiguous: true}
+  - {name: Groovy, category: language}
+  - {name: VBA, category: language, aliases: [Visual Basic]}
+  - {name: Perl, category: language}
+  - {name: Julia, category: language, ambiguous: true}
+  - {name: Elixir, category: language}
+  - {name: Haskell, category: language}
+  - {name: Solidity, category: language}
+
+  # Data engineering
+  - {name: Spark, category: data, aliases: [Apache Spark, PySpark, Spark SQL, Spark Streaming]}
+  - {name: Kafka, category: data, aliases: [Apache Kafka, Kafka Streams, Confluent]}
+  - {name: Airflow, category: data, aliases: [Apache Airflow]}
+  - {name: dbt, category: data, aliases: [data build tool, dbt Core, dbt Cloud]}
+  - {name: Databricks, category: data, aliases: [Azure Databricks]}
+  - {name: Snowflake, category: data}
+  - {name: Hadoop, category: data, aliases: [Apache Hadoop, HDFS]}
+  - {name: Flink, category: data, aliases: [Apache Flink]}
+  - {name: Hive, category: data, ambiguous: true, aliases: [Apache Hive, HiveQL]}
+  - {name: Delta Lake, category: data}
+  - {name: Iceberg, category: data, ambiguous: true, aliases: [Apache Iceberg]}
+  - {name: Talend, category: data}
+  - {name: Informatica, category: data, aliases: [Informatica PowerCenter]}
+  - {name: SSIS, category: data, aliases: [SQL Server Integration Services]}
+  - {name: Azure Data Factory, category: data, aliases: [ADF]}
+  - {name: AWS Glue, category: data}
+  - {name: Dagster, category: data}
+  - {name: Prefect, category: data, ambiguous: true}
+  - {name: NiFi, category: data, aliases: [Apache NiFi]}
+  - {name: Fivetran, category: data}
+  - {name: Airbyte, category: data}
+  - {name: BigQuery, category: data, aliases: [Google BigQuery]}
+  - {name: Redshift, category: data, aliases: [Amazon Redshift, AWS Redshift]}
+  - {name: Synapse, category: data, aliases: [Azure Synapse, Azure Synapse Analytics]}
+  - {name: Microsoft Fabric, category: data, aliases: [MS Fabric]}
+  - {name: Kinesis, category: data, aliases: [Amazon Kinesis, AWS Kinesis]}
+  - {name: ETL, category: data, aliases: [ELT, ETL-Prozesse, ETL/ELT, ETL-Strecken]}
+  - {name: Data Warehouse, category: data, aliases: [DWH, Data Warehousing, Datawarehouse]}
+  - {name: Data Lake, category: data, aliases: [Data Lakehouse, Lakehouse]}
+  - {name: Data Modeling, category: data, aliases: [Datenmodellierung, Data Modelling, Data Vault]}
+  - {name: Pandas, category: data}
+  - {name: NumPy, category: data}
+  - {name: Polars, category: data, ambiguous: true}
+  - {name: DuckDB, category: data}
+
+  # Databases
+  - {name: PostgreSQL, category: database, aliases: [Postgres, PostGIS]}
+  - {name: MySQL, category: database}
+  - {name: MariaDB, category: database}
+  - {name: Oracle Database, category: database, aliases: [Oracle DB, Oracle SQL, PL/SQL, Oracle]}
+  - {name: SQL Server, category: database, aliases: [MS SQL, MSSQL, MS SQL Server, Microsoft SQL Server, T-SQL, TSQL]}
+  - {name: MongoDB, category: database, aliases: [Mongo]}
+  - {name: Redis, category: database}
+  - {name: Elasticsearch, category: database, aliases: [Elastic Search, ELK, ELK Stack, Elastic Stack]}
+  - {name: OpenSearch, category: database}
+  - {name: Cassandra, category: database, aliases: [Apache Cassandra]}
+  - {name: DynamoDB, category: database, aliases: [Amazon DynamoDB]}
+  - {name: Neo4j, category: database}
+  - {name: SQLite, category: database}
+  - {name: Cosmos DB, category: database, aliases: [Azure Cosmos DB, CosmosDB]}
+  - {name: SAP HANA, category: database, aliases: [HANA]}
+  - {name: DB2, category: database, aliases: [IBM DB2, IBM Db2]}
+  - {name: NoSQL, category: database}
+
+  # Cloud
+  - {name: AWS, category: cloud, aliases: [Amazon Web Services, AWS Cloud, AWS Lambda, EC2, Amazon S3]}
+  - {name: Azure, category: cloud, aliases: [Microsoft Azure, MS Azure, Azure Cloud, Azure Functions]}
+  - {name: GCP, category: cloud, aliases: [Google Cloud, Google Cloud Platform]}
+  - {name: OpenStack, category: cloud}
+  - {name: Cloudflare, category: cloud}
+
+  # DevOps and infrastructure
+  - {name: Docker, category: devops, aliases: [Docker Compose, Containerisierung, Containerization]}
+  - {name: Kubernetes, category: devops, aliases: [K8s, AKS, EKS, GKE]}
+  - {name: OpenShift, category: devops, aliases: [Red Hat OpenShift]}
+  - {name: Helm, category: devops, ambiguous: true, aliases: [Helm Charts]}
+  - {name: Terraform, category: devops, aliases: [OpenTofu]}
+  - {name: Ansible, category: devops}
+  - {name: Puppet, category: devops, ambiguous: true}
+  - {name: Pulumi, category: devops}
+  - {name: Bicep, category: devops, ambiguous: true}
+  - {name: Jenkins, category: devops}
+  - {name: GitLab CI, category: devops, aliases: [GitLab CI/CD]}
+  - {name: GitHub Actions, category: devops}
+  - {name: Azure DevOps, category: devops, aliases: [ADO, TFS, Azure Pipelines]}
+  - {name: ArgoCD, category: devops, aliases: [Argo CD]}
+  - {name: CI/CD, category: devops, aliases: [CI/CD-Pipelines, Continuous Integration, Continuous Delivery, Continuous Deployment]}
+  - {name: Git, category: devops, aliases: [GitHub, GitLab, Bitbucket]}
+  - {name: Linux, category: devops, aliases: [Unix, Ubuntu, Red Hat, RHEL, Debian]}
+  - {name: Windows Server, category: devops}
+  - {name: Prometheus, category: devops}
+  - {name: Grafana, category: devops}
+  - {name: Datadog, category: devops}
+  - {name: Splunk, category: devops}
+  - {name: Nginx, category: devops}
+  - {name: Infrastructure as Code, category: devops, aliases: [IaC]}
+  - {name: Networking, category: devops, aliases: [TCP/IP, DNS, Netzwerktechnik]}
+  - {name: VMware, category: devops, aliases: [vSphere]}
+
+  # Machine learning and AI
+  - {name: Machine Learning, category: ml, aliases: [ML, maschinelles Lernen]}
+  - {name: Deep Learning, category: ml, aliases: [Neural Networks, neuronale Netze]}
+  - {name: PyTorch, category: ml}
+  - {name: TensorFlow, category: ml}
+  - {name: Keras, category: ml}
+  - {name: scikit-learn, category: ml, aliases: [sklearn, scikit]}
+  - {name: XGBoost, category: ml, aliases: [LightGBM]}
+  - {name: NLP, category: ml, aliases: [Natural Language Processing]}
+  - {name: Computer Vision, category: ml, aliases: [Bildverarbeitung, OpenCV]}
+  - {name: LLM, category: ml, aliases: [LLMs, Large Language Models, Large Language Model, GPT]}
+  - {name: Generative AI, category: ml, aliases: [GenAI, Gen AI, generative KI]}
+  - {name: RAG, category: ml, aliases: [Retrieval Augmented Generation, Retrieval-Augmented Generation]}
+  - {name: LangChain, category: ml, aliases: [LangGraph]}
+  - {name: Hugging Face, category: ml, aliases: [HuggingFace]}
+  - {name: MLflow, category: ml}
+  - {name: Kubeflow, category: ml}
+  - {name: MLOps, category: ml}
+  - {name: Reinforcement Learning, category: ml}
+  - {name: Statistics, category: ml, aliases: [Statistik, statistische Methoden]}
+
+  # BI and analytics
+  - {name: Power BI, category: analytics, aliases: [PowerBI, Microsoft Power BI, DAX]}
+  - {name: Tableau, category: analytics}
+  - {name: Qlik, category: analytics, aliases: [Qlik Sense, QlikView]}
+  - {name: Looker, category: analytics, aliases: [Looker Studio]}
+  - {name: Excel, category: analytics, aliases: [MS Excel, Microsoft Excel]}
+  - {name: SAP BW, category: analytics, aliases: [SAP BW/4HANA, BW/4HANA]}
+  - {name: SAP Analytics Cloud, category: analytics, aliases: [SAC]}
+
+  # Frontend
+  - {name: React, category: frontend, aliases: [React.js, ReactJS]}
+  - {name: Angular, category: frontend, aliases: [AngularJS]}
+  - {name: Vue.js, category: frontend, aliases: [Vue, VueJS, Nuxt]}
+  - {name: Next.js, category: frontend, aliases: [NextJS]}
+  - {name: Svelte, category: frontend, aliases: [SvelteKit]}
+  - {name: HTML, category: frontend, aliases: [HTML5]}
+  - {name: CSS, category: frontend, aliases: [CSS3, SCSS, Sass]}
+  - {name: Tailwind CSS, category: frontend, aliases: [Tailwind]}
+  - {name: Redux, category: frontend}
+  - {name: jQuery, category: frontend}
+
+  # Backend frameworks
+  - {name: Spring, category: backend, ambiguous: true, aliases: [Spring Boot, Spring Framework, SpringBoot, Spring Cloud]}
+  - {name: Node.js, category: backend, aliases: [NodeJS]}
+  - {name: .NET, category: backend, aliases: [dotnet, .NET Core, .NET Framework]}
+  - {name: ASP.NET, category: backend, aliases: [ASP.NET Core, ASP.NET MVC]}
+  - {name: Django, category: backend}
+  - {name: Flask, category: backend, ambiguous: true}
+  - {name: FastAPI, category: backend}
+  - {name: Express, category: backend, ambiguous: true, aliases: [Express.js, ExpressJS]}
+  - {name: NestJS, category: backend}
+  - {name: Laravel, category: backend}
+  - {name: Symfony, category: backend}
+  - {name: Ruby on Rails, category: backend, aliases: [Rails]}
+  - {name: Hibernate, category: backend, aliases: [JPA]}
+  - {name: Quarkus, category: backend}
+  - {name: Jakarta EE, category: backend, aliases: [Java EE, J2EE]}
+
+  # APIs and architecture
+  - {name: REST, category: architecture, ambiguous: true, aliases: [REST API, REST APIs, RESTful, REST-Schnittstellen, REST-Services]}
+  - {name: GraphQL, category: architecture}
+  - {name: gRPC, category: architecture}
+  - {name: SOAP, category: architecture, ambiguous: true}
+  - {name: Microservices, category: architecture, aliases: [Microservice, Microservice-Architektur, Microservice-Architekturen, Microservices-Architektur]}
+  - {name: RabbitMQ, category: architecture}
+  - {name: Event-Driven Architecture, category: architecture, aliases: [Event Driven, Event-Driven, eventgetrieben]}
+  - {name: Domain-Driven Design, category: architecture, aliases: [DDD]}
+  - {name: OpenAPI, category: architecture, aliases: [Swagger]}
+
+  # Mobile
+  - {name: Android, category: mobile}
+  - {name: iOS, category: mobile}
+  - {name: Flutter, category: mobile}
+  - {name: React Native, category: mobile}
+  - {name: SwiftUI, category: mobile}
+
+  # Testing
+  - {name: Selenium, category: testing}
+  - {name: Cypress, category: testing}
+  - {name: Playwright, category: testing}
+  - {name: JUnit, category: testing}
+  - {name: pytest, category: testing}
+  - {name: Jest, category: testing}
+  - {name: TDD, category: testing, aliases: [Test Driven Development, Test-Driven Development, testgetriebene Entwicklung]}
+  - {name: Test Automation, category: testing, aliases: [Testautomatisierung, automatisierte Tests]}
+
+  # Security
+  - {name: OAuth, category: security, aliases: [OAuth2, OAuth 2.0, OpenID Connect, OIDC]}
+  - {name: Keycloak, category: security}
+  - {name: IAM, category: security, aliases: [Identity and Access Management]}
+  - {name: ISO 27001, category: security, aliases: [ISO/IEC 27001, ISMS]}
+  - {name: Penetration Testing, category: security, aliases: [Pentesting, Pentest]}
+  - {name: SIEM, category: security}
+  - {name: Cryptography, category: security, aliases: [Kryptographie, Kryptografie, PKI]}
+
+  # Enterprise software
+  - {name: SAP, category: enterprise, aliases: [SAP ERP, SAP R/3]}
+  - {name: SAP S/4HANA, category: enterprise, aliases: [S/4HANA, S4HANA, S/4]}
+  - {name: Salesforce, category: enterprise}
+  - {name: Dynamics 365, category: enterprise, aliases: [Microsoft Dynamics, MS Dynamics, D365]}
+  - {name: ServiceNow, category: enterprise}
+  - {name: SharePoint, category: enterprise}
+
+  # Embedded and engineering
+  - {name: Embedded Systems, category: engineering, aliases: [Embedded, Embedded Software, Embedded-Systeme, Embedded Linux]}
+  - {name: FPGA, category: engineering}
+  - {name: VHDL, category: engineering, aliases: [Verilog, SystemVerilog]}
+  - {name: AUTOSAR, category: engineering}
+  - {name: CAD, category: engineering, aliases: [AutoCAD, CATIA, SolidWorks, Siemens NX, Creo]}
+  - {name: PLC, category: engineering, aliases: [SPS, TIA Portal, Siemens S7, CODESYS]}
+  - {name: Microcontrollers, category: engineering, aliases: [Microcontroller, Mikrocontroller, ARM Cortex, STM32]}
+  - {name: RTOS, category: engineering, aliases: [FreeRTOS, Zephyr]}
+
+  # Methods and tools
+  - {name: Agile, category: method, aliases: [agil, agile Methoden, agile Softwareentwicklung]}
+  - {name: Scrum, category: method}
+  - {name: Kanban, category: method}
+  - {name: SAFe, category: method, ambiguous: true, aliases: [Scaled Agile Framework]}
+  - {name: Jira, category: method}
+  - {name: Confluence, category: method}
+  - {name: ITIL, category: method}
+  - {name: DevOps, category: method}
+  - {name: UML, category: method}
+  - {name: Clean Code, category: method}
+  - {name: Design Patterns, category: method, aliases: [Entwurfsmuster]}

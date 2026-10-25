@@ -17,6 +17,7 @@ dependencies = [
 skillradar-snapshot = "skillradar.ingestion.cli:main"
 skillradar-schedule = "skillradar.schedule.cli:main"
 skillradar-transform = "skillradar.transform.cli:main"
+skillradar-skills = "skillradar.skills.report:main"
 
 [dependency-groups]
 dev = [

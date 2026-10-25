@@ -18,7 +18,9 @@ region. A CV gap analyser compares your CV with that demand.
 | History: first/last seen | done |
 | Remove personal data, clean city names | done |
 | Run once a day when the Mac is on, compress search files | done |
-| LLM skill extraction + eval | next |
+| Skill list (taxonomy) + keyword baseline | done |
+| LLM skill extraction | next |
+| Evaluation (precision, recall) | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
 | Forecasting | planned |
@@ -27,6 +29,7 @@ region. A CV gap analyser compares your CV with that demand.
 
 ```
 config/search.yaml      search terms, cities, API settings
+config/skills.yaml      skill list: one name per skill, with category and other spellings
 src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
@@ -40,6 +43,7 @@ src/skillradar/         Python package
   notify.py             desktop alert when a run fails
   transform/            runs dbt (bronze → silver)
   clean/redact.py       removes emails, phones, links and contact names from texts
+  skills/               skill list loader, name lookup, keyword search, report
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history
@@ -102,6 +106,19 @@ remove skills like "Kafka".
 A posting counts as closed on the first *complete* day it is missing. A day is complete when
 it has an `ok` run over all cities and terms. Partial runs and test runs with `--city` or
 `--term` never close postings, because a missing posting may only have been missed.
+
+## Skills
+
+`config/skills.yaml` maps every spelling of a skill to one name ("PySpark" → Spark,
+"K8s" → Kubernetes). Names that are also normal words ("REST", "Go") are marked
+`ambiguous`; the keyword search then only uses their safe spellings ("REST-API", "Golang").
+
+```sh
+uv run skillradar-skills report                         # most common skills in all postings
+uv run skillradar-skills report --title "Data Engineer"  # only matching titles
+```
+
+The keyword search is a simple baseline. The LLM extraction has to beat it.
 
 ## Daily schedule (macOS)
 
