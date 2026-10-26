@@ -276,7 +276,7 @@ class TestSubmitAndCollect:
         client.batches.finish("msgbatch_1", [succeeded(custom_id("a"))])
         collect(client, store)
 
-        assert store.done_refnrs("claude-haiku-5-5", PROMPT_VERSION) == set()
+        assert store.done_refnrs("some-other-model", PROMPT_VERSION) == set()
         assert store.done_refnrs(settings.model, "v0") == set()
 
     def test_nothing_to_send(self, settings, taxonomy, store):

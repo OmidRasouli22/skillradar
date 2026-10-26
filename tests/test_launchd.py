@@ -44,9 +44,7 @@ class TestJob:
             "run",
             "--project",
             str(job.project_dir),
-            "skillradar-snapshot",
-            "--notify",
-            "--once-per-day",
+            "skillradar-daily",
         ]
         assert plist["RunAtLoad"] is True
         assert plist["StartInterval"] == 30 * 60

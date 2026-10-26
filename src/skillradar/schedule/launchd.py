@@ -1,7 +1,7 @@
 """Daily job for macOS launchd.
 
 launchd skips a fixed time when the Mac is off. So the job starts at login and then every
-hour, and the snapshot itself does nothing when today already has a full run.
+hour. skillradar-daily does nothing when today already has a full run and silver is up to date.
 """
 
 import os
@@ -44,9 +44,7 @@ def build_plist(job: Job) -> bytes:
                 "run",
                 "--project",
                 str(job.project_dir),
-                "skillradar-snapshot",
-                "--notify",
-                "--once-per-day",
+                "skillradar-daily",
             ],
             "WorkingDirectory": str(job.project_dir),
             "RunAtLoad": True,

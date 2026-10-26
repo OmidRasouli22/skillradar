@@ -11,6 +11,7 @@ from skillradar.ingestion.bronze import BronzeStore
 from skillradar.ingestion.client import JobsucheClient
 from skillradar.ingestion.snapshot import RunSummary, run_snapshot
 from skillradar.lock import AlreadyRunning, run_lock
+from skillradar.logs import setup_logging
 from skillradar.notify import notify
 
 logger = logging.getLogger(__name__)
@@ -31,8 +32,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    setup_logging()
 
     try:
         config = load_config(args.config).only(cities=args.city, terms=args.term)

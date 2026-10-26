@@ -41,7 +41,9 @@ src/skillradar/         Python package
     snapshot.py         one daily run: search, then details for new postings
     cli.py              command line entry point
   schedule/             daily job on macOS (launchd)
+  daily.py              the scheduled job: snapshot, then rebuild silver
   lock.py               stops two runs at the same time
+  logs.py               logging setup for all commands
   notify.py             desktop alert when a run fails
   transform/            runs dbt (bronze → silver)
   clean/redact.py       removes emails, phones, links and contact names from texts
@@ -152,9 +154,13 @@ uv run skillradar-schedule uninstall
 ```
 
 launchd skips a fixed time when the Mac is off, so the job starts at login and then checks
-every hour. With `--once-per-day` the snapshot does nothing when today (UTC) already has a
-full `ok` or `partial` run. A `failed` day is tried again at the next check. While a run is
-going, `caffeinate` keeps the Mac awake.
+every hour. It runs `skillradar-daily`:
+
+1. snapshot, once per day: nothing happens when today (UTC) already has a full `ok` or
+   `partial` run; a `failed` day is tried again at the next check
+2. `dbt build` when a run finished after the last build, so a failed build is retried too
+
+While the job runs, `caffeinate` keeps the Mac awake.
 
 The log is in `data/logs/snapshot.log`. You get a desktop alert when a run is not `ok`.
 

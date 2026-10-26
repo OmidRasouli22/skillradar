@@ -21,6 +21,7 @@ skillradar-schedule = "skillradar.schedule.cli:main"
 skillradar-transform = "skillradar.transform.cli:main"
 skillradar-skills = "skillradar.skills.report:main"
 skillradar-extract = "skillradar.extract.cli:main"
+skillradar-daily = "skillradar.daily:main"
 
 [dependency-groups]
 dev = [

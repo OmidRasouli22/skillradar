@@ -21,6 +21,7 @@ from skillradar.extract.batch import PostingText, collect, extract_one, submit
 from skillradar.extract.prompt import PROMPT_VERSION, system_prompt
 from skillradar.extract.settings import load_settings
 from skillradar.extract.store import ExtractionStore
+from skillradar.logs import setup_logging
 from skillradar.skills.taxonomy import load_taxonomy
 from skillradar.transform.runner import warehouse_path
 
@@ -61,8 +62,7 @@ def load_postings(warehouse: Path) -> list[PostingText]:
 
 def main(argv: list[str] | None = None, client: Any = None) -> int:
     args = parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    setup_logging()
     load_dotenv(PROJECT_ROOT / ".env")
 
     data_dir = args.data_dir.resolve()
