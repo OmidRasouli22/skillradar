@@ -3,6 +3,8 @@
 /api/overview   data date, number of postings, roles and regions to choose from
 /api/skills     the most asked-for skills for one role and region
 /api/dashboard  everything the page shows for one region
+/api/postings   open postings for a role and region, newest first
+/api/postings/{refnr}  one posting with the important parts marked
 /               the page, built from web/ with `npm run build`
 """
 
@@ -15,7 +17,9 @@ from fastapi.staticfiles import StaticFiles
 
 from skillradar.api.data import GoldData, NoData
 from skillradar.api.labels import ALL, REGIONS, ROLES
+from skillradar.api.postings import REFNR
 from skillradar.config import DATA_DIR, PROJECT_ROOT
+from skillradar.skills.taxonomy import load_taxonomy
 from skillradar.transform.runner import serve_dir
 
 WEB_BUILD = PROJECT_ROOT / "web" / "out"
@@ -33,7 +37,7 @@ SECURITY_HEADERS = {
 
 
 def create_app(data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD) -> FastAPI:
-    gold = GoldData(serve_dir(data_dir))
+    gold = GoldData(serve_dir(data_dir), load_taxonomy())
     app = FastAPI(
         title="SkillRadar", docs_url="/api/docs", redoc_url=None, openapi_url="/api/openapi.json"
     )
@@ -58,10 +62,7 @@ def create_app(data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD) -> FastAP
         region: str = ALL,
         limit: Annotated[int, Query(ge=1, le=50)] = 15,
     ) -> dict:
-        if role not in ROLES:
-            raise HTTPException(status_code=422, detail=f"unknown role: {role[:40]}")
-        if region not in REGIONS:
-            raise HTTPException(status_code=422, detail=f"unknown region: {region[:40]}")
+        _check(role, region)
         return gold.skills(role, region, limit)
 
     @app.get("/api/dashboard")
@@ -69,6 +70,25 @@ def create_app(data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD) -> FastAP
         if region not in REGIONS:
             raise HTTPException(status_code=422, detail=f"unknown region: {region[:40]}")
         return gold.dashboard(region)
+
+    @app.get("/api/postings")
+    def postings(
+        role: str = ALL,
+        region: str = ALL,
+        offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+        limit: Annotated[int, Query(ge=1, le=50)] = 20,
+    ) -> dict:
+        _check(role, region)
+        return gold.postings(role, region, offset, limit)
+
+    @app.get("/api/postings/{refnr}")
+    def posting(refnr: str) -> dict:
+        if not REFNR.fullmatch(refnr):
+            raise HTTPException(status_code=422, detail="invalid reference number")
+        found = gold.posting(refnr)
+        if found is None:
+            raise HTTPException(status_code=404, detail="no open posting with this number")
+        return found
 
     if (web_build / "index.html").exists():
         app.mount("/", StaticFiles(directory=web_build, html=True), name="page")
@@ -79,3 +99,10 @@ def create_app(data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD) -> FastAP
             return "The page is not built yet: cd web && npm install && npm run build"
 
     return app
+
+
+def _check(role: str, region: str) -> None:
+    if role not in ROLES:
+        raise HTTPException(status_code=422, detail=f"unknown role: {role[:40]}")
+    if region not in REGIONS:
+        raise HTTPException(status_code=422, detail=f"unknown region: {region[:40]}")

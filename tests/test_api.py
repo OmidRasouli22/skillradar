@@ -10,10 +10,10 @@ from skillradar.transform.runner import serve_dir
 
 SCOPE = [
     # refnr, role, region
-    ("p1", "data_engineer", "BAYERN"),
-    ("p2", "data_engineer", "BERLIN"),
-    ("p3", "backend_developer", "BAYERN"),
-    ("p4", "other_tech", "WIEN"),  # a place outside Germany: only in 'all'
+    ("job-1", "data_engineer", "BAYERN"),
+    ("job-2", "data_engineer", "BERLIN"),
+    ("job-3", "backend_developer", "BAYERN"),
+    ("job-4", "other_tech", "WIEN"),  # a place outside Germany: only in 'all'
 ]
 
 
@@ -48,6 +48,31 @@ def write_gold(data_dir):
             "create table gold_emerging_share as select * from (values "
             "('all', 'all', 1, 4, 0.25), ('data_engineer', 'all', 0, 2, 0.0)"
             ") t(role, region, postings, total_postings, share)"
+        )
+        con.execute(
+            "create table gold_postings as select * from (values "
+            "('job-1', 'Data Engineer (m/w/d)', 'Acme', date '2026-11-05', 'data_engineer', "
+            "'mid', 'hybrid', 'München', 'BAYERN', 'fluent', 'not asked'), "
+            "('job-2', 'Senior Data Engineer', 'Beta', date '2026-11-06', 'data_engineer', "
+            "'senior', 'remote', 'Berlin', 'BERLIN', 'not asked', 'good'), "
+            "('job-3', 'Backend Developer', 'Gamma', null, 'backend_developer', "
+            "'junior', 'onsite', 'Nürnberg', 'BAYERN', 'good', 'not asked'), "
+            "('job-4', 'Developer', 'Delta', date '2026-11-01', 'other_tech', "
+            "'mid', 'unknown', 'Wien', 'WIEN', 'not asked', 'not asked')"
+            ") t(refnr, title, employer, first_published, role, seniority, remote, city, "
+            "region, german, english)"
+        )
+        con.execute(
+            "create table gold_posting_skills as select * from (values "
+            "('job-1', 'SQL', true, false), ('job-1', 'Python', false, false), "
+            "('job-1', 'RAG', false, true)"
+            ") t(refnr, skill, required, emerging)"
+        )
+        con.execute(
+            "create table gold_posting_texts as select * from (values "
+            "('job-1', 'Sehr gute SQL-Kenntnisse, Python von Vorteil. Deutsch C1. Home-Office.'),"
+            "('job-2', 'Text'), ('job-3', 'Text'), ('job-4', 'Text')"
+            ") t(refnr, description)"
         )
         con.execute(
             "create table gold_meta as select date '2026-11-06' as as_of, 4 as tech_postings, "
@@ -168,6 +193,51 @@ class TestDashboard:
     @pytest.mark.parametrize("region", ["WIEN", "nowhere", "x' or 1=1 --"])
     def test_unknown_region(self, client, region):
         assert client.get("/api/dashboard", params={"region": region}).status_code == 422
+
+
+class TestPostings:
+    def test_list_for_a_role_newest_first(self, client):
+        data = client.get("/api/postings", params={"role": "data_engineer"}).json()
+        assert data["total"] == 2
+        assert [p["refnr"] for p in data["items"]] == ["job-2", "job-1"]
+        # Required skills first on the card.
+        assert data["items"][1]["skills"] == ["SQL", "Python", "RAG"]
+        assert data["items"][0]["published"] == "2026-11-06"
+
+    def test_list_for_a_region_and_paging(self, client):
+        data = client.get("/api/postings", params={"region": "BAYERN", "limit": 1}).json()
+        assert data["total"] == 2 and len(data["items"]) == 1
+        page_two = client.get(
+            "/api/postings", params={"region": "BAYERN", "limit": 1, "offset": 1}
+        ).json()
+        assert page_two["items"][0]["refnr"] != data["items"][0]["refnr"]
+
+    def test_one_posting_with_marks(self, client):
+        data = client.get("/api/postings/job-1").json()
+        assert data["title"] == "Data Engineer (m/w/d)" and data["role"] == "Data Engineer"
+        assert data["region"] == "Bayern" and data["german"] == "fluent"
+        assert data["url"] == "https://www.arbeitsagentur.de/jobsuche/jobdetail/job-1"
+        assert data["skills"][0] == {"name": "SQL", "required": True, "emerging": False}
+        marked = [(data["text"][m["start"] : m["end"]], m["kind"]) for m in data["marks"]]
+        assert marked == [
+            ("SQL", "required"),
+            ("Python", "nice"),
+            ("Deutsch", "language"),
+            ("Home-Office", "home_office"),
+        ]
+
+    def test_unknown_posting(self, client):
+        assert client.get("/api/postings/job-999").status_code == 404
+
+    @pytest.mark.parametrize("refnr", ["x' or 1=1", "a"])
+    def test_bad_reference_number(self, client, refnr):
+        assert client.get(f"/api/postings/{refnr}").status_code == 422
+
+    @pytest.mark.parametrize(
+        "params", [{"role": "astronaut"}, {"region": "WIEN"}, {"offset": -1}, {"limit": 51}]
+    )
+    def test_bad_list_input(self, client, params):
+        assert client.get("/api/postings", params=params).status_code == 422
 
 
 def test_no_data_yet(tmp_path):

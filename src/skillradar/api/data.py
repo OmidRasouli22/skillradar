@@ -9,6 +9,8 @@ from pathlib import Path
 import duckdb
 
 from skillradar.api.labels import ALL, REGIONS, ROLES
+from skillradar.api.postings import JOB_URL, marks, readable
+from skillradar.skills.taxonomy import Taxonomy
 
 TABLES = (
     "gold_meta",
@@ -16,7 +18,12 @@ TABLES = (
     "gold_skill_demand",
     "gold_attribute_shares",
     "gold_emerging_share",
+    "gold_postings",
+    "gold_posting_skills",
+    "gold_posting_texts",
 )
+# Skills shown on each card of the job list.
+CARD_SKILLS = 4
 # Skills per role on the page, and columns in the role × skill heatmap.
 TOP_SKILLS = 30
 HEATMAP_SKILLS = 10
@@ -27,8 +34,9 @@ class NoData(Exception):
 
 
 class GoldData:
-    def __init__(self, folder: Path) -> None:
+    def __init__(self, folder: Path, taxonomy: Taxonomy) -> None:
         self.folder = folder
+        self.taxonomy = taxonomy
 
     def overview(self) -> dict:
         with self._connect() as con:
@@ -145,6 +153,89 @@ class GoldData:
                 for role, postings, share in emerging_rows
             },
             "states": states,
+        }
+
+    def postings(self, role: str, region: str, offset: int, limit: int) -> dict:
+        """Open postings for a role and region, newest first."""
+        with self._connect() as con:
+            [(total,)] = con.execute(
+                "select count(*) from gold_scope where role = ? and region = ?", [role, region]
+            ).fetchall()
+            rows = con.execute(
+                "select p.refnr, p.title, p.employer, p.city, p.first_published, p.seniority, "
+                "p.remote from gold_postings p join gold_scope s using (refnr) "
+                "where s.role = ? and s.region = ? "
+                "order by p.first_published desc nulls last, p.refnr limit ? offset ?",
+                [role, region, limit, offset],
+            ).fetchall()
+            refnrs = [row[0] for row in rows]
+            skill_rows = con.execute(
+                "select refnr, skill from (select *, row_number() over (partition by refnr "
+                "order by required desc, skill) as rank from gold_posting_skills "
+                "where list_contains(?, refnr)) where rank <= ? order by refnr, rank",
+                [refnrs, CARD_SKILLS],
+            ).fetchall()
+        skills: dict[str, list[str]] = {}
+        for refnr, skill in skill_rows:
+            skills.setdefault(refnr, []).append(skill)
+        return {
+            "role": role,
+            "region": region,
+            "total": total,
+            "offset": offset,
+            "items": [
+                {
+                    "refnr": refnr,
+                    "title": title,
+                    "employer": employer,
+                    "city": city,
+                    "published": published.isoformat() if published else None,
+                    "seniority": seniority,
+                    "remote": remote,
+                    "skills": skills.get(refnr, []),
+                }
+                for refnr, title, employer, city, published, seniority, remote in rows
+            ],
+        }
+
+    def posting(self, refnr: str) -> dict | None:
+        """One posting with its facts, skills, text and the parts to mark."""
+        with self._connect() as con:
+            rows = con.execute(
+                "select p.refnr, p.title, p.employer, p.city, p.region, p.first_published, "
+                "p.role, p.seniority, p.remote, p.german, p.english, t.description "
+                "from gold_postings p join gold_posting_texts t using (refnr) where p.refnr = ?",
+                [refnr],
+            ).fetchall()
+            if not rows:
+                return None
+            skills = con.execute(
+                "select skill, required, emerging from gold_posting_skills where refnr = ? "
+                "order by required desc, skill",
+                [refnr],
+            ).fetchall()
+        (_, title, employer, city, region, published, role, seniority, remote, german,
+         english, raw_text) = rows[0]  # fmt: skip
+        text = readable(raw_text)
+        return {
+            "refnr": refnr,
+            "title": title,
+            "employer": employer,
+            "city": city,
+            "region": REGIONS.get(region or "", None),
+            "published": published.isoformat() if published else None,
+            "role": ROLES.get(role, role),
+            "seniority": seniority,
+            "remote": remote,
+            "german": german,
+            "english": english,
+            "url": JOB_URL.format(refnr=refnr),
+            "skills": [
+                {"name": name, "required": required, "emerging": emerging}
+                for name, required, emerging in skills
+            ],
+            "text": text,
+            "marks": marks(text, [(name, required) for name, required, _ in skills], self.taxonomy),
         }
 
     def _connect(self) -> duckdb.DuckDBPyConnection:

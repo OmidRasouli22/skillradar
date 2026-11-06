@@ -50,6 +50,46 @@ models:
       - name: share
         data_tests: [not_null]
 
+  - name: gold_postings
+    description: >
+      One row per open tech posting with an answer from Claude, for the job list and the
+      job view: title, employer, first place, role, seniority, home office and language
+      levels ('not asked' when the posting does not mention the language).
+    columns:
+      - name: refnr
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        data_tests: [not_null]
+      - name: role
+        data_tests: [not_null]
+
+  - name: gold_posting_skills
+    description: The skills each posting is counted for (made-up product names left out).
+    columns:
+      - name: refnr
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_postings')
+                field: refnr
+      - name: skill
+        data_tests: [not_null]
+
+  - name: gold_posting_texts
+    description: The cleaned text of each posting in gold_postings, contact details removed.
+    columns:
+      - name: refnr
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_postings')
+                field: refnr
+
   - name: gold_meta
     description: >
       Date of the newest snapshot (as_of), open postings without apprenticeships, how many

@@ -234,6 +234,9 @@ def test_gold_tables_are_exported_for_the_api(data_dir):
         "gold_attribute_shares.parquet",
         "gold_emerging_share.parquet",
         "gold_meta.parquet",
+        "gold_posting_skills.parquet",
+        "gold_posting_texts.parquet",
+        "gold_postings.parquet",
         "gold_scope.parquet",
         "gold_skill_demand.parquet",
     ]
@@ -271,6 +274,22 @@ class TestGoldTables:
             "from gold_emerging_share order by role",
         )
         assert rows == [("all", "all", 1, 1, 1.0), ("backend_developer", "all", 1, 1, 1.0)]
+
+    def test_postings_for_the_job_list(self, data_dir):
+        rows = query(
+            data_dir,
+            "select refnr, title, role, seniority, remote, city, region, german, english "
+            "from gold_postings",
+        )
+        assert rows == [
+            ("b", "New", "backend_developer", "mid", "hybrid", "Nürnberg", None, "fluent",
+             "not asked")
+        ]  # fmt: skip
+        skills = query(data_dir, "select skill, required from gold_posting_skills order by skill")
+        # AWS is not in the text, so it is left out here too.
+        assert skills == [("Kafka", False), ("LLM", False), ("Networking", False), ("Python", True)]
+        [(text,)] = query(data_dir, "select description from gold_posting_texts")
+        assert "[email]" in text and "Anna" not in text
 
     def test_attribute_shares(self, data_dir):
         rows = query(
