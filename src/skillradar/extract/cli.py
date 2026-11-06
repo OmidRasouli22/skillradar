@@ -1,6 +1,6 @@
-"""Command line: uv run skillradar-extract estimate|try|submit|collect|status
+"""Command line: uv run skillradar-extract estimate|try|submit|collect|status|quality
 
-estimate and status are free. try, submit and collect call the Claude API.
+estimate, status and quality are free. try, submit and collect call the Claude API.
 try and submit never send more than budget_usd in config/llm.yaml allows.
 The API key is read from .env (ANTHROPIC_API_KEY) or the environment.
 """
@@ -21,6 +21,7 @@ from skillradar.config import DATA_DIR, PROJECT_ROOT
 from skillradar.extract import budget
 from skillradar.extract.batch import PostingText, collect, extract_one, submit
 from skillradar.extract.prompt import PROMPT_VERSION, system_prompt
+from skillradar.extract.quality import summary
 from skillradar.extract.settings import load_settings
 from skillradar.extract.store import ExtractionStore
 from skillradar.logs import setup_logging
@@ -54,6 +55,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     send.add_argument("--limit", type=int, help="send at most this many postings")
     commands.add_parser("collect", help="save answers from finished batches")
     commands.add_parser("status", help="pending batches and saved answers (free)")
+    commands.add_parser("quality", help="quality numbers per prompt version (free)")
     return parser.parse_args(argv)
 
 
@@ -73,6 +75,8 @@ def main(argv: list[str] | None = None, client: Any = None) -> int:
 
     if args.command == "status":
         return _status(store, settings)
+    if args.command == "quality":
+        return _quality(store)
 
     warehouse = warehouse_path(data_dir)
     if args.command in ("estimate", "try", "submit") and not warehouse.exists():
@@ -158,6 +162,17 @@ def _status(store: ExtractionStore, settings) -> int:
     if not results and not store.pending():
         print("no batches yet")
     _print_budget(store, settings)
+    return 0
+
+
+def _quality(store: ExtractionStore) -> int:
+    groups = summary(store.results(), load_taxonomy())
+    for (model, version), numbers in groups.items():
+        print(f"{model} {version}")
+        for name, value in numbers.items():
+            print(f"  {name:<22} {value}")
+    if not groups:
+        print("no answers yet")
     return 0
 
 

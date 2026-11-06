@@ -6,7 +6,7 @@ PROMPT_VERSION whenever the text changes, so old results can be found and redone
 
 from skillradar.skills.taxonomy import Taxonomy
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v4"
 
 ROLES = {
     "data_engineer": "builds data pipelines, ETL, data warehouses or data platforms",
@@ -37,21 +37,25 @@ Contact details were replaced with [name], [email], [phone] and [link]. Ignore t
 role: the one role that best fits the main work of the job.
 {roles}
 
-seniority:
-- student: Werkstudent, internship, thesis, apprenticeship (Ausbildung, duales Studium)
-- junior: entry level, Berufseinsteiger, 0-2 years of experience
-- mid: a professional role with no junior or senior hint, or 2-5 years
-- senior: Senior in the title or 5+ years
-- lead: team lead, head of, principal, chief
-- unknown: only if the posting gives no hint at all
+seniority: check these in order and take the first that fits.
+1. student: Werkstudent, internship, thesis, apprenticeship (Ausbildung, duales Studium)
+2. lead: team lead, head of, principal, chief
+3. senior: Senior in the title, langjährige Erfahrung, or 5 or more years
+4. junior: entry level, Berufseinsteiger, Absolvent, PhD position (Promotion), "erste
+   Berufserfahrung", "erste Kenntnisse", or at most 3 years (e.g. "1-3 Jahre")
+5. mid: every other professional job, e.g. it asks for Berufserfahrung, fundierte or
+   mehrjährige Erfahrung, a finished degree or a finished Ausbildung
+6. unknown: only for a posting that is not a normal job offer, e.g. a talent pool
 
 remote:
 - remote: the job can be done fully from home
-- hybrid: some home office is possible
+- hybrid: some home office is possible, also "nach Absprache", "teilweise", "mobiles
+  Arbeiten" or "mobile working"
 - onsite: the posting says the work is on site, without home office
 - unknown: home office is not mentioned
 
-languages: human languages the job requires, with the level.
+languages: human languages the job requires, with the level. Only languages the posting
+asks for; the language the posting is written in is not a requirement by itself.
 - native: Muttersprache, native
 - fluent: verhandlungssicher, fließend, sehr gut, C1, C2
 - good: gut, B2
@@ -65,6 +69,12 @@ tools, platforms, databases, cloud services and technical methods.
   erforderlich, sehr gute Kenntnisse). false if it is a plus (wünschenswert, von Vorteil,
   idealerweise, nice to have).
 - Use a name from the list below when the skill matches one. Otherwise use the usual name.
+- List skills for every posting, also when the role is not_tech.
+- Skills named as examples count: "Kenntnisse in X (z. B. Y oder Z)" means Y and Z.
+- Only skills written in the posting. Never add a skill the posting does not name.
+- A general word is not a product: "Cloud" is not AWS, Azure or GCP, "Container" is not
+  Docker, "Datenbank" is not PostgreSQL, "GitHub" is not GitHub Actions. Name a product
+  only when the posting names it.
 - One entry per skill. Only skills the posting asks for; never guess.
 
 Skill names:

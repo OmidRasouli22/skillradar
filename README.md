@@ -138,11 +138,16 @@ uv run skillradar-extract try --refnr <refnr>  # one posting now, to check the p
 uv run skillradar-extract submit --limit 200   # send a batch
 uv run skillradar-extract collect              # save answers of finished batches
 uv run skillradar-extract status               # free
+uv run skillradar-extract quality              # answer quality per prompt version (free)
 ```
 
 Put the API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). A batch can take
 hours, so `submit` saves it as pending and `collect` can run later, also after a restart.
 Answers are stored with model and prompt version; changing either sends postings again.
+
+`quality` shows, per model and prompt version: answer status, how often seniority or
+remote is `unknown`, skills per posting, the share of skills in `config/skills.yaml` and
+the languages found. Use it to compare prompt versions before a large run.
 
 Spending is capped by `budget_usd` in `config/llm.yaml`. Before sending, `try` and `submit`
 add the worst case (every byte a token, all of `max_tokens` used) to what was already spent,

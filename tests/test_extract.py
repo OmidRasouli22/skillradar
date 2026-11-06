@@ -17,7 +17,8 @@ from skillradar.extract.batch import (
     submit,
 )
 from skillradar.extract.prompt import PROMPT_VERSION, ROLES, system_prompt, user_message
-from skillradar.extract.schema import OUTPUT_SCHEMA, Extraction, Role, Seniority
+from skillradar.extract.quality import summary
+from skillradar.extract.schema import OUTPUT_SCHEMA, Extraction, Language, Role, Seniority
 from skillradar.extract.settings import LlmSettings, load_settings
 from skillradar.extract.store import ExtractionStore, PendingBatch
 from skillradar.skills.taxonomy import load_taxonomy
@@ -103,6 +104,13 @@ class TestSchema:
         props = OUTPUT_SCHEMA["properties"]
         assert props["role"]["enum"] == list(get_args(Role))
         assert props["seniority"]["enum"] == list(get_args(Seniority))
+        language = props["languages"]["items"]["properties"]["language"]
+        assert language["enum"] == list(get_args(Language))
+
+    def test_language_names_are_english(self):
+        bad = ANSWER | {"languages": [{"language": "Deutsch", "level": "fluent"}]}
+        with pytest.raises(ValidationError):
+            Extraction.model_validate(bad)
 
     def test_every_object_is_closed_and_fully_required(self):
         def objects(node):
@@ -384,6 +392,39 @@ class TestBudget:
         assert 200 * one < settings.budget_usd
 
 
+class TestQuality:
+    def record(self, version, status="ok", **output):
+        return {
+            "refnr": "a",
+            "model": "m",
+            "prompt_version": version,
+            "status": status,
+            "output": (ANSWER | output) if status == "ok" else None,
+            "usage": {"output_tokens": 100},
+        }
+
+    def test_numbers_per_prompt_version(self, taxonomy):
+        results = [
+            self.record("v1", seniority="unknown"),
+            self.record("v1"),
+            self.record("v1", status="max_tokens"),
+            self.record("v2"),
+        ]
+        groups = summary(results, taxonomy)
+
+        v1 = groups[("m", "v1")]
+        assert v1["answers"] == 3 and v1["status"] == {"ok": 2, "max_tokens": 1}
+        assert v1["seniority unknown"] == 0.5
+        assert v1["languages"] == {"German": 2}
+        assert v1["skills in skill list"] == 1.0
+        assert groups[("m", "v2")]["seniority unknown"] == 0
+
+    def test_no_answers(self, taxonomy):
+        assert summary([], taxonomy) == {}
+        only_failed = summary([self.record("v1", status="invalid")], taxonomy)
+        assert only_failed[("m", "v1")]["skills per answer"] == 0
+
+
 class TestStore:
     @pytest.mark.parametrize("bad", ["../../etc/x", "a/b", "", "x" * 101])
     def test_unsafe_batch_id(self, store, bad):
@@ -404,6 +445,8 @@ class TestStore:
         )
         path = store.save_pending(batch)
         assert path.stat().st_mode & 0o777 == 0o600
+        for folder in (store.root, store.root / "batches", path.parent):
+            assert folder.stat().st_mode & 0o777 == 0o700
 
 
 @pytest.fixture
@@ -465,6 +508,10 @@ class TestCli:
         assert cli.main(["--data-dir", str(tmp_path), "status"]) == 0
         expected = f"budget ${load_settings().budget_usd:.2f}, spent $0.0000"
         assert expected in capsys.readouterr().out
+
+    def test_quality(self, tmp_path, capsys):
+        assert cli.main(["--data-dir", str(tmp_path), "quality"]) == 0
+        assert "no answers yet" in capsys.readouterr().out
 
     def test_wrong_api_key(self, data_dir, capsys):
         import anthropic

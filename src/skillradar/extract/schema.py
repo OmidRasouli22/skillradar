@@ -30,6 +30,12 @@ Role = Literal[
 Seniority = Literal["student", "junior", "mid", "senior", "lead", "unknown"]
 Remote = Literal["onsite", "hybrid", "remote", "unknown"]
 Level = Literal["basic", "good", "fluent", "native", "unknown"]
+# English names only, so "Deutsch" and "German" cannot both appear.
+Language = Literal[
+    "German", "English", "French", "Spanish", "Italian", "Dutch", "Polish", "Portuguese",
+    "Czech", "Russian", "Ukrainian", "Turkish", "Arabic", "Chinese", "Japanese", "Korean",
+    "Swedish", "Danish", "Norwegian", "Finnish", "Hungarian", "Romanian", "Greek", "Other",
+]  # fmt: skip
 
 
 class Strict(BaseModel):
@@ -42,7 +48,7 @@ class SkillMention(Strict):
 
 
 class LanguageRequirement(Strict):
-    language: str = Field(min_length=1, max_length=40)
+    language: Language
     level: Level
 
 
@@ -74,7 +80,7 @@ OUTPUT_SCHEMA = _object(
         "remote": _enum(Remote),
         "languages": {
             "type": "array",
-            "items": _object({"language": {"type": "string"}, "level": _enum(Level)}),
+            "items": _object({"language": _enum(Language), "level": _enum(Level)}),
         },
         "skills": {
             "type": "array",
