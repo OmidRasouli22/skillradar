@@ -1586,6 +1586,42 @@ button {
   animation: pulse 1.4s var(--ease-out);
 }
 
+/* Public site: the text is not published, the posting is linked instead */
+.elsewhere {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.elsewhere-card {
+  max-width: 420px;
+  padding: 32px;
+  text-align: center;
+  background:
+    radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  animation: rise 0.6s var(--ease-out) 0.35s both;
+}
+
+.elsewhere-card svg {
+  color: var(--accent);
+}
+
+.elsewhere-card h3 {
+  margin: 12px 0 8px;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.elsewhere-card p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--secondary);
+}
+
 /* Minimap: one tick per mark, at its place in the text */
 .minimap {
   position: absolute;

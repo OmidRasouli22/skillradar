@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
+    "build:public": "NEXT_PUBLIC_DATA_MODE=static NEXT_PUBLIC_BASE_PATH=/skillradar next build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },

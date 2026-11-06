@@ -43,6 +43,13 @@ def calls(monkeypatch):
     monkeypatch.setattr(daily.auto, "collect_step", fake_step("collect"))
     monkeypatch.setattr(daily.auto, "submit_step", fake_step("submit"))
     monkeypatch.setattr(daily.auto, "wait_step", fake_step("wait"))
+
+    def fake_publish(data_dir):
+        seen["order"].append("publish")
+        if seen.get("publish_error"):
+            raise daily.site.PublishError("no network")
+
+    monkeypatch.setattr(daily.site, "daily_publish", fake_publish)
     monkeypatch.setattr(daily, "notify", lambda title, message: seen["notify"].append(title))
     return seen
 
@@ -115,7 +122,7 @@ def test_claude_steps_run_around_the_build(tmp_path, calls):
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
     # Old answers are collected before the build, new postings are sent after it.
-    assert calls["order"] == ["collect", "build", "submit", "wait"]
+    assert calls["order"] == ["collect", "build", "submit", "wait", "publish"]
 
 
 def test_new_answers_are_built_the_same_day(tmp_path, calls):
@@ -123,7 +130,7 @@ def test_new_answers_are_built_the_same_day(tmp_path, calls):
     calls["new_answers"] = True
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    assert calls["order"] == ["collect", "build", "submit", "wait", "build"]
+    assert calls["order"] == ["collect", "build", "submit", "wait", "build", "publish"]
 
 
 def test_claude_steps_run_when_nothing_is_new(tmp_path, calls):
@@ -131,7 +138,7 @@ def test_claude_steps_run_when_nothing_is_new(tmp_path, calls):
     touch(tmp_path / "warehouse.duckdb", 200)
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    assert calls["order"] == ["collect", "submit", "wait"]
+    assert calls["order"] == ["collect", "submit", "wait", "publish"]
 
 
 def test_failed_snapshot_skips_claude(tmp_path, calls):
@@ -153,5 +160,13 @@ def test_bug_in_a_claude_step_does_not_stop_the_job(tmp_path, calls, capsys):
     calls["claude_error"] = True
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    assert calls["order"] == ["collect", "build", "submit", "wait"]
+    assert calls["order"] == ["collect", "build", "submit", "wait", "publish"]
     assert "claude step collect failed" in capsys.readouterr().out
+
+
+def test_failed_publish_alerts_but_the_job_succeeds(tmp_path, calls):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+    calls["publish_error"] = True
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 0
+    assert calls["notify"] == ["SkillRadar: site not published"]

@@ -199,62 +199,23 @@ class GoldData:
         }
 
     def posting(self, refnr: str) -> dict | None:
-        """One posting with its facts, skills, text and the parts to mark."""
+        """One posting: its profile, its text, and the parts of the text to mark."""
         with self._connect() as con:
-            rows = con.execute(
-                "select p.refnr, p.title, p.employer, p.city, p.region, p.first_published, "
-                "p.role, p.seniority, p.remote, p.german, p.english, t.description "
-                "from gold_postings p join gold_posting_texts t using (refnr) where p.refnr = ?",
-                [refnr],
+            profiles = _profiles(con, [refnr])
+            texts = con.execute(
+                "select description from gold_posting_texts where refnr = ?", [refnr]
             ).fetchall()
-            if not rows:
-                return None
-            # How common each skill is in this role, across Germany, for the job profile.
-            skills = con.execute(
-                "select k.skill, k.required, k.emerging, coalesce(d.share, 0) "
-                "from gold_posting_skills k join gold_postings p using (refnr) "
-                "left join gold_skill_demand d "
-                "on d.skill = k.skill and d.role = p.role and d.region = ? "
-                "where k.refnr = ? order by k.required desc, k.skill",
-                [ALL, refnr],
-            ).fetchall()
-            [(role_postings,)] = con.execute(
-                "select count(*) from gold_scope where role = "
-                "(select role from gold_postings where refnr = ?) and region = ?",
-                [refnr, ALL],
-            ).fetchall()
-        (_, title, employer, city, region, published, role, seniority, remote, german,
-         english, raw_text) = rows[0]  # fmt: skip
-        text = readable(raw_text)
-        return {
-            "refnr": refnr,
-            "title": title,
-            "employer": employer,
-            "city": city,
-            "region": REGIONS.get(region or "", None),
-            "published": published.isoformat() if published else None,
-            "role": ROLES.get(role, role),
-            "role_id": role,
-            "role_postings": role_postings,
-            "seniority": seniority,
-            "remote": remote,
-            "german": german,
-            "english": english,
-            "url": JOB_URL.format(refnr=refnr),
-            "skills": [
-                {
-                    "name": name,
-                    "required": required,
-                    "emerging": emerging,
-                    "share_in_role": float(share),
-                }
-                for name, required, emerging, share in skills
-            ],
-            "text": text,
-            "marks": marks(
-                text, [(name, required) for name, required, *_ in skills], self.taxonomy
-            ),
-        }
+        if refnr not in profiles or not texts:
+            return None
+        profile = profiles[refnr]
+        text = readable(texts[0][0])
+        skills = [(s["name"], s["required"]) for s in profile["skills"]]
+        return {**profile, "text": text, "marks": marks(text, skills, self.taxonomy)}
+
+    def profiles(self) -> dict[str, dict]:
+        """Every posting's profile, without its text: for the public site."""
+        with self._connect() as con:
+            return _profiles(con, None)
 
     def _connect(self) -> duckdb.DuckDBPyConnection:
         missing = [t for t in TABLES if not (self.folder / f"{t}.parquet").exists()]
@@ -264,6 +225,65 @@ class GoldData:
         for table in TABLES:
             con.read_parquet(str(self.folder / f"{table}.parquet")).create_view(table)
         return con
+
+
+def _profiles(con: duckdb.DuckDBPyConnection, refnrs: list[str] | None) -> dict[str, dict]:
+    """Facts and skills of the given postings (all when refnrs is None), keyed by refnr.
+
+    Each skill comes with how common it is in the posting's role across Germany.
+    """
+    # A null list means all postings.
+    rows = con.execute(
+        "select p.refnr, p.title, p.employer, p.city, p.region, p.first_published, p.role, "
+        "p.seniority, p.remote, p.german, p.english from gold_postings p "
+        "where (?::varchar[] is null or list_contains(?::varchar[], p.refnr))",
+        [refnrs, refnrs],
+    ).fetchall()
+    skill_rows = con.execute(
+        "select k.refnr, k.skill, k.required, k.emerging, coalesce(d.share, 0) "
+        "from gold_posting_skills k join gold_postings p using (refnr) "
+        "left join gold_skill_demand d "
+        "on d.skill = k.skill and d.role = p.role and d.region = ? "
+        "where (?::varchar[] is null or list_contains(?::varchar[], p.refnr)) "
+        "order by k.refnr, k.required desc, k.skill",
+        [ALL, refnrs, refnrs],
+    ).fetchall()
+    role_postings = dict(
+        con.execute(
+            "select role, count(*) from gold_scope where region = ? group by role", [ALL]
+        ).fetchall()
+    )
+    skills: dict[str, list[dict]] = {}
+    for refnr, name, required, emerging, share in skill_rows:
+        skills.setdefault(refnr, []).append(
+            {
+                "name": name,
+                "required": required,
+                "emerging": emerging,
+                "share_in_role": float(share),
+            }
+        )
+    profiles = {}
+    for (refnr, title, employer, city, region, published, role, seniority, remote, german,
+         english) in rows:  # fmt: skip
+        profiles[refnr] = {
+            "refnr": refnr,
+            "title": title,
+            "employer": employer,
+            "city": city,
+            "region": REGIONS.get(region or "", None),
+            "published": published.isoformat() if published else None,
+            "role": ROLES.get(role, role),
+            "role_id": role,
+            "role_postings": role_postings.get(role, 0),
+            "seniority": seniority,
+            "remote": remote,
+            "german": german,
+            "english": english,
+            "url": JOB_URL.format(refnr=refnr),
+            "skills": skills.get(refnr, []),
+        }
+    return profiles
 
 
 def _skill(name: str, postings: int, required: int, total: int, share) -> dict:

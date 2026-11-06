@@ -1,0 +1,9 @@
+# The public website on GitHub Pages: https://<user>.github.io/<repo>/
+#
+# skillradar-publish puts the static page (built with `npm run build:public` in web/) and
+# fresh data on the branch below, as one replaced commit. Full posting texts are never
+# published: the public job view shows the profile and links to the original posting.
+
+enabled: true      # also publish at the end of the daily job
+remote: origin     # git remote of this repository
+branch: gh-pages   # GitHub Pages serves this branch

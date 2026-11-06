@@ -25,6 +25,7 @@ region. A CV gap analyser compares your CV with that demand.
 | Daily extraction with a monthly spending limit | done |
 | Gold tables (skill demand per role and region) | done |
 | Webpage: one page, local (FastAPI + Next.js) | done |
+| Public website on GitHub Pages, updated daily | done |
 | Skill trends over time | planned |
 | Evaluation (precision, recall) | planned |
 | Postgres export, hosting | planned |
@@ -36,6 +37,7 @@ region. A CV gap analyser compares your CV with that demand.
 config/search.yaml      search terms, cities, API settings
 config/skills.yaml      skill list: one name per skill, with category and other spellings
 config/llm.yaml         model, prices, monthly spending limit, daily on/off
+config/site.yaml        public website: on/off, git remote and branch
 src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
@@ -55,6 +57,7 @@ src/skillradar/         Python package
   extract/              skill extraction with Claude: prompt, batches, spending limit,
                         daily step, quality numbers, silver table rows
   api/                  web API over the gold tables, and the command that starts the page
+  publish/              the public website: data files and the push to GitHub Pages
   storage.py            atomic writes, private folders, JSON lines
 web/                    the page (Next.js), built into static files in web/out
 transform/              dbt project
@@ -286,6 +289,38 @@ The API is at `/api/dashboard?region=BAYERN` (everything the page shows for one 
 `/api/overview` and `/api/skills?role=data_engineer&region=BAYERN` (docs at `/api/docs`). It only reads data, only listens on 127.0.0.1, and only accepts
 known roles and regions.
 
+## Public website (GitHub Pages)
+
+A public copy of the page: https://omidrasouli22.github.io/skillradar/
+
+GitHub Pages only serves files, so the public page reads JSON files instead of the API.
+`skillradar-publish` writes them, adds the built page, and pushes everything to the
+`gh-pages` branch as one replaced commit, so the repository does not grow.
+
+What is public: the charts, the job list, and each job's profile (facts, key points,
+skill profile) with a link to the original posting. **Full posting texts are not
+published**: the employers own them, and a contact name can slip through the cleaning.
+The full text with highlights stays in your local version.
+
+Set up once:
+
+```sh
+cd web && npm install && npm run build:public && cd ..   # the public page, in web/out-public
+uv run skillradar-publish --dry-run                       # build data/site without pushing
+uv run skillradar-publish                                 # push it to the gh-pages branch
+```
+
+Then on GitHub: Settings → Pages → "Deploy from a branch" → `gh-pages`, folder `/ (root)`.
+
+After that the daily job publishes by itself whenever the data changed (step 6 below).
+Build the public page again only when you change files in `web/`. Turn publishing off
+with `enabled: false` in `config/site.yaml`.
+
+To look at the public version before pushing: after `--dry-run`, run
+`mkdir -p data/preview && ln -sfn ../site data/preview/skillradar` and
+`python3 -m http.server 8010 --directory data/preview`, then open
+http://127.0.0.1:8010/skillradar/.
+
 ## Daily schedule (macOS)
 
 ```sh
@@ -307,6 +342,8 @@ wakes up. If the Mac is off, it runs at the next login. It runs `skillradar-dail
 5. **Wait** for that batch (usually 5 to 15 minutes, at most 60), then rebuild silver again,
    so the day's answers are in the tables the same day. A slower batch is collected the
    next day.
+6. **Publish** the public website when the data changed. If that fails (no network, the
+   public page not built yet), you get a desktop alert; the rest of the job is not affected.
 
 If something fails (the job API is down, or the dbt build breaks), it is tried again at
 the next run, so the next day or at the next login. You can also start it by hand with

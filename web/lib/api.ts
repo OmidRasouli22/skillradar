@@ -1,4 +1,10 @@
-// Types and calls for the local API (src/skillradar/api).
+// Types and calls for the data. The local page asks the API (src/skillradar/api); the
+// public page reads the JSON files that skillradar-publish writes.
+
+// Set at build time by `npm run build:public`.
+export const PUBLIC_SITE = process.env.NEXT_PUBLIC_DATA_MODE === "static";
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const PAGE_SIZE = 20;
 
 export type Choice = { id: string; label: string; postings: number };
 
@@ -85,8 +91,11 @@ export type PostingDetail = {
   marks: Mark[];
 };
 
+class NotFound extends Error {}
+
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal, headers: { Accept: "application/json" } });
+  if (response.status === 404) throw new NotFound("not found");
   if (!response.ok) {
     const body = await response.json().catch(() => null);
     throw new Error(body?.detail ?? `Request failed (${response.status})`);
@@ -94,24 +103,62 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+// A file name part from an id; ids are checked by the API, this only keeps paths safe.
+function part(id: string): string {
+  return encodeURIComponent(id);
+}
+
 export function getOverview(signal?: AbortSignal): Promise<Overview> {
-  return get<Overview>("/api/overview", signal);
+  return get<Overview>(PUBLIC_SITE ? `${BASE}/data/overview.json` : "/api/overview", signal);
 }
 
 export function getDashboard(region: string, signal?: AbortSignal): Promise<Dashboard> {
-  return get<Dashboard>(`/api/dashboard?${new URLSearchParams({ region })}`, signal);
+  return get<Dashboard>(
+    PUBLIC_SITE
+      ? `${BASE}/data/dashboard/${part(region)}.json`
+      : `/api/dashboard?${new URLSearchParams({ region })}`,
+    signal,
+  );
 }
 
-export function getPostings(
+// The public site has one file per role and region with every posting; pages of 20 are
+// cut from it here, so the list behaves the same as with the API.
+const lists = new Map<string, Promise<PostingList>>();
+
+export async function getPostings(
   role: string,
   region: string,
   offset: number,
   signal?: AbortSignal,
 ): Promise<PostingList> {
-  const query = new URLSearchParams({ role, region, offset: String(offset), limit: "20" });
-  return get<PostingList>(`/api/postings?${query}`, signal);
+  if (!PUBLIC_SITE) {
+    const query = new URLSearchParams({ role, region, offset: String(offset), limit: String(PAGE_SIZE) });
+    return get<PostingList>(`/api/postings?${query}`, signal);
+  }
+  const key = `${role}/${region}`;
+  if (!lists.has(key)) {
+    const file = get<PostingList>(`${BASE}/data/postings/${part(role)}/${part(region)}.json`).catch(
+      (error) => {
+        if (error instanceof NotFound) return { role, region, total: 0, offset: 0, items: [] };
+        lists.delete(key);
+        throw error;
+      },
+    );
+    lists.set(key, file);
+  }
+  const all = await lists.get(key)!;
+  if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+  return { ...all, offset, items: all.items.slice(offset, offset + PAGE_SIZE) };
 }
 
-export function getPosting(refnr: string, signal?: AbortSignal): Promise<PostingDetail> {
-  return get<PostingDetail>(`/api/postings/${encodeURIComponent(refnr)}`, signal);
+export async function getPosting(refnr: string, signal?: AbortSignal): Promise<PostingDetail> {
+  try {
+    return await get<PostingDetail>(
+      PUBLIC_SITE ? `${BASE}/data/jobs/${part(refnr)}.json` : `/api/postings/${part(refnr)}`,
+      signal,
+    );
+  } catch (error) {
+    if (error instanceof NotFound) throw new Error("no open posting with this number");
+    throw error;
+  }
 }

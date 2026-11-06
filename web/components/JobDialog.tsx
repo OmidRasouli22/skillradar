@@ -171,7 +171,10 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
 
               <section className="skill-profile">
                 <h3>Skill profile</h3>
-                <p className="hint">How many {job.role} jobs ask for each skill. Click one to find it in the text.</p>
+                <p className="hint">
+                  How many {job.role} jobs ask for each skill.
+                  {job.text && " Click one to find it in the text."}
+                </p>
                 <ul>
                   {job.skills.map((skill, i) => {
                     const first = job.marks.findIndex((m) => m.label === skill.name);
@@ -182,7 +185,7 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
                           className={skill.required ? "skill-row required" : "skill-row nice"}
                           onClick={() => first >= 0 && jump(first)}
                           disabled={first < 0}
-                          title={first < 0 ? "Described in other words in the text" : "Show in the text"}
+                          title={!job.text ? undefined : first < 0 ? "Described in other words in the text" : "Show in the text"}
                         >
                           <span className="skill-name">
                             {skill.name}
@@ -201,6 +204,30 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
               </section>
             </aside>
 
+            {!job.text ? (
+              <section className="profile-text elsewhere" aria-label="Job posting">
+                <div className="elsewhere-card">
+                  <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                    <path
+                      d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <h3>Read the full posting at the source</h3>
+                  <p>
+                    This public page shows what the AI found in the posting. The text itself belongs
+                    to the employer and is published by the Bundesagentur für Arbeit.
+                  </p>
+                  <a className="button" href={job.url} target="_blank" rel="noopener noreferrer">
+                    Open on arbeitsagentur.de <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+              </section>
+            ) : (
             <section className="profile-text" aria-label="Job posting">
               <div className="mark-filters" role="group" aria-label="Show marks">
                 {KINDS.map((k) => {
@@ -229,6 +256,7 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
                 <MiniMap text={job.text} marks={job.marks} hidden={hidden} onJump={jump} />
               </div>
             </section>
+            )}
           </div>
         )}
       </div>

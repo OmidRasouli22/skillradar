@@ -25,6 +25,7 @@ skillradar-skills = "skillradar.skills.report:main"
 skillradar-extract = "skillradar.extract.cli:main"
 skillradar-daily = "skillradar.daily:main"
 skillradar-web = "skillradar.api.cli:main"
+skillradar-publish = "skillradar.publish.cli:main"
 
 [dependency-groups]
 dev = [
