@@ -25,7 +25,7 @@ const SMALL_GROUP = 30;
 const MIN_SHARE = 0.05;
 const MIN_POSTINGS = 5;
 // Reference numbers of the job search, as the API accepts them.
-const REFNR = /^[A-Za-z0-9][A-Za-z0-9_-]{2,79}$/;
+const REFNR = /^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._-]{2,79}$/;
 
 type Result = { region: string; data?: Dashboard; error?: string };
 

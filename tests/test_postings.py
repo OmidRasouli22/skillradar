@@ -53,12 +53,16 @@ def test_positions_fit_the_original_text(taxonomy):
     assert text[mark["start"] : mark["end"]] == "REST‑APIs"
 
 
-@pytest.mark.parametrize("refnr", ["13635-f28d5696_JB5265243-S", "10000-1207544109-S"])
+@pytest.mark.parametrize(
+    "refnr", ["13635-f28d5696_JB5265243-S", "10000-1207544109-S", "12564-k21840.14639-S"]
+)
 def test_real_reference_numbers(refnr):
     assert REFNR.fullmatch(refnr)
 
 
-@pytest.mark.parametrize("refnr", ["", "a", "../etc/passwd", "x' or 1=1", "a b", "x" * 81])
+@pytest.mark.parametrize(
+    "refnr", ["", "a", "../etc/passwd", "a..b-S", ".hidden", "x' or 1=1", "a b", "x" * 81]
+)
 def test_bad_reference_numbers(refnr):
     assert not REFNR.fullmatch(refnr)
 

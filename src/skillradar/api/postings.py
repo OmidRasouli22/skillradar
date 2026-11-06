@@ -11,8 +11,10 @@ import re
 from skillradar.skills.matching import prepare, spans
 from skillradar.skills.taxonomy import Taxonomy
 
-# Reference numbers from the job search, e.g. "13635-f28d5696_JB5265243-S".
-REFNR = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{2,79}")
+# Reference numbers from the job search, e.g. "13635-f28d5696_JB5265243-S" or
+# "12564-k21840.14639-S". Letters, digits, "-", "_" and single dots; never "..", so a
+# number can be used as a file name.
+REFNR = re.compile(r"(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._-]{2,79}")
 JOB_URL = "https://www.arbeitsagentur.de/jobsuche/jobdetail/{refnr}"
 
 # "Deutschkenntnisse", "fließend Englisch", "English"; not the country ("Deutschland").
