@@ -215,6 +215,9 @@ page reads only these files, never the warehouse, so it can't block the daily bu
 | `gold_skill_demand` | per role, region and skill: how many postings ask for it, how many require it, all postings in the group, and the share |
 | `gold_attribute_shares` | per role and region: share of each seniority, home office option, and German and English level ("not asked" when a posting does not mention the language) |
 | `gold_emerging_share` | per role and region: postings that ask for at least one skill from 2022 or later, and the share |
+| `gold_postings` | one row per open tech posting: title, employer, place, role, seniority, home office, languages |
+| `gold_posting_skills` | the skills each posting is counted for |
+| `gold_posting_texts` | the cleaned text of each posting (contact details removed) |
 | `gold_meta` | one row: date of the data, open postings, how many have an answer, how many are tech jobs, model and prompt version |
 | `gold_scope` | which posting belongs to which role and region (used by the others) |
 
@@ -242,8 +245,14 @@ from a few angles. Pick a role and a region at the top; everything below follows
 - **Do you need German?** language level per role
 - **What do the jobs look like?** home office and seniority
 - **Where are the jobs?** a small map of the German states; click a state to filter
+- **Open jobs** (sidebar): the postings for the chosen role and region, newest first.
+  Click one to open it: key facts, its skills, and the full text with the important parts
+  marked (required and nice-to-have skills, languages, home office), plus a link to the
+  original posting. The address keeps the open job, so a link can point to it.
 
 Every chart has a tooltip (mouse and keyboard) and a "Table" button with the same numbers.
+Sections fade in, bars grow and the job view opens with a soft rise; all motion is turned
+off when the system asks for reduced motion.
 The page follows the Mac's light or dark mode and works on a phone. It runs on your Mac
 only.
 
@@ -272,6 +281,8 @@ To work on the page with live reload, run `uv run skillradar-web` in one termina
 Checks for the page: `npm run typecheck`, `npm run lint` and `npm run build` in `web/`.
 
 The API is at `/api/dashboard?region=BAYERN` (everything the page shows for one region),
+`/api/postings?role=data_engineer&region=BAYERN` (the job list),
+`/api/postings/<refnr>` (one job with its marks),
 `/api/overview` and `/api/skills?role=data_engineer&region=BAYERN` (docs at `/api/docs`). It only reads data, only listens on 127.0.0.1, and only accepts
 known roles and regions.
 

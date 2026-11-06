@@ -50,6 +50,14 @@
   --seq-ink-6: #ffffff;
   --seq-ink-7: #ffffff;
   --seq-ink-8: #ffffff;
+  --mark-skill: rgba(42, 120, 214, 0.22);
+  --mark-skill-soft: rgba(42, 120, 214, 0.1);
+  --mark-skill-line: #2a78d6;
+  --mark-language: rgba(235, 104, 52, 0.18);
+  --mark-language-line: #eb6834;
+  --mark-office: rgba(27, 175, 122, 0.18);
+  --mark-office-line: #1baf7a;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --radius: 16px;
@@ -104,6 +112,13 @@
     --seq-ink-6: #0b0b0b;
     --seq-ink-7: #0b0b0b;
     --seq-ink-8: #0b0b0b;
+    --mark-skill: rgba(57, 135, 229, 0.3);
+    --mark-skill-soft: rgba(57, 135, 229, 0.14);
+    --mark-skill-line: #3987e5;
+    --mark-language: rgba(217, 89, 38, 0.28);
+    --mark-language-line: #d95926;
+    --mark-office: rgba(25, 158, 112, 0.28);
+    --mark-office-line: #199e70;
   }
 }
 
@@ -133,7 +148,7 @@ button {
 }
 
 .page {
-  max-width: 980px;
+  max-width: 1340px;
   margin: 0 auto;
   padding: 36px 20px 72px;
 }
@@ -161,7 +176,8 @@ button {
 
 .hero {
   margin: 64px 0 36px;
-  max-width: 720px;
+  max-width: 760px;
+  animation: rise 0.7s var(--ease-out) both;
 }
 
 .hero h1 {
@@ -875,9 +891,528 @@ button {
   white-space: nowrap;
 }
 
+/* Layout: charts and the job list */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.main {
+  min-width: 0;
+}
+
+/* Sidebar: open jobs */
+
+.sidebar {
+  position: sticky;
+  top: 86px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 100px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sidebar-head {
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--grid);
+}
+
+.sidebar-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-head p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--secondary);
+}
+
+.jobs {
+  flex: 1;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jobs.loading {
+  opacity: 0.45;
+}
+
+.jobs li {
+  animation: rise 0.45s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+.job {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 12px 13px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s var(--ease-out);
+}
+
+.job:hover {
+  background: var(--track);
+  transform: translateX(2px);
+}
+
+.job.active {
+  background: var(--track);
+  border-color: var(--accent);
+}
+
+.job-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.job-meta {
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 550;
+  color: var(--secondary);
+  background: var(--track);
+  border-radius: 99px;
+}
+
+.job:hover .tag,
+.job.active .tag {
+  background: var(--surface);
+}
+
+.tag.quiet {
+  color: var(--muted);
+  background: transparent;
+}
+
+.job-skills {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sidebar .more {
+  margin: 0;
+}
+
+/* Job dialog */
+
+.job-dialog {
+  width: min(820px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(88vh, 960px);
+  padding: 0;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  overflow: visible;
+}
+
+.job-dialog::backdrop {
+  background: rgba(10, 12, 16, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.job-dialog[open] {
+  animation: dialog-in 0.5s var(--ease-out) both;
+}
+
+.job-dialog[open]::backdrop {
+  animation: fade-in 0.35s ease both;
+}
+
+.job-dialog.closing {
+  animation: dialog-out 0.22s ease-in both;
+}
+
+.job-dialog.closing::backdrop {
+  animation: fade-out 0.22s ease-in both;
+}
+
+.dialog-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(88vh, 960px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--grid);
+}
+
+.dialog-meta {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--muted);
+}
+
+.dialog-head h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.dialog-employer {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--secondary);
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.button {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--surface);
+  background: var(--text);
+  border-radius: 99px;
+  text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.close {
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--secondary);
+  background: var(--track);
+  border: 0;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.close:hover {
+  transform: rotate(90deg);
+  color: var(--text);
+}
+
+.dialog-body {
+  padding: 20px 24px 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dialog-body > * {
+  animation: rise 0.55s var(--ease-out) both;
+  animation-delay: calc(120ms + var(--i, 0) * 70ms);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.facts div {
+  padding: 12px 14px;
+  background: var(--track);
+  border-radius: 12px;
+}
+
+.facts dt {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chips-block {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 13px;
+  font-weight: 550;
+  border-radius: 99px;
+  animation: pop 0.4s var(--ease-out) both;
+  animation-delay: calc(260ms + var(--i, 0) * 30ms);
+}
+
+.chip.required {
+  background: var(--mark-skill);
+  box-shadow: inset 0 0 0 1px var(--mark-skill-line);
+}
+
+.chip.nice {
+  background: var(--mark-skill-soft);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.badge {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--surface);
+  background: var(--text);
+  border-radius: 99px;
+}
+
+.mark-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.legend-mark {
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.posting-text {
+  font-size: 14.5px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+/* Marks sweep in one after another when the job opens */
+.posting-text mark,
+.legend-mark {
+  color: inherit;
+  /* no browser-default yellow under the colored wash */
+  background-color: transparent;
+  border-radius: 4px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.posting-text mark {
+  padding: 1px 2px;
+  animation: sweep 0.6s var(--ease-out) both;
+  animation-delay: calc(500ms + var(--i, 0) * 45ms);
+}
+
+mark.required,
+.legend-mark.required {
+  background-image: linear-gradient(var(--mark-skill), var(--mark-skill));
+  box-shadow: inset 0 -2px 0 var(--mark-skill-line);
+}
+
+mark.required {
+  font-weight: 600;
+}
+
+mark.nice,
+.legend-mark.nice {
+  background-image: linear-gradient(var(--mark-skill-soft), var(--mark-skill-soft));
+  box-shadow: inset 0 -1px 0 var(--mark-skill-line);
+}
+
+mark.language,
+.legend-mark.language {
+  background-image: linear-gradient(var(--mark-language), var(--mark-language));
+  box-shadow: inset 0 -2px 0 var(--mark-language-line);
+}
+
+mark.home_office,
+.legend-mark.home_office {
+  background-image: linear-gradient(var(--mark-office), var(--mark-office));
+  box-shadow: inset 0 -2px 0 var(--mark-office-line);
+}
+
+.skeleton-line {
+  height: 14px;
+  margin: 0 0 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--track), var(--grid), var(--track));
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+}
+
+/* Motion */
+
+/* Sections fade in as they scroll into view. Pure CSS: a browser without scroll-driven
+   animations simply shows them, so nothing can stay hidden. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+.kpi {
+  animation: rise 0.6s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.fill,
+.meter span,
+.segment,
+.block {
+  animation: grow 0.9s var(--ease-out) both;
+  transform-origin: left center;
+}
+
+.cell {
+  animation: fade-in 0.6s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sweep {
+  from {
+    background-size: 0% 100%;
+    box-shadow: inset 0 0 0 transparent;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.96);
+  }
+}
+
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 /* Small screens */
 
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    max-height: none;
+  }
+  .jobs {
+    max-height: 640px;
+  }
+}
+
 @media (max-width: 760px) {
+  .facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .kpis {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -927,12 +1462,35 @@ button {
   }
 }
 
+@media (max-width: 560px) {
+  .job-dialog {
+    width: 100vw;
+    max-height: 100dvh;
+    margin: auto 0 0;
+  }
+  .dialog-panel {
+    max-height: 92dvh;
+    border-radius: 20px 20px 0 0;
+  }
+  .dialog-head {
+    flex-direction: column-reverse;
+    padding: 18px 18px 14px;
+  }
+  .dialog-actions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  .dialog-body {
+    padding: 16px 18px 24px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fill,
-  .sections,
-  .card-body,
-  .tile,
-  .cell {
-    transition: none;
+  *,
+  *::before,
+  *::after,
+  .job-dialog::backdrop {
+    animation: none !important;
+    transition: none !important;
   }
 }

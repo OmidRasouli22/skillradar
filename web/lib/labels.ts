@@ -29,6 +29,10 @@ export const SENIORITY: Level[] = [
   { value: "unknown", label: "Not clear", tone: "var(--gray-1)", ink: "var(--gray-ink-1)" },
 ];
 
+export function label(levels: Level[], value: string): string {
+  return levels.find((level) => level.value === value)?.label ?? value;
+}
+
 // Short names for the state tiles.
 export const STATE_SHORT: Record<string, string> = {
   BADEN_WUERTTEMBERG: "BW",

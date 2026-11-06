@@ -10,14 +10,14 @@ export function percent(share: number): string {
   return `${Math.round(value)}%`;
 }
 
-// "2026-11-06" -> "6 Nov 2026". Parsed as UTC so the day never shifts.
-export function day(iso: string | null): string {
+// "2026-11-06" -> "6 Nov 2026" (or "6 Nov"). Parsed as UTC so the day never shifts.
+export function day(iso: string | null, withYear = true): string {
   if (!iso) return "unknown date";
   const date = new Date(`${iso}T00:00:00Z`);
   return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
-    year: "numeric",
+    ...(withYear ? { year: "numeric" } : {}),
     timeZone: "UTC",
   });
 }

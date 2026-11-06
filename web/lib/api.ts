@@ -38,6 +38,50 @@ export type Dashboard = {
   states: Record<string, Choice[]>;
 };
 
+export type PostingCard = {
+  refnr: string;
+  title: string;
+  employer: string | null;
+  city: string | null;
+  published: string | null;
+  seniority: string;
+  remote: string;
+  skills: string[];
+};
+
+export type PostingList = {
+  role: string;
+  region: string;
+  total: number;
+  offset: number;
+  items: PostingCard[];
+};
+
+export type Mark = {
+  start: number;
+  end: number;
+  kind: "required" | "nice" | "language" | "home_office";
+  label: string;
+};
+
+export type PostingDetail = {
+  refnr: string;
+  title: string;
+  employer: string | null;
+  city: string | null;
+  region: string | null;
+  published: string | null;
+  role: string;
+  seniority: string;
+  remote: string;
+  german: string;
+  english: string;
+  url: string;
+  skills: { name: string; required: boolean; emerging: boolean }[];
+  text: string;
+  marks: Mark[];
+};
+
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal, headers: { Accept: "application/json" } });
   if (!response.ok) {
@@ -53,4 +97,18 @@ export function getOverview(signal?: AbortSignal): Promise<Overview> {
 
 export function getDashboard(region: string, signal?: AbortSignal): Promise<Dashboard> {
   return get<Dashboard>(`/api/dashboard?${new URLSearchParams({ region })}`, signal);
+}
+
+export function getPostings(
+  role: string,
+  region: string,
+  offset: number,
+  signal?: AbortSignal,
+): Promise<PostingList> {
+  const query = new URLSearchParams({ role, region, offset: String(offset), limit: "20" });
+  return get<PostingList>(`/api/postings?${query}`, signal);
+}
+
+export function getPosting(refnr: string, signal?: AbortSignal): Promise<PostingDetail> {
+  return get<PostingDetail>(`/api/postings/${encodeURIComponent(refnr)}`, signal);
 }

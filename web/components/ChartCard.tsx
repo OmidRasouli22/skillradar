@@ -19,7 +19,7 @@ export function ChartCard(props: {
   const { id, question, answer, legend, table, loading, children } = props;
   const [asTable, setAsTable] = useState(false);
   return (
-    <section className="card" aria-labelledby={`${id}-title`} aria-busy={loading}>
+    <section className="card reveal" aria-labelledby={`${id}-title`} aria-busy={loading}>
       <div className="card-head">
         <div>
           <h2 id={`${id}-title`}>{question}</h2>

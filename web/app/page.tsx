@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChartCard, Swatch, type Table } from "@/components/ChartCard";
 import { Heatmap, ScaleLegend } from "@/components/Heatmap";
+import { JobDialog } from "@/components/JobDialog";
+import { JobList } from "@/components/JobList";
 import { KpiRow, type Kpi } from "@/components/KpiRow";
 import { RequiredLists } from "@/components/RequiredLists";
 import { RoleBars } from "@/components/RoleBars";
@@ -22,6 +24,8 @@ const SMALL_GROUP = 30;
 // A skill must be this common in the group to be compared in "must-have or bonus".
 const MIN_SHARE = 0.05;
 const MIN_POSTINGS = 5;
+// Reference numbers of the job search, as the API accepts them.
+const REFNR = /^[A-Za-z0-9][A-Za-z0-9_-]{2,79}$/;
 
 type Result = { region: string; data?: Dashboard; error?: string };
 
@@ -32,6 +36,7 @@ export default function Home() {
   const [role, setRole] = useState("all");
   const [limit, setLimit] = useState(FIRST);
   const [result, setResult] = useState<Result | null>(null);
+  const [job, setJob] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -41,6 +46,8 @@ export default function Home() {
         const params = new URLSearchParams(window.location.search);
         setRole(pick(params.get("role"), data.roles));
         setRegion(pick(params.get("region"), data.regions));
+        const shared = params.get("job");
+        if (shared && REFNR.test(shared)) setJob(shared);
         setOverview(data);
       })
       .catch((error: Error) => {
@@ -67,11 +74,12 @@ export default function Home() {
     setRole(nextRole);
     setRegion(nextRegion);
     setLimit(FIRST);
-    const params = new URLSearchParams();
-    if (nextRole !== "all") params.set("role", nextRole);
-    if (nextRegion !== "all") params.set("region", nextRegion);
-    const query = params.toString();
-    window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
+    link(nextRole, nextRegion, job);
+  }
+
+  function openJob(refnr: string | null) {
+    setJob(refnr);
+    link(role, region, refnr);
   }
 
   const current = result?.region === region ? result : null;
@@ -136,31 +144,45 @@ export default function Home() {
               />
             </div>
 
-            {current?.error ? (
-              <div className="card">
-                <div className="state" role="alert">
-                  <strong>Could not load the data.</strong>
-                  {current.error}
-                </div>
+            <div className="layout">
+              <div className="main">
+                {current?.error ? (
+                  <div className="card">
+                    <div className="state" role="alert">
+                      <strong>Could not load the data.</strong>
+                      {current.error}
+                    </div>
+                  </div>
+                ) : !dash ? (
+                  <div className="card">
+                    <div className="state">Loading…</div>
+                  </div>
+                ) : (
+                  <Sections
+                    dash={dash}
+                    role={role}
+                    roleLabel={roleLabel}
+                    region={region}
+                    where={where}
+                    total={total}
+                    limit={limit}
+                    loading={loading}
+                    onMore={() => setLimit(MORE)}
+                    choose={choose}
+                  />
+                )}
               </div>
-            ) : !dash ? (
-              <div className="card">
-                <div className="state">Loading…</div>
-              </div>
-            ) : (
-              <Sections
-                dash={dash}
-                role={role}
-                roleLabel={roleLabel}
-                region={region}
-                where={where}
-                total={total}
-                limit={limit}
-                loading={loading}
-                onMore={() => setLimit(MORE)}
-                choose={choose}
-              />
-            )}
+              {overview && (
+                <JobList
+                  role={role}
+                  region={region}
+                  title={`${role === "all" ? "tech" : roleLabel} jobs ${where}`}
+                  active={job}
+                  onOpen={openJob}
+                />
+              )}
+            </div>
+            {job && <JobDialog key={job} refnr={job} onClose={() => openJob(null)} />}
           </>
         )}
 
@@ -502,6 +524,16 @@ function partRow(question: string, answer: string, parts: Part[], value: string)
 
 function shareOf(parts: Part[], values: string[]): number {
   return parts.filter((p) => values.includes(p.value)).reduce((sum, p) => sum + p.share, 0);
+}
+
+// Keep the choices in the address, so a link opens the same view.
+function link(role: string, region: string, job: string | null) {
+  const params = new URLSearchParams();
+  if (role !== "all") params.set("role", role);
+  if (region !== "all") params.set("region", region);
+  if (job) params.set("job", job);
+  const query = params.toString();
+  window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
 }
 
 function pick(value: string | null, choices: Choice[]): string {
