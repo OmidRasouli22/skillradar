@@ -138,3 +138,9 @@ class TestFindInText:
 def test_category_of(taxonomy):
     assert taxonomy.category_of("Kafka") == "data"
     assert taxonomy.category_of("nope") is None
+
+
+def test_spellings_of():
+    taxonomy = load_taxonomy()
+    assert "PySpark" in taxonomy.spellings_of("Spark")
+    assert taxonomy.spellings_of("Not a skill") == []

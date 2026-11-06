@@ -73,6 +73,10 @@ class Taxonomy(BaseModel):
     def names(self) -> list[str]:
         return [skill.name for skill in self.skills]
 
+    def spellings_of(self, name: str) -> list[str]:
+        """The name and aliases of a skill in the list, or [] if it is not in the list."""
+        return next((s.spellings() for s in self.skills if s.name == name), [])
+
     def category_of(self, name: str) -> str | None:
         return next((s.category for s in self.skills if s.name == name), None)
 

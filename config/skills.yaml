@@ -41,7 +41,8 @@ skills:
   - {name: PHP, category: language}
   - {name: Ruby, category: language, ambiguous: true}
   - {name: Swift, category: language, ambiguous: true}
-  - {name: Bash, category: language, aliases: [Shell Scripting, Shell-Skripte, Shell-Scripting]}
+  - {name: Bash, category: language}
+  - {name: Shell Scripting, category: language, aliases: [Shell-Skripte, Shell-Scripting, Shellscripting, Shell Scripts, Unix-Scripting]}
   - {name: PowerShell, category: language}
   - {name: SQL, category: language}
   - {name: MATLAB, category: language, aliases: [Simulink]}
@@ -117,9 +118,13 @@ skills:
   - {name: GCP, category: cloud, aliases: [Google Cloud, Google Cloud Platform]}
   - {name: OpenStack, category: cloud}
   - {name: Cloudflare, category: cloud}
+  # General skill for postings that name no provider
+  - {name: Cloud Computing, category: cloud, aliases: [Multi-Cloud, Cloud-Plattformen, Cloud-Umgebungen, Public Cloud, Cloud-Technologien]}
 
   # DevOps and infrastructure
-  - {name: Docker, category: devops, aliases: [Docker Compose, Containerisierung, Containerization]}
+  - {name: Docker, category: devops, aliases: [Docker Compose]}
+  # General skill: "Container" in a posting is not Docker
+  - {name: Containers, category: devops, aliases: [Containerisierung, Containerization, Container-Technologien]}
   - {name: Kubernetes, category: devops, aliases: [K8s, AKS, EKS, GKE]}
   - {name: OpenShift, category: devops, aliases: [Red Hat OpenShift]}
   - {name: Helm, category: devops, ambiguous: true, aliases: [Helm Charts]}
@@ -137,6 +142,7 @@ skills:
   - {name: Git, category: devops, aliases: [GitHub, GitLab, Bitbucket]}
   - {name: Linux, category: devops, aliases: [Unix, Ubuntu, Red Hat, RHEL, Debian]}
   - {name: Windows Server, category: devops}
+  - {name: Windows, category: devops, aliases: [Windows-Clients, Windows Client, Windows 10, Windows 11]}
   - {name: Prometheus, category: devops}
   - {name: Grafana, category: devops}
   - {name: Datadog, category: devops}
