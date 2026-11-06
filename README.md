@@ -57,43 +57,6 @@ Click a job and it opens as a short profile: the key facts, what makes this job 
 from others in the same role ("only 12% of Data Engineer jobs ask for Linux"), and how
 common each of its skills is. A button leads to the original posting.
 
-## Keeping the AI honest
-
-An AI model can be wrong, so a few rules keep the numbers trustworthy:
-
-- **A strict answer format.** Claude can only choose from fixed lists of roles, levels and
-  languages, so every answer can be counted.
-- **Every skill is checked against the text.** If the model names a product the posting
-  never mentions, for example "AWS" when the text only says "cloud", it is left out. That
-  happened 1,275 times.
-- **Prompts are tested before the full run.** Each version of the instructions was compared
-  on the same 200 postings. Postings with an unclear seniority fell from 28% to 1%.
-- **Small groups are marked.** Two postings in one city say little, and the page says so.
-
-## Keeping it cheap and safe
-
-- **About 75 cents a month.** Postings go out in batches at half price, and the
-  instructions are cached. The first full run, tests included, cost $1.22. A hard limit of
-  $2 a month is checked before anything is sent, using the worst possible cost.
-- **Contact details stay out.** Emails, phone numbers and contact names are removed before
-  the AI reads a posting. A rare name in an unusual place can slip through, which is one
-  more reason the public site leaves the texts out.
-- **No posting texts on the public site.** They belong to the employers, so the public site
-  shows what the AI found and links to the original.
-
-## What it can't tell yet
-
-- **Trends.** Collection started in October 2026. Every day adds history, so in a few
-  months the page can show how demand changes.
-- **All of Germany.** The search covers the areas around ten large cities.
-- **Every employer.** One source only: jobs posted only on LinkedIn or a company's own
-  website are missing.
-
-## Built with
-
-Python · Claude API (Haiku 5.5, batch requests, structured output) · dbt and DuckDB ·
-FastAPI · Next.js · GitHub Pages · launchd
-
 ## Run it yourself
 
 ```sh
