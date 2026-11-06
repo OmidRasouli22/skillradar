@@ -36,3 +36,10 @@ def test_lock_file_is_private(tmp_path):
 
     with run_lock(lock):
         assert lock.stat().st_mode & 0o777 == 0o600
+
+
+def test_new_parent_folders_are_private(tmp_path):
+    lock = tmp_path / "a" / "b" / ".lock"
+    with run_lock(lock):
+        for folder in (tmp_path / "a", tmp_path / "a" / "b"):
+            assert folder.stat().st_mode & 0o777 == 0o700

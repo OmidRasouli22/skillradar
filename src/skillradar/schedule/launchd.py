@@ -11,6 +11,8 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
+from skillradar.storage import make_private_dir
+
 LABEL = "com.skillradar.snapshot"
 LAUNCH_AGENTS = Path.home() / "Library" / "LaunchAgents"
 
@@ -52,6 +54,8 @@ def build_plist(job: Job) -> bytes:
             "StandardOutPath": str(job.log_file),
             "StandardErrorPath": str(job.log_file),
             "ProcessType": "Background",
+            # 0o077: files the job creates, like the log, are for the owner only.
+            "Umask": 0o077,
         }
     )
 
@@ -67,7 +71,7 @@ class LaunchAgent:
         self._domain = f"gui/{os.getuid()}"
 
     def install(self, job: Job) -> Path:
-        job.log_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        make_private_dir(job.log_file.parent)
         self.plist_path.parent.mkdir(parents=True, exist_ok=True)
         self._unload()
         self.plist_path.write_bytes(build_plist(job))

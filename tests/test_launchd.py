@@ -50,6 +50,7 @@ class TestJob:
         assert plist["StartInterval"] == 30 * 60
         assert "StartCalendarInterval" not in plist
         assert plist["StandardOutPath"] == str(job.log_file)
+        assert plist["Umask"] == 0o077
 
     def test_special_characters_in_paths_are_escaped(self, tmp_path):
         job = make_job(tmp_path, project_dir=tmp_path / "a&b <c>")

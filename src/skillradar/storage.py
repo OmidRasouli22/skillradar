@@ -14,7 +14,13 @@ Record = dict[str, Any]
 
 
 def make_private_dir(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    """Create the folder and its missing parents, each readable by the owner only.
+
+    mkdir(parents=True, mode=...) gives the mode to the last folder only.
+    """
+    missing = [folder for folder in (path, *path.parents) if not folder.exists()]
+    for folder in reversed(missing):
+        folder.mkdir(mode=0o700, exist_ok=True)
 
 
 def atomic_write(path: Path, data: bytes) -> None:

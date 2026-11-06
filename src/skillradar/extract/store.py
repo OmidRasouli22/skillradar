@@ -14,7 +14,13 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from skillradar.storage import Record, atomic_write, json_line, read_json_lines
+from skillradar.storage import (
+    Record,
+    atomic_write,
+    json_line,
+    make_private_dir,
+    read_json_lines,
+)
 
 # Batch ids come from the API and end up in file names.
 BATCH_ID = re.compile(r"[A-Za-z0-9_-]{1,100}")
@@ -50,7 +56,7 @@ class ExtractionStore:
         path = self.root / "extractions" / f"{_safe(batch_id)}.jsonl"
         atomic_write(path, "".join(json_line(r) for r in results).encode("utf-8"))
         done = self._batch_file("done", batch_id)
-        done.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        make_private_dir(done.parent)
         os.replace(self._batch_file("pending", batch_id), done)
         return path
 
