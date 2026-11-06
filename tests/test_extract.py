@@ -461,7 +461,12 @@ def data_dir(tmp_path):
             "insert into silver_postings values ('a', 'Data Engineer', 'ARBEIT', '2026-10-01'), "
             "('b', 'Azubi', 'AUSBILDUNG', '2026-10-01')"
         )
-        con.execute("insert into silver_posting_texts values ('a', 'SQL'), ('b', 'Lernen')")
+        con.execute(
+            "insert into silver_posting_texts values ('a', 'SQL'), ('b', 'Lernen'), ('c', 'Go')"
+        )
+        con.execute("insert into silver_postings values ('c', 'Closed', 'ARBEIT', '2026-09-01')")
+        con.execute("create table silver_posting_history (refnr varchar, is_open boolean)")
+        con.execute("insert into silver_posting_history values ('a', true), ('c', false)")
     return tmp_path
 
 
@@ -473,8 +478,16 @@ class TestCli:
     def test_estimate_skips_apprenticeships(self, data_dir, capsys):
         assert cli.main(["--data-dir", str(data_dir), "estimate"]) == 0
         out = capsys.readouterr().out
-        assert out.startswith("1 postings without an answer")
+        assert out.startswith("2 postings without an answer")
         assert "claude-haiku-5-5" in out
+
+    def test_open_only(self, data_dir, capsys):
+        assert cli.main(["--data-dir", str(data_dir), "estimate", "--open-only"]) == 0
+        assert capsys.readouterr().out.startswith("1 postings without an answer")
+
+        client = FakeClient()
+        assert cli.main(["--data-dir", str(data_dir), "submit", "--open-only"], client=client) == 0
+        assert [r["custom_id"] for r in client.batches.sent[0]] == [custom_id("a")]
 
     def test_estimate_needs_warehouse(self, tmp_path, capsys):
         assert cli.main(["--data-dir", str(tmp_path), "estimate"]) == 1
@@ -489,11 +502,11 @@ class TestCli:
     def test_submit_and_collect(self, data_dir, capsys):
         client = FakeClient()
         assert cli.main(["--data-dir", str(data_dir), "submit"], client=client) == 0
-        assert "1 postings" in capsys.readouterr().out
+        assert "2 postings" in capsys.readouterr().out
 
-        client.batches.finish("msgbatch_1", [succeeded(custom_id("a"))])
+        client.batches.finish("msgbatch_1", [succeeded(custom_id("a")), succeeded(custom_id("c"))])
         assert cli.main(["--data-dir", str(data_dir), "collect"], client=client) == 0
-        assert "{'ok': 1}" in capsys.readouterr().out
+        assert "{'ok': 2}" in capsys.readouterr().out
 
     def test_over_budget(self, data_dir, capsys, monkeypatch):
         tiny = load_settings().model_copy(update={"budget_usd": 0.0001})
