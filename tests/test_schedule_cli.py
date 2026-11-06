@@ -6,7 +6,9 @@ from tests.test_launchd import FakeLaunchctl
 
 
 @pytest.fixture
-def agent(tmp_path):
+def agent(tmp_path, monkeypatch):
+    # Keep the job's log folder out of the real data folder.
+    monkeypatch.setattr(cli, "DATA_DIR", tmp_path / "data")
     return LaunchAgent(tmp_path / "agents", runner=FakeLaunchctl())
 
 
