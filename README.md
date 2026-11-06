@@ -24,7 +24,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Full extraction run (4,913 open postings, $1.22) | done |
 | Daily extraction with a monthly spending limit | done |
 | Evaluation (precision, recall) | next |
-| Gold tables, Postgres export | planned |
+| Gold tables (skill demand per role and region) | done |
+| Postgres export | planned |
 | FastAPI + Next.js app | planned |
 | Forecasting | planned |
 
@@ -56,6 +57,7 @@ src/skillradar/         Python package
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history, skills
+  models/gold/          skill demand and shares per role and region, for the webpage
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -118,9 +120,17 @@ it has an `ok` run over all cities and terms. Partial runs and test runs with `-
 
 ## Skills
 
-`config/skills.yaml` maps every spelling of a skill to one name ("PySpark" → Spark,
-"K8s" → Kubernetes). Names that are also normal words ("REST", "Go") are marked
-`ambiguous`; the keyword search then only uses their safe spellings ("REST-API", "Golang").
+`config/skills.yaml` is the list of about 310 skills. It maps every spelling of a skill to
+one name ("PySpark" → Spark, "K8s" → Kubernetes). Two marks matter:
+
+- `general`: the skill is a concept, not a product ("Networking", "CI/CD"). Postings often
+  describe a concept in other words, so it counts even when its name is not in the text.
+  A product counts only when the posting names it.
+- `ambiguous`: the name is also a normal word ("REST", "Go", "CAN"). The keyword search
+  then only uses the safe spellings ("REST-API", "Golang", "CAN-Bus").
+
+You can add skills at any time. Run `skillradar-transform` afterwards; old answers from
+Claude are matched to the new list, nothing is sent again.
 
 ```sh
 uv run skillradar-skills report                         # most common skills in all postings
@@ -185,6 +195,27 @@ likely made up by the model, so leave those out when counting.
 `quality` shows, per prompt version: how many answers came back, how often seniority or
 home office is `unknown`, skills per posting, how many skills are in `config/skills.yaml`,
 and which languages were found. Use it to compare prompt versions before a large run.
+
+## Gold tables
+
+The numbers the webpage shows. They cover open postings that have an answer from Claude,
+and are rebuilt with silver. `role` and `region` (German state) can also be `all`.
+
+| Table | What it holds |
+|---|---|
+| `gold_skill_demand` | per role, region and skill: how many postings ask for it, how many require it, all postings in the group, and the share |
+| `gold_attribute_shares` | per role and region: share of each seniority, home office option, and German and English level ("not asked" when a posting does not mention the language) |
+| `gold_meta` | one row: date of the data, open postings, how many have an answer, model and prompt version |
+| `gold_scope` | which posting belongs to which role and region (used by the others) |
+
+Two rules make the numbers honest:
+
+- A product name that is not in the posting text is left out, because the model most
+  likely made it up. Concepts (`general` skills) always count.
+- A posting with places in two states counts in both states, and once in `all`.
+
+Some groups are small (for example one role in one state), so a share can jump a lot.
+Always show `total_postings` next to a share.
 
 ## Daily schedule (macOS)
 

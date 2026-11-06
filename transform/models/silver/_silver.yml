@@ -121,6 +121,9 @@ models:
         data_tests: [not_null]
       - name: required
         data_tests: [not_null]
+      - name: general
+        description: True for a concept ("Networking"), false for a product or an unknown skill.
+        data_tests: [not_null]
       - name: in_text
         data_tests: [not_null]
 

@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: gold_scope
+    description: >
+      Open postings with an answer from Claude, one row per posting, role and region.
+      role and region can be 'all'.
+    columns:
+      - name: refnr
+        data_tests: [not_null]
+      - name: role
+        data_tests: [not_null]
+      - name: region
+        data_tests: [not_null]
+
+  - name: gold_skill_demand
+    description: >
+      Per role, region and skill: how many open postings ask for the skill (postings), how
+      many require it (required_postings), all postings in the group (total_postings) and
+      postings / total_postings (share). Small groups give noisy shares, so always show
+      total_postings. Product names that are not in the posting text are left out.
+    columns:
+      - name: skill
+        data_tests: [not_null]
+      - name: share
+        data_tests: [not_null]
+
+  - name: gold_attribute_shares
+    description: >
+      Per role and region: how open postings split by seniority, remote (home office),
+      german and english (language level, or 'not asked').
+    columns:
+      - name: attribute
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [seniority, remote, german, english]
+      - name: value
+        data_tests: [not_null]
+
+  - name: gold_meta
+    description: >
+      Date of the newest snapshot (as_of), open postings without apprenticeships, how many
+      of them have an answer, and the model and prompt version behind the answers.

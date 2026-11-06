@@ -9,8 +9,10 @@ from skillradar.transform import cli
 from skillradar.transform.runner import TransformError, build, warehouse_path
 from tests.helpers import write_jsonl, write_run_log
 
+DEFAULT_SKILLS = [{"name": "SQL", "required": True}, {"name": "AWS", "required": False}]
 
-def llm_answer(refnr, prompt_version=PROMPT_VERSION):
+
+def llm_answer(refnr, prompt_version=PROMPT_VERSION, skills=None, role="data_engineer"):
     return {
         "refnr": refnr,
         "model": load_settings().model,
@@ -18,11 +20,11 @@ def llm_answer(refnr, prompt_version=PROMPT_VERSION):
         "status": "ok",
         "extracted_at": "2026-11-06T10:00:00",
         "output": {
-            "role": "data_engineer",
+            "role": role,
             "seniority": "mid",
             "remote": "hybrid",
             "languages": [{"language": "German", "level": "fluent"}],
-            "skills": [{"name": "SQL", "required": True}, {"name": "AWS", "required": False}],
+            "skills": skills or DEFAULT_SKILLS,
         },
     }
 
@@ -91,7 +93,23 @@ def data_dir(tmp_path_factory):
     search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl.gz"
     write_jsonl(search, [{"run_id": run2, "posting": {"referenznummer": "b"}}])
 
-    answers = [llm_answer("a"), llm_answer("b", prompt_version="v0"), llm_answer("not-a-posting")]
+    # b is the only open posting. Its text names Python and Kafka, not AWS or "Networking".
+    open_answer = llm_answer(
+        "b",
+        role="backend_developer",
+        skills=[
+            {"name": "Python", "required": True},
+            {"name": "Kafka", "required": False},
+            {"name": "AWS", "required": True},
+            {"name": "Networking", "required": False},
+        ],
+    )
+    answers = [
+        llm_answer("a"),
+        llm_answer("b", prompt_version="v0"),
+        open_answer,
+        llm_answer("not-a-posting"),
+    ]
     write_jsonl(data / "llm/extractions/msgbatch_1.jsonl", answers)
 
     build(data)
@@ -176,22 +194,67 @@ class TestSilverTexts:
 
 class TestSkillTables:
     def test_only_current_prompt_and_known_postings(self, data_dir):
-        rows = query(data_dir, "select refnr, role, seniority from silver_posting_extractions")
-        assert rows == [("a", "data_engineer", "mid")]
+        sql = "select refnr, role from silver_posting_extractions order by refnr"
+        assert query(data_dir, sql) == [("a", "data_engineer"), ("b", "backend_developer")]
 
     def test_skills_are_checked_against_the_text(self, data_dir):
         rows = query(
             data_dir,
-            "select skill, required, in_skill_list, in_text from silver_posting_skills "
-            "order by skill",
+            "select skill, required, in_skill_list, general, in_text "
+            "from silver_posting_skills where refnr = 'a' order by skill",
         )
         # The text names SQL but not AWS.
-        assert rows == [("AWS", False, True, False), ("SQL", True, True, True)]
+        assert rows == [("AWS", False, True, False, False), ("SQL", True, True, False, True)]
 
     def test_languages(self, data_dir):
-        assert query(data_dir, "select * from silver_posting_languages") == [
-            ("a", "German", "fluent")
+        assert query(data_dir, "select * from silver_posting_languages order by refnr") == [
+            ("a", "German", "fluent"),
+            ("b", "German", "fluent"),
         ]
+
+
+class TestGoldTables:
+    def test_scope_has_open_postings_per_role_and_region(self, data_dir):
+        rows = query(data_dir, "select refnr, role, region from gold_scope order by role")
+        # b is open and has no region, so it is only in 'all'. a is closed.
+        assert rows == [("b", "all", "all"), ("b", "backend_developer", "all")]
+
+    def test_skill_demand_leaves_out_made_up_products(self, data_dir):
+        rows = query(
+            data_dir,
+            "select skill, postings, required_postings, total_postings, share "
+            "from gold_skill_demand where role = 'all' and region = 'all' order by skill",
+        )
+        # AWS is not in the text, so it is left out. Networking is a concept, so it counts.
+        assert rows == [
+            ("Kafka", 1, 0, 1, 1.0),
+            ("Networking", 1, 0, 1, 1.0),
+            ("Python", 1, 1, 1, 1.0),
+        ]
+
+    def test_attribute_shares(self, data_dir):
+        rows = query(
+            data_dir,
+            "select attribute, value, share from gold_attribute_shares "
+            "where role = 'all' and region = 'all' order by attribute",
+        )
+        assert rows == [
+            ("english", "not asked", 1.0),
+            ("german", "fluent", 1.0),
+            ("remote", "hybrid", 1.0),
+            ("seniority", "mid", 1.0),
+        ]
+
+    def test_meta(self, data_dir):
+        [(as_of, open_postings, with_answers, _, version)] = query(
+            data_dir, "select * from gold_meta"
+        )
+        assert (str(as_of), open_postings, with_answers, version) == (
+            "2026-10-24",
+            1,
+            1,
+            PROMPT_VERSION,
+        )
 
 
 def test_city_names_are_cleaned(data_dir):

@@ -13,6 +13,7 @@ SCHEMA = pa.schema(
         ("refnr", pa.string()),
         ("skill", pa.string()),
         ("category", pa.string()),
+        ("general", pa.bool_()),
         ("required", pa.bool_()),
         ("in_skill_list", pa.bool_()),
         ("in_text", pa.bool_()),

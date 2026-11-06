@@ -84,11 +84,17 @@ class TestSkillRows:
     def test_names_from_the_skill_list(self, taxonomy):
         rows = self.rows(taxonomy, [{"name": "PySpark", "required": True}], "PySpark")
         assert rows["Spark"]["category"] == "data" and rows["Spark"]["in_skill_list"]
+        assert rows["Spark"]["general"] is False
+
+    def test_concepts_are_general(self, taxonomy):
+        rows = self.rows(taxonomy, [{"name": "Networking", "required": True}], "Netzwerk")
+        assert rows["Networking"]["general"] is True and rows["Networking"]["in_text"] is False
 
     def test_unknown_skill_keeps_its_name(self, taxonomy):
         rows = self.rows(taxonomy, [{"name": "Zemax  OpticStudio", "required": False}], "Zemax")
         row = rows["Zemax OpticStudio"]
         assert (row["category"], row["in_skill_list"], row["in_text"]) == (None, False, False)
+        assert row["general"] is False
 
     def test_same_skill_twice_is_one_row(self, taxonomy):
         skills = [{"name": "Spark", "required": False}, {"name": "PySpark", "required": True}]

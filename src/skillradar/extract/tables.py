@@ -69,9 +69,10 @@ def skill_rows(answers: list[Record], taxonomy: Taxonomy, texts: dict[str, str])
     """One row per posting and skill.
 
     skill is the name from config/skills.yaml when it is in the list, else Claude's name.
-    in_text says if the posting names the skill or one of its spellings. A skill can be
-    missing from the text for a good reason ("Networking" for "Netzwerk"), but a product
-    name that is missing was most likely added by the model.
+    in_text says if the posting names the skill or one of its spellings. general says if
+    the skill is a concept, not a product. A concept can be missing from the text for a
+    good reason ("Networking" for "Netzwerk"); a product that is missing was most likely
+    added by the model.
     """
     rows: dict[tuple[str, str], Record] = {}
     for a in answers:
@@ -88,6 +89,7 @@ def skill_rows(answers: list[Record], taxonomy: Taxonomy, texts: dict[str, str])
                 "refnr": a["refnr"],
                 "skill": name,
                 "category": taxonomy.category_of(name),
+                "general": taxonomy.is_general(name),
                 "required": item["required"],
                 "in_skill_list": taxonomy.normalize(raw) is not None,
                 "in_text": any(written_in(text, term) for term in terms),
