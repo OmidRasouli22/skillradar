@@ -6,6 +6,8 @@
 #   general:   true for a concept, not a named product ("Networking", "CI/CD"). Postings
 #              often describe a concept in other words, so it counts even when its name
 #              is not in the text. A product counts only when the posting names it.
+#   emerging:  true for skills that only became mainstream in 2022 or later (LLMs, RAG,
+#              AI coding tools). The page shows how much of today's demand they make up.
 #   ambiguous: true if the name is also a normal word ("REST", "Go"). Keyword search then
 #              only uses the aliases; the LLM decides from context.
 
@@ -188,10 +190,10 @@ skills:
   - {name: XGBoost, category: ml, aliases: [LightGBM]}
   - {name: NLP, category: ml, general: true, aliases: [Natural Language Processing]}
   - {name: Computer Vision, category: ml, general: true, aliases: [Bildverarbeitung, OpenCV]}
-  - {name: LLM, category: ml, general: true, aliases: [LLMs, Large Language Models, Large Language Model, GPT]}
-  - {name: Generative AI, category: ml, general: true, aliases: [GenAI, Gen AI, generative KI]}
-  - {name: RAG, category: ml, general: true, aliases: [Retrieval Augmented Generation, Retrieval-Augmented Generation]}
-  - {name: LangChain, category: ml, aliases: [LangGraph]}
+  - {name: LLM, category: ml, general: true, emerging: true, aliases: [LLMs, Large Language Models, Large Language Model, GPT]}
+  - {name: Generative AI, category: ml, general: true, emerging: true, aliases: [GenAI, Gen AI, generative KI]}
+  - {name: RAG, category: ml, general: true, emerging: true, aliases: [Retrieval Augmented Generation, Retrieval-Augmented Generation]}
+  - {name: LangChain, category: ml, emerging: true, aliases: [LangGraph]}
   - {name: Hugging Face, category: ml, aliases: [HuggingFace]}
   - {name: MLflow, category: ml}
   - {name: Kubeflow, category: ml}
@@ -199,8 +201,8 @@ skills:
   - {name: Reinforcement Learning, category: ml, general: true}
   - {name: Statistics, category: ml, general: true, aliases: [Statistik, statistische Methoden]}
   - {name: Artificial Intelligence, category: ml, general: true, aliases: [Künstliche Intelligenz]}
-  - {name: Prompt Engineering, category: ml, general: true}
-  - {name: LlamaIndex, category: ml}
+  - {name: Prompt Engineering, category: ml, general: true, emerging: true}
+  - {name: LlamaIndex, category: ml, emerging: true}
 
   # BI and analytics
   - {name: Power BI, category: analytics, aliases: [PowerBI, Microsoft Power BI, DAX]}
@@ -372,8 +374,8 @@ skills:
   - {name: Eclipse, category: method, ambiguous: true, aliases: [Eclipse IDE]}
 
   # AI assistants and coding tools
-  - {name: GitHub Copilot, category: ai_tools}
-  - {name: Claude Code, category: ai_tools}
-  - {name: Cursor, category: ai_tools, ambiguous: true, aliases: [Cursor IDE, Cursor AI]}
-  - {name: Codex, category: ai_tools, ambiguous: true, aliases: [OpenAI Codex]}
-  - {name: Microsoft Copilot, category: ai_tools, aliases: [Microsoft 365 Copilot, M365 Copilot]}
+  - {name: GitHub Copilot, category: ai_tools, emerging: true}
+  - {name: Claude Code, category: ai_tools, emerging: true}
+  - {name: Cursor, category: ai_tools, emerging: true, ambiguous: true, aliases: [Cursor IDE, Cursor AI]}
+  - {name: Codex, category: ai_tools, emerging: true, ambiguous: true, aliases: [OpenAI Codex]}
+  - {name: Microsoft Copilot, category: ai_tools, emerging: true, aliases: [Microsoft 365 Copilot, M365 Copilot]}

@@ -3,6 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from skillradar.api.app import SECURITY_HEADERS, create_app
+from skillradar.api.data import TABLES
 from skillradar.api.labels import REGIONS, ROLES
 from skillradar.extract.schema import Role
 from skillradar.transform.runner import serve_dir
@@ -29,16 +30,30 @@ def write_gold(data_dir):
         con.executemany("insert into gold_scope values (?, ?, ?)", rows)
         con.execute(
             "create table gold_skill_demand as select * from (values "
-            "('all', 'all', 'Python', 3, 2, 4, 0.75), ('all', 'all', 'SQL', 2, 2, 4, 0.5), "
-            "('all', 'all', 'Rust', 2, 0, 4, 0.5), "
-            "('data_engineer', 'all', 'SQL', 2, 2, 2, 1.0)"
-            ") t(role, region, skill, postings, required_postings, total_postings, share)"
+            "('all', 'all', 'Python', false, 3, 2, 4, 0.75), "
+            "('all', 'all', 'SQL', false, 2, 2, 4, 0.5), "
+            "('all', 'all', 'Rust', false, 2, 0, 4, 0.5), "
+            "('all', 'all', 'RAG', true, 1, 0, 4, 0.25), "
+            "('data_engineer', 'all', 'SQL', false, 2, 2, 2, 1.0)"
+            ") t(role, region, skill, emerging, postings, required_postings, total_postings, share)"
+        )
+        con.execute(
+            "create table gold_attribute_shares as select * from (values "
+            "('all', 'all', 'german', 'fluent', 3, 4, 0.75), "
+            "('all', 'all', 'german', 'not asked', 1, 4, 0.25), "
+            "('all', 'all', 'remote', 'hybrid', 4, 4, 1.0)"
+            ") t(role, region, attribute, value, postings, total_postings, share)"
+        )
+        con.execute(
+            "create table gold_emerging_share as select * from (values "
+            "('all', 'all', 1, 4, 0.25), ('data_engineer', 'all', 0, 2, 0.0)"
+            ") t(role, region, postings, total_postings, share)"
         )
         con.execute(
             "create table gold_meta as select date '2026-11-06' as as_of, 4 as tech_postings, "
             "'claude-haiku-5-5' as model, 'v4' as prompt_version"
         )
-        for table in ("gold_scope", "gold_skill_demand", "gold_meta"):
+        for table in TABLES:
             con.execute(f"copy {table} to '{folder / table}.parquet' (format parquet)")
 
 
@@ -77,7 +92,7 @@ class TestSkills:
         data = client.get("/api/skills").json()
         assert data["total_postings"] == 4
         # Most postings first; ties by name.
-        assert [s["name"] for s in data["skills"]] == ["Python", "Rust", "SQL"]
+        assert [s["name"] for s in data["skills"]] == ["Python", "Rust", "SQL", "RAG"]
         assert data["skills"][0] == {
             "name": "Python",
             "postings": 3,
@@ -110,6 +125,49 @@ class TestSkills:
     )
     def test_bad_input_is_rejected(self, client, params):
         assert client.get("/api/skills", params=params).status_code == 422
+
+
+class TestDashboard:
+    def test_everything_for_one_region(self, client):
+        data = client.get("/api/dashboard").json()
+        assert data["region"] == "all" and data["total_postings"] == 4
+        assert data["as_of"] == "2026-11-06" and data["model"] == "claude-haiku-5-5"
+        assert [r["id"] for r in data["roles"]][0] == "all"
+        assert [s["name"] for s in data["skills"]["all"]] == ["Python", "Rust", "SQL", "RAG"]
+        assert data["skills"]["data_engineer"][0]["required_share"] == 1.0
+
+    def test_heatmap_has_zero_where_a_role_never_asks(self, client):
+        heatmap = client.get("/api/dashboard").json()["heatmap"]
+        assert heatmap["skills"] == ["Python", "Rust", "SQL", "RAG"]
+        rows = {row["id"]: row["shares"] for row in heatmap["rows"]}
+        assert "all" not in rows
+        assert rows["data_engineer"] == [0.0, 0.0, 1.0, 0.0]
+        assert rows["backend_developer"] == [0.0, 0.0, 0.0, 0.0]
+
+    def test_emerging(self, client):
+        data = client.get("/api/dashboard").json()
+        assert data["emerging_skills"] == [{"name": "RAG", "postings": 1, "share": 0.25}]
+        assert data["emerging"]["all"] == {"postings": 1, "share": 0.25}
+
+    def test_attributes(self, client):
+        german = client.get("/api/dashboard").json()["attributes"]["all"]["german"]
+        assert german == [
+            {"value": "fluent", "postings": 3, "share": 0.75},
+            {"value": "not asked", "postings": 1, "share": 0.25},
+        ]
+
+    def test_states_leave_out_places_outside_germany(self, client):
+        states = client.get("/api/dashboard").json()["states"]
+        assert sorted(s["id"] for s in states["all"]) == ["BAYERN", "BERLIN"]
+        assert "other_tech" not in states  # its only place is in Austria
+
+    def test_one_region(self, client):
+        data = client.get("/api/dashboard", params={"region": "BERLIN"}).json()
+        assert data["total_postings"] == 1 and data["skills"] == {}
+
+    @pytest.mark.parametrize("region", ["WIEN", "nowhere", "x' or 1=1 --"])
+    def test_unknown_region(self, client, region):
+        assert client.get("/api/dashboard", params={"region": region}).status_code == 422
 
 
 def test_no_data_yet(tmp_path):

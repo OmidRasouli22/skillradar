@@ -124,6 +124,9 @@ models:
       - name: general
         description: True for a concept ("Networking"), false for a product or an unknown skill.
         data_tests: [not_null]
+      - name: emerging
+        description: True for skills that only became mainstream in 2022 or later.
+        data_tests: [not_null]
       - name: in_text
         data_tests: [not_null]
 

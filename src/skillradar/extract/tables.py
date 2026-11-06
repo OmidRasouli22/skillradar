@@ -90,6 +90,7 @@ def skill_rows(answers: list[Record], taxonomy: Taxonomy, texts: dict[str, str])
                 "skill": name,
                 "category": taxonomy.category_of(name),
                 "general": taxonomy.is_general(name),
+                "emerging": taxonomy.is_emerging(name),
                 "required": item["required"],
                 "in_skill_list": taxonomy.normalize(raw) is not None,
                 "in_text": any(written_in(text, term) for term in terms),

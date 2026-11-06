@@ -38,6 +38,18 @@ models:
       - name: value
         data_tests: [not_null]
 
+  - name: gold_emerging_share
+    description: >
+      Per role and region: open postings that ask for at least one skill that only became
+      mainstream in 2022 or later (emerging in config/skills.yaml), and their share.
+    columns:
+      - name: role
+        data_tests: [not_null]
+      - name: region
+        data_tests: [not_null]
+      - name: share
+        data_tests: [not_null]
+
   - name: gold_meta
     description: >
       Date of the newest snapshot (as_of), open postings without apprenticeships, how many

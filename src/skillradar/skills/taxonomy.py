@@ -27,6 +27,7 @@ class Skill(BaseModel):
     category: str
     aliases: list[str] = Field(default_factory=list)
     general: bool = False  # a concept, not a named product
+    emerging: bool = False  # mainstream only since 2022
     ambiguous: bool = False
 
     def spellings(self) -> list[str]:
@@ -80,6 +81,9 @@ class Taxonomy(BaseModel):
 
     def is_general(self, name: str) -> bool:
         return any(s.general for s in self.skills if s.name == name)
+
+    def is_emerging(self, name: str) -> bool:
+        return any(s.emerging for s in self.skills if s.name == name)
 
     def category_of(self, name: str) -> str | None:
         return next((s.category for s in self.skills if s.name == name), None)

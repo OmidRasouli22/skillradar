@@ -2,6 +2,7 @@
 
 /api/overview   data date, number of postings, roles and regions to choose from
 /api/skills     the most asked-for skills for one role and region
+/api/dashboard  everything the page shows for one region
 /               the page, built from web/ with `npm run build`
 """
 
@@ -62,6 +63,12 @@ def create_app(data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD) -> FastAP
         if region not in REGIONS:
             raise HTTPException(status_code=422, detail=f"unknown region: {region[:40]}")
         return gold.skills(role, region, limit)
+
+    @app.get("/api/dashboard")
+    def dashboard(region: str = ALL) -> dict:
+        if region not in REGIONS:
+            raise HTTPException(status_code=422, detail=f"unknown region: {region[:40]}")
+        return gold.dashboard(region)
 
     if (web_build / "index.html").exists():
         app.mount("/", StaticFiles(directory=web_build, html=True), name="page")

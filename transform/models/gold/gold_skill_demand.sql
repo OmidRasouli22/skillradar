@@ -13,7 +13,7 @@ totals as (
 ),
 
 skills as (
-    select refnr, skill, category, general, required
+    select refnr, skill, category, general, emerging, required
     from {{ ref('silver_posting_skills') }}
     where in_text or general
 )
@@ -24,6 +24,7 @@ select
     skills.skill,
     skills.category,
     skills.general,
+    skills.emerging,
     count(*) as postings,
     count(*) filter (where skills.required) as required_postings,
     totals.total_postings,
@@ -31,4 +32,6 @@ select
 from scope
 join skills using (refnr)
 join totals using (role, region)
-group by scope.role, scope.region, skills.skill, skills.category, skills.general, totals.total_postings
+group by
+    scope.role, scope.region, skills.skill, skills.category, skills.general, skills.emerging,
+    totals.total_postings

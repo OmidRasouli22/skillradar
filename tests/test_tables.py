@@ -86,6 +86,11 @@ class TestSkillRows:
         assert rows["Spark"]["category"] == "data" and rows["Spark"]["in_skill_list"]
         assert rows["Spark"]["general"] is False
 
+    def test_emerging_skills(self, taxonomy):
+        skills = [{"name": "GitHub Copilot", "required": False}, {"name": "Java", "required": True}]
+        rows = self.rows(taxonomy, skills, "GitHub Copilot und Java")
+        assert rows["GitHub Copilot"]["emerging"] is True and rows["Java"]["emerging"] is False
+
     def test_concepts_are_general(self, taxonomy):
         rows = self.rows(taxonomy, [{"name": "Networking", "required": True}], "Netzwerk")
         assert rows["Networking"]["general"] is True and rows["Networking"]["in_text"] is False

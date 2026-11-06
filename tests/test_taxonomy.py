@@ -144,3 +144,9 @@ def test_spellings_of():
     taxonomy = load_taxonomy()
     assert "PySpark" in taxonomy.spellings_of("Spark")
     assert taxonomy.spellings_of("Not a skill") == []
+
+
+def test_emerging_skills():
+    taxonomy = load_taxonomy()
+    assert taxonomy.is_emerging("Claude Code") and taxonomy.is_emerging("RAG")
+    assert not taxonomy.is_emerging("Python") and not taxonomy.is_emerging("Not a skill")

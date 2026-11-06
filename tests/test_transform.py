@@ -54,7 +54,7 @@ def data_dir(tmp_path_factory):
         {"adresse": {"ort": "Stuttgart", "plz": "70173", "region": "BADEN_WUERTTEMBERG"}},
         {"adresse": {"ort": "Esslingen"}, "breite": 48.74, "laenge": 9.31},
     ]
-    contact = "Python und Kafka. Fragen an Frau Anna Weber, Tel. 0711 123456, anna@firma.de"
+    contact = "Python, Kafka und LLMs. Fragen an Frau Anna Weber, Tel. 0711 123456, anna@firma.de"
     posting_a = details(
         "a",
         gehaltsspanneVon="55000",
@@ -99,7 +99,8 @@ def data_dir(tmp_path_factory):
         ],
     )
 
-    # b is the only open posting. Its text names Python and Kafka, not AWS or "Networking".
+    # b is the only open posting. Its text names Python, Kafka and LLMs, not AWS or
+    # "Networking".
     open_answer = llm_answer(
         "b",
         role="backend_developer",
@@ -108,6 +109,7 @@ def data_dir(tmp_path_factory):
             {"name": "Kafka", "required": False},
             {"name": "AWS", "required": True},
             {"name": "Networking", "required": False},
+            {"name": "LLM", "required": False},  # emerging, named as "LLMs"
         ],
     )
     answers = [
@@ -187,7 +189,7 @@ class TestSilverTexts:
             data_dir,
             "select description, emails, phones, names from silver_posting_texts where refnr = 'b'",
         )
-        assert text == "Python und Kafka. Fragen an Frau [name], Tel. [phone], [email]"
+        assert text == "Python, Kafka und LLMs. Fragen an Frau [name], Tel. [phone], [email]"
         assert (emails, phones, names) == (1, 1, 1)
 
     def test_clean_text_is_unchanged(self, data_dir):
@@ -230,6 +232,7 @@ def test_gold_tables_are_exported_for_the_api(data_dir):
     names = sorted(path.name for path in folder.iterdir())
     assert names == [
         "gold_attribute_shares.parquet",
+        "gold_emerging_share.parquet",
         "gold_meta.parquet",
         "gold_scope.parquet",
         "gold_skill_demand.parquet",
@@ -256,9 +259,18 @@ class TestGoldTables:
         # AWS is not in the text, so it is left out. Networking is a concept, so it counts.
         assert rows == [
             ("Kafka", 1, 0, 1, 1.0),
+            ("LLM", 1, 0, 1, 1.0),
             ("Networking", 1, 0, 1, 1.0),
             ("Python", 1, 1, 1, 1.0),
         ]
+
+    def test_emerging_share(self, data_dir):
+        rows = query(
+            data_dir,
+            "select role, region, postings, total_postings, share "
+            "from gold_emerging_share order by role",
+        )
+        assert rows == [("all", "all", 1, 1, 1.0), ("backend_developer", "all", 1, 1, 1.0)]
 
     def test_attribute_shares(self, data_dir):
         rows = query(
