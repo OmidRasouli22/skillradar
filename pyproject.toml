@@ -8,11 +8,13 @@ dependencies = [
     "anthropic>=2.3.0",
     "dbt-core>=1.10",
     "dbt-duckdb>=1.9",
+    "fastapi>=0.115",
     "httpx>=0.27",
     "pyarrow>=17",
     "pydantic>=2.8",
     "python-dotenv>=1.2.4",
     "pyyaml>=6.0",
+    "uvicorn>=0.32",
 ]
 
 [project.scripts]
@@ -22,6 +24,7 @@ skillradar-transform = "skillradar.transform.cli:main"
 skillradar-skills = "skillradar.skills.report:main"
 skillradar-extract = "skillradar.extract.cli:main"
 skillradar-daily = "skillradar.daily:main"
+skillradar-web = "skillradar.api.cli:main"
 
 [dependency-groups]
 dev = [

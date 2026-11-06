@@ -23,10 +23,11 @@ region. A CV gap analyser compares your CV with that demand.
 | dbt models for skills, test runs on 200 postings | done |
 | Full extraction run (4,913 open postings, $1.22) | done |
 | Daily extraction with a monthly spending limit | done |
-| Evaluation (precision, recall) | next |
 | Gold tables (skill demand per role and region) | done |
-| Postgres export | planned |
-| FastAPI + Next.js app | planned |
+| Webpage: one page, local (FastAPI + Next.js) | done |
+| Skill trends over time | planned |
+| Evaluation (precision, recall) | planned |
+| Postgres export, hosting | planned |
 | Forecasting | planned |
 
 ## Layout
@@ -53,7 +54,9 @@ src/skillradar/         Python package
   skills/               skill list loader, name lookup, keyword search, report
   extract/              skill extraction with Claude: prompt, batches, spending limit,
                         daily step, quality numbers, silver table rows
+  api/                  web API over the gold tables, and the command that starts the page
   storage.py            atomic writes, private folders, JSON lines
+web/                    the page (Next.js), built into static files in web/out
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history, skills
@@ -198,14 +201,18 @@ and which languages were found. Use it to compare prompt versions before a large
 
 ## Gold tables
 
-The numbers the webpage shows. They cover open postings that have an answer from Claude,
-and are rebuilt with silver. `role` and `region` (German state) can also be `all`.
+The numbers the webpage shows. They cover open tech postings that have an answer from
+Claude, and are rebuilt with silver. Jobs that are not tech work (the search finds a few,
+like sales or HR) are left out. `role` and `region` (German state) can also be `all`.
+
+After each build the gold tables are also saved as Parquet files in `data/serve/`. The
+page reads only these files, never the warehouse, so it can't block the daily build.
 
 | Table | What it holds |
 |---|---|
 | `gold_skill_demand` | per role, region and skill: how many postings ask for it, how many require it, all postings in the group, and the share |
 | `gold_attribute_shares` | per role and region: share of each seniority, home office option, and German and English level ("not asked" when a posting does not mention the language) |
-| `gold_meta` | one row: date of the data, open postings, how many have an answer, model and prompt version |
+| `gold_meta` | one row: date of the data, open postings, how many have an answer, how many are tech jobs, model and prompt version |
 | `gold_scope` | which posting belongs to which role and region (used by the others) |
 
 Two rules make the numbers honest:
@@ -216,6 +223,36 @@ Two rules make the numbers honest:
 
 Some groups are small (for example one role in one state), so a share can jump a lot.
 Always show `total_postings` next to a share.
+
+## Webpage
+
+One page that answers the main question: which skills do German tech employers ask for?
+Pick a role and a region, and see the most asked-for skills, split into required and nice
+to have, with the number of postings behind them. It runs on your Mac only.
+
+First time, build the page (needs Node.js):
+
+```sh
+cd web && npm install && npm run build && cd ..
+```
+
+Then start it and open http://127.0.0.1:8000:
+
+```sh
+uv run skillradar-web
+```
+
+The page always shows the latest gold tables; reload it after the daily job ran. Build the
+page again only when you change files in `web/`.
+
+To work on the page with live reload, run `uv run skillradar-web` in one terminal and
+`cd web && npm run dev` in another, then open http://localhost:3000.
+
+Checks for the page: `npm run typecheck`, `npm run lint` and `npm run build` in `web/`.
+
+The API is at `/api/overview` and `/api/skills?role=data_engineer&region=BAYERN`
+(docs at `/api/docs`). It only reads data, only listens on 127.0.0.1, and only accepts
+known roles and regions.
 
 ## Daily schedule (macOS)
 
