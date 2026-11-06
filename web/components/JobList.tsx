@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getPostings, type PostingCard } from "@/lib/api";
 import { count, day } from "@/lib/format";
 import { label, REMOTE, SENIORITY } from "@/lib/labels";
+import type { Origin } from "./JobDialog";
 
 type Page = { key: string; items: PostingCard[]; total: number; error?: string };
 
@@ -13,7 +14,7 @@ export function JobList(props: {
   region: string;
   title: string;
   active: string | null;
-  onOpen: (refnr: string) => void;
+  onOpen: (refnr: string, origin: Origin) => void;
 }) {
   const { role, region, title, active, onOpen } = props;
   const key = `${role}|${region}`;
@@ -56,7 +57,10 @@ export function JobList(props: {
               <button
                 type="button"
                 className={job.refnr === active ? "job active" : "job"}
-                onClick={() => onOpen(job.refnr)}
+                onClick={(event) => {
+                  const box = event.currentTarget.getBoundingClientRect();
+                  onOpen(job.refnr, { x: box.left, y: box.top, width: box.width, height: box.height });
+                }}
               >
                 <span className="job-title">{job.title}</span>
                 <span className="job-meta">

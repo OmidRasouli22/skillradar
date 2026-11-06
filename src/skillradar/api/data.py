@@ -209,10 +209,19 @@ class GoldData:
             ).fetchall()
             if not rows:
                 return None
+            # How common each skill is in this role, across Germany, for the job profile.
             skills = con.execute(
-                "select skill, required, emerging from gold_posting_skills where refnr = ? "
-                "order by required desc, skill",
-                [refnr],
+                "select k.skill, k.required, k.emerging, coalesce(d.share, 0) "
+                "from gold_posting_skills k join gold_postings p using (refnr) "
+                "left join gold_skill_demand d "
+                "on d.skill = k.skill and d.role = p.role and d.region = ? "
+                "where k.refnr = ? order by k.required desc, k.skill",
+                [ALL, refnr],
+            ).fetchall()
+            [(role_postings,)] = con.execute(
+                "select count(*) from gold_scope where role = "
+                "(select role from gold_postings where refnr = ?) and region = ?",
+                [refnr, ALL],
             ).fetchall()
         (_, title, employer, city, region, published, role, seniority, remote, german,
          english, raw_text) = rows[0]  # fmt: skip
@@ -225,17 +234,26 @@ class GoldData:
             "region": REGIONS.get(region or "", None),
             "published": published.isoformat() if published else None,
             "role": ROLES.get(role, role),
+            "role_id": role,
+            "role_postings": role_postings,
             "seniority": seniority,
             "remote": remote,
             "german": german,
             "english": english,
             "url": JOB_URL.format(refnr=refnr),
             "skills": [
-                {"name": name, "required": required, "emerging": emerging}
-                for name, required, emerging in skills
+                {
+                    "name": name,
+                    "required": required,
+                    "emerging": emerging,
+                    "share_in_role": float(share),
+                }
+                for name, required, emerging, share in skills
             ],
             "text": text,
-            "marks": marks(text, [(name, required) for name, required, _ in skills], self.taxonomy),
+            "marks": marks(
+                text, [(name, required) for name, required, *_ in skills], self.taxonomy
+            ),
         }
 
     def _connect(self) -> duckdb.DuckDBPyConnection:

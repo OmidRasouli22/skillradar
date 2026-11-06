@@ -72,12 +72,15 @@ export type PostingDetail = {
   region: string | null;
   published: string | null;
   role: string;
+  role_id: string;
+  role_postings: number;
   seniority: string;
   remote: string;
   german: string;
   english: string;
   url: string;
-  skills: { name: string; required: boolean; emerging: boolean }[];
+  // share_in_role: how many postings of the same role ask for the skill
+  skills: { name: string; required: boolean; emerging: boolean; share_in_role: number }[];
   text: string;
   marks: Mark[];
 };

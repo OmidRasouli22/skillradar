@@ -217,7 +217,15 @@ class TestPostings:
         assert data["title"] == "Data Engineer (m/w/d)" and data["role"] == "Data Engineer"
         assert data["region"] == "Bayern" and data["german"] == "fluent"
         assert data["url"] == "https://www.arbeitsagentur.de/jobsuche/jobdetail/job-1"
-        assert data["skills"][0] == {"name": "SQL", "required": True, "emerging": False}
+        assert data["role_id"] == "data_engineer" and data["role_postings"] == 2
+        # SQL is in 100% of the fixture's data_engineer postings; Python has no role row.
+        assert data["skills"][0] == {
+            "name": "SQL",
+            "required": True,
+            "emerging": False,
+            "share_in_role": 1.0,
+        }
+        assert data["skills"][1]["share_in_role"] == 0.0
         marked = [(data["text"][m["start"] : m["end"]], m["kind"]) for m in data["marks"]]
         assert marked == [
             ("SQL", "required"),

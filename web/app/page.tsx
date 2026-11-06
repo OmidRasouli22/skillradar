@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChartCard, Swatch, type Table } from "@/components/ChartCard";
 import { Heatmap, ScaleLegend } from "@/components/Heatmap";
-import { JobDialog } from "@/components/JobDialog";
+import { JobDialog, type Origin } from "@/components/JobDialog";
 import { JobList } from "@/components/JobList";
 import { KpiRow, type Kpi } from "@/components/KpiRow";
 import { RequiredLists } from "@/components/RequiredLists";
@@ -37,6 +37,7 @@ export default function Home() {
   const [limit, setLimit] = useState(FIRST);
   const [result, setResult] = useState<Result | null>(null);
   const [job, setJob] = useState<string | null>(null);
+  const [origin, setOrigin] = useState<Origin | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -77,8 +78,9 @@ export default function Home() {
     link(nextRole, nextRegion, job);
   }
 
-  function openJob(refnr: string | null) {
+  function openJob(refnr: string | null, from: Origin | null = null) {
     setJob(refnr);
+    setOrigin(from);
     link(role, region, refnr);
   }
 
@@ -182,7 +184,7 @@ export default function Home() {
                 />
               )}
             </div>
-            {job && <JobDialog key={job} refnr={job} onClose={() => openJob(null)} />}
+            {job && <JobDialog key={job} refnr={job} origin={origin} onClose={() => openJob(null)} />}
           </>
         )}
 
