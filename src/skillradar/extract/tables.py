@@ -4,17 +4,14 @@ Only answers from the current model and prompt version are used, so all rows com
 the same instructions. Older answers stay on disk for comparison.
 """
 
-import re
 from pathlib import Path
 
 from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import load_settings
 from skillradar.extract.store import ExtractionStore
+from skillradar.skills.matching import prepare, written_in
 from skillradar.skills.taxonomy import Taxonomy
 from skillradar.storage import Record
-
-# Postings use several dash characters; they count as a normal hyphen.
-DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014\u00ad"})
 
 
 def load_current_answers(llm_dir: Path, refnrs: set[str]) -> list[Record]:
@@ -76,7 +73,7 @@ def skill_rows(answers: list[Record], taxonomy: Taxonomy, texts: dict[str, str])
     """
     rows: dict[tuple[str, str], Record] = {}
     for a in answers:
-        text = texts.get(a["refnr"], "").translate(DASHES).casefold()
+        text = prepare(texts.get(a["refnr"], ""))
         for item in a["output"]["skills"]:
             raw = " ".join(item["name"].split())
             name = taxonomy.normalize(raw) or raw
@@ -96,13 +93,3 @@ def skill_rows(answers: list[Record], taxonomy: Taxonomy, texts: dict[str, str])
                 "in_text": any(written_in(text, term) for term in terms),
             }
     return list(rows.values())
-
-
-def written_in(text: str, term: str) -> bool:
-    """Is the term in the text? Expects a casefolded text with plain hyphens.
-
-    A space or hyphen in the term may be a space, a hyphen or nothing in the text.
-    """
-    parts = re.split(r"[\s-]+", term.translate(DASHES).casefold().strip())
-    body = r"[\s-]?".join(re.escape(part) for part in parts if part)
-    return bool(body) and re.search(rf"(?<![\w#+.]){body}(?![\w#+])", text) is not None

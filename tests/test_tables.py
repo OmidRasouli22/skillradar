@@ -1,12 +1,7 @@
 import pytest
 
-from skillradar.extract.tables import (
-    current_answers,
-    language_rows,
-    posting_rows,
-    skill_rows,
-    written_in,
-)
+from skillradar.extract.tables import current_answers, language_rows, posting_rows, skill_rows
+from skillradar.skills.matching import prepare, spans, written_in
 from skillradar.skills.taxonomy import load_taxonomy
 
 
@@ -138,3 +133,11 @@ class TestSkillRows:
 )
 def test_written_in(text, term, expected):
     assert written_in(text, term) is expected
+
+
+def test_matching_ignores_case_and_keeps_positions():
+    text = prepare("Gute Kenntnisse in PYTHON und Data\u2011Warehouse; Straße")
+    assert written_in(text, "python")
+    [(start, end)] = spans(text, "Data Warehouse")
+    assert text[start:end] == "Data-Warehouse"
+    assert len(text) == len("Gute Kenntnisse in PYTHON und Data\u2011Warehouse; Straße")
