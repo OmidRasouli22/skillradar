@@ -1,7 +1,8 @@
 """Daily job for macOS launchd.
 
-launchd skips a fixed time when the Mac is off. So the job starts at login and then every
-hour. skillradar-daily does nothing when today already has a full run and silver is up to date.
+The job runs once a day at a fixed time. If the Mac was asleep then, launchd runs it when
+the Mac wakes up. If the Mac was off, it runs at the next login. A second start on the
+same day does nothing: skillradar-daily skips a day that already has a full run.
 """
 
 import os
@@ -24,11 +25,12 @@ class Job:
     uv: Path
     project_dir: Path
     log_file: Path
-    check_every_minutes: int = 60
+    hour: int = 8
+    minute: int = 0
 
     def __post_init__(self) -> None:
-        if not 5 <= self.check_every_minutes <= 24 * 60:
-            raise ValueError(f"invalid check interval: {self.check_every_minutes} minutes")
+        if not (0 <= self.hour <= 23 and 0 <= self.minute <= 59):
+            raise ValueError(f"invalid time: {self.hour}:{self.minute:02d}")
         for path in (self.uv, self.project_dir, self.log_file):
             if not path.is_absolute():
                 raise ValueError(f"path must be absolute: {path}")
@@ -49,8 +51,9 @@ def build_plist(job: Job) -> bytes:
                 "skillradar-daily",
             ],
             "WorkingDirectory": str(job.project_dir),
+            # At login, for days when the Mac was off at the daily time.
             "RunAtLoad": True,
-            "StartInterval": job.check_every_minutes * 60,
+            "StartCalendarInterval": {"Hour": job.hour, "Minute": job.minute},
             "StandardOutPath": str(job.log_file),
             "StandardErrorPath": str(job.log_file),
             "ProcessType": "Background",

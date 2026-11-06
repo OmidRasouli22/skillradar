@@ -129,3 +129,36 @@ class TestCollectStep:
 
         store = ExtractionStore(data_dir / "llm")
         assert store.pending() == [] and [r["refnr"] for r in store.results()] == ["open"]
+
+
+class TestWaitStep:
+    def test_nothing_pending_returns_at_once(self, data_dir):
+        auto.wait_step(data_dir, fail_if_called, sleep=fail_if_called)
+
+    def test_collects_when_the_batch_ends(self, data_dir):
+        client = FakeClient()
+        auto.submit_step(data_dir, lambda: client)
+        waits = []
+
+        def sleep(seconds):
+            waits.append(seconds)
+            if len(waits) == 3:  # the batch ends during the third wait
+                client.batches.finish("msgbatch_1", [succeeded(custom_id("open"))])
+
+        auto.wait_step(data_dir, lambda: client, sleep=sleep)
+
+        assert len(waits) == 3
+        store = ExtractionStore(data_dir / "llm")
+        assert store.pending() == [] and len(store.results()) == 1
+
+    def test_gives_up_after_the_limit(self, data_dir, caplog):
+        client = FakeClient()
+        auto.submit_step(data_dir, lambda: client)
+        waits = []
+
+        with caplog.at_level(logging.INFO):
+            auto.wait_step(data_dir, lambda: client, sleep=waits.append)
+
+        assert sum(waits) == auto.WAIT_MINUTES * 60
+        assert len(ExtractionStore(data_dir / "llm").pending()) == 1
+        assert "collected next time" in caplog.text

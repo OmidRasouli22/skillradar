@@ -25,12 +25,15 @@ def calls(monkeypatch):
         seen["order"].append("build")
         if seen.get("build_error"):
             raise TransformError("dbt failed")
+        (data_dir / "warehouse.duckdb").write_text("built")  # a real build updates it
 
     def fake_step(name):
         def step(data_dir):
             seen["order"].append(name)
             if seen.get("claude_error"):
                 raise RuntimeError("bug in a Claude step")
+            if name == "wait" and seen.get("new_answers"):
+                touch(data_dir / "llm/extractions/msgbatch_1.jsonl", 4_000_000_000)
 
         step.__name__ = name
         return step
@@ -39,6 +42,7 @@ def calls(monkeypatch):
     monkeypatch.setattr(daily, "build", fake_build)
     monkeypatch.setattr(daily.auto, "collect_step", fake_step("collect"))
     monkeypatch.setattr(daily.auto, "submit_step", fake_step("submit"))
+    monkeypatch.setattr(daily.auto, "wait_step", fake_step("wait"))
     monkeypatch.setattr(daily, "notify", lambda title, message: seen["notify"].append(title))
     return seen
 
@@ -100,7 +104,7 @@ def test_failed_build_alerts_and_is_retried(tmp_path, calls):
     assert daily.main(["--data-dir", str(tmp_path)]) == 1
     assert calls["notify"] == ["SkillRadar transform failed"]
 
-    # The warehouse was not updated, so the next hourly check builds again.
+    # The warehouse was not updated, so the next run builds again.
     calls["build_error"] = False
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
     assert len(calls["build"]) == 2
@@ -110,8 +114,16 @@ def test_claude_steps_run_around_the_build(tmp_path, calls):
     touch(tmp_path / "bronze/runs/run_1.json", 100)
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    # Answers collected first so the build includes them; new postings sent after it.
-    assert calls["order"] == ["collect", "build", "submit"]
+    # Old answers are collected before the build, new postings are sent after it.
+    assert calls["order"] == ["collect", "build", "submit", "wait"]
+
+
+def test_new_answers_are_built_the_same_day(tmp_path, calls):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+    calls["new_answers"] = True
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 0
+    assert calls["order"] == ["collect", "build", "submit", "wait", "build"]
 
 
 def test_claude_steps_run_when_nothing_is_new(tmp_path, calls):
@@ -119,7 +131,7 @@ def test_claude_steps_run_when_nothing_is_new(tmp_path, calls):
     touch(tmp_path / "warehouse.duckdb", 200)
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    assert calls["order"] == ["collect", "submit"]
+    assert calls["order"] == ["collect", "submit", "wait"]
 
 
 def test_failed_snapshot_skips_claude(tmp_path, calls):
@@ -141,5 +153,5 @@ def test_bug_in_a_claude_step_does_not_stop_the_job(tmp_path, calls, capsys):
     calls["claude_error"] = True
 
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
-    assert calls["order"] == ["collect", "build", "submit"]
+    assert calls["order"] == ["collect", "build", "submit", "wait"]
     assert "claude step collect failed" in capsys.readouterr().out

@@ -11,17 +11,23 @@ def agent(tmp_path):
 
 
 def test_install_and_uninstall(agent, capsys):
-    assert cli.main(["install", "--check-every", "30"], agent=agent) == 0
-    assert "every 30 min" in capsys.readouterr().out
+    assert cli.main(["install", "--at", "7:30"], agent=agent) == 0
+    assert "every day at 07:30" in capsys.readouterr().out
     assert agent.plist_path.exists()
 
     assert cli.main(["uninstall"], agent=agent) == 0
     assert "removed" in capsys.readouterr().out
 
 
-def test_invalid_interval_is_rejected(agent, capsys):
-    assert cli.main(["install", "--check-every", "1"], agent=agent) == 1
-    assert "invalid check interval" in capsys.readouterr().err
+def test_default_time(agent, capsys):
+    assert cli.main(["install"], agent=agent) == 0
+    assert "every day at 08:00" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("time", ["25:00", "8:60", "7am", "8", ""])
+def test_invalid_time_is_rejected(agent, capsys, time):
+    assert cli.main(["install", "--at", time], agent=agent) == 1
+    assert "invalid time" in capsys.readouterr().err
     assert not agent.plist_path.exists()
 
 

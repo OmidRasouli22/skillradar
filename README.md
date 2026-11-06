@@ -152,8 +152,8 @@ not done and are sent again.
 
 ### Every day
 
-You don't need to run these commands by hand. The daily job (see below) collects finished
-batches and sends the new open postings, about 110 a day for about $0.75 a month. Set
+You don't need to run these commands by hand. The daily job (see below) sends the new open
+postings, about 110 a day for about $0.75 a month, and waits for the answers. Set
 `daily: false` in `config/llm.yaml` to turn this off.
 
 ### Spending limit
@@ -189,25 +189,29 @@ and which languages were found. Use it to compare prompt versions before a large
 ## Daily schedule (macOS)
 
 ```sh
-uv run skillradar-schedule install                   # at login, then every hour
-uv run skillradar-schedule install --check-every 30  # check more often
-uv run skillradar-schedule run-now                   # start a check now
+uv run skillradar-schedule install             # every day at 08:00
+uv run skillradar-schedule install --at 06:30  # another time
+uv run skillradar-schedule run-now             # start it now
 uv run skillradar-schedule uninstall
 ```
 
-launchd skips a fixed time when the Mac is off, so the job starts at login and then checks
-every hour. Each check runs `skillradar-daily`:
+The job runs once a day. If the Mac is asleep at that time, it runs as soon as the Mac
+wakes up. If the Mac is off, it runs at the next login. It runs `skillradar-daily`:
 
-1. **Snapshot**, once per day. Nothing happens when today (UTC) already has a full `ok` or
-   `partial` run. A `failed` day is tried again at the next check.
-2. **Collect** Claude's finished batches (free).
-3. **Rebuild silver** when there are new postings or new answers. A failed build is tried
-   again at the next check.
+1. **Snapshot.** Skipped when today (UTC) already has a full `ok` or `partial` run, so a
+   second start on the same day does nothing.
+2. **Collect** Claude's batches that finished since the last run (free).
+3. **Rebuild silver** when there are new postings or new answers.
 4. **Send** new open postings to Claude, within the monthly limit. Postings that already
    have an answer or are in a running batch are never sent twice.
+5. **Wait** for that batch (usually 5 to 15 minutes, at most 60), then rebuild silver again,
+   so the day's answers are in the tables the same day. A slower batch is collected the
+   next day.
 
-Problems with Claude (no key, limit reached, API down) are written to the log and never
-stop steps 1 and 3. A rejected API key also shows a desktop alert.
+If something fails (the job API is down, or the dbt build breaks), it is tried again at
+the next run, so the next day or at the next login. You can also start it by hand with
+`run-now`. Problems with Claude (no key, limit reached, API down) are written to the log
+and never stop the snapshot or silver. A rejected API key shows a desktop alert.
 
 While the job runs, `caffeinate` keeps the Mac awake. The log is in
 `data/logs/snapshot.log` and only you can read it. You get a desktop alert when a snapshot

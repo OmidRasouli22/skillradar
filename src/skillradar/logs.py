@@ -13,6 +13,6 @@ def setup_logging() -> None:
         stream=sys.stdout,
         force=True,
     )
-    # One line per HTTP request is too much for the hourly log. The Anthropic SDK uses httpx2.
+    # One line per HTTP request is too much for the daily log. The Anthropic SDK uses httpx2.
     for name in ("httpx", "httpx2"):
         logging.getLogger(name).setLevel(logging.WARNING)

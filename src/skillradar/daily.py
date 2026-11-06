@@ -1,10 +1,11 @@
 """Command line: uv run skillradar-daily
 
-The scheduled job, every hour while the Mac is on:
-1. snapshot once per day
-2. collect Claude's finished batches
-3. rebuild silver when there is new data (postings or answers)
+The scheduled job, once a day:
+1. snapshot (skipped when today already has a full run)
+2. collect Claude's batches that finished since the last run
+3. rebuild silver when there are new postings or answers
 4. send new open postings to Claude, within the monthly budget
+5. wait for that batch, then rebuild silver again with its answers
 """
 
 import argparse
@@ -26,7 +27,7 @@ SNAPSHOT_FAILED = 1
 def needs_transform(data_dir: Path) -> bool:
     """True if a run or Claude's answers came after the last build.
 
-    A failed build is retried on the next check.
+    A failed build is retried on the next run.
     """
     warehouse = warehouse_path(data_dir)
     run_logs = list((data_dir / "bronze" / "runs").glob("run_*.json"))
@@ -40,7 +41,7 @@ def needs_transform(data_dir: Path) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Daily snapshot, then rebuild silver.")
+    parser = argparse.ArgumentParser(description="Daily snapshot, Claude, then rebuild silver.")
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     args = parser.parse_args(argv)
     setup_logging()
@@ -51,21 +52,29 @@ def main(argv: list[str] | None = None) -> int:
         return code
 
     _claude_step(auto.collect_step, data_dir)
-
-    if needs_transform(data_dir):
-        logger.info("new data, rebuilding silver")
-        try:
-            build(data_dir)
-        except TransformError as error:
-            logger.error("transform failed: %s", error)
-            notify("SkillRadar transform failed", "See data/logs/snapshot.log")
-            return 1
-        logger.info("silver rebuilt")
-    else:
-        logger.info("silver is up to date")
-
+    if not _rebuild_if_needed(data_dir):
+        return 1
     _claude_step(auto.submit_step, data_dir)
+    _claude_step(auto.wait_step, data_dir)
+    if not _rebuild_if_needed(data_dir):
+        return 1
     return code
+
+
+def _rebuild_if_needed(data_dir: Path) -> bool:
+    """Rebuild silver if there is new data. False if the build failed."""
+    if not needs_transform(data_dir):
+        logger.info("silver is up to date")
+        return True
+    logger.info("new data, rebuilding silver")
+    try:
+        build(data_dir)
+    except TransformError as error:
+        logger.error("transform failed: %s", error)
+        notify("SkillRadar transform failed", "See data/logs/snapshot.log")
+        return False
+    logger.info("silver rebuilt")
+    return True
 
 
 def _claude_step(step, data_dir: Path) -> None:
