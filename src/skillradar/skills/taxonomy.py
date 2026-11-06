@@ -26,6 +26,7 @@ class Skill(BaseModel):
     name: str = Field(min_length=1)
     category: str
     aliases: list[str] = Field(default_factory=list)
+    general: bool = False  # a concept, not a named product
     ambiguous: bool = False
 
     def spellings(self) -> list[str]:
@@ -76,6 +77,9 @@ class Taxonomy(BaseModel):
     def spellings_of(self, name: str) -> list[str]:
         """The name and aliases of a skill in the list, or [] if it is not in the list."""
         return next((s.spellings() for s in self.skills if s.name == name), [])
+
+    def is_general(self, name: str) -> bool:
+        return any(s.general for s in self.skills if s.name == name)
 
     def category_of(self, name: str) -> str | None:
         return next((s.category for s in self.skills if s.name == name), None)

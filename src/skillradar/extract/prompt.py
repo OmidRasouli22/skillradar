@@ -1,7 +1,11 @@
 """Instructions for Claude and how one posting is wrapped.
 
 The system prompt is the same for every posting, so it can be cached. Change
-PROMPT_VERSION whenever the text changes, so old results can be found and redone.
+PROMPT_VERSION when the instructions change, so old results can be found and redone.
+A new version sends every posting again, which costs money.
+
+Adding skills to config/skills.yaml needs no new version: the names in old answers are
+matched to the list again each time silver is built.
 """
 
 from skillradar.skills.taxonomy import Taxonomy
