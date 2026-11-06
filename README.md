@@ -21,8 +21,9 @@ region. A CV gap analyser compares your CV with that demand.
 | Skill list (taxonomy) + keyword baseline | done |
 | LLM skill extraction (code, tests) | done |
 | dbt models for skills, test runs on 200 postings | done |
-| Full extraction run (all postings) | next |
-| Evaluation (precision, recall) | planned |
+| Full extraction run (4,913 open postings, $1.22) | done |
+| Daily extraction with a monthly spending limit | done |
+| Evaluation (precision, recall) | next |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
 | Forecasting | planned |
@@ -32,7 +33,7 @@ region. A CV gap analyser compares your CV with that demand.
 ```
 config/search.yaml      search terms, cities, API settings
 config/skills.yaml      skill list: one name per skill, with category and other spellings
-config/llm.yaml         model, effort and prices for skill extraction
+config/llm.yaml         model, prices, monthly spending limit, daily on/off
 src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
@@ -42,14 +43,15 @@ src/skillradar/         Python package
     snapshot.py         one daily run: search, then details for new postings
     cli.py              command line entry point
   schedule/             daily job on macOS (launchd)
-  daily.py              the scheduled job: snapshot, then rebuild silver
+  daily.py              the scheduled job: snapshot, Claude, rebuild silver
   lock.py               stops two runs at the same time
   logs.py               logging setup for all commands
   notify.py             desktop alert when a run fails
   transform/            runs dbt (bronze → silver)
   clean/redact.py       removes emails, phones, links and contact names from texts
   skills/               skill list loader, name lookup, keyword search, report
-  extract/              skill extraction with Claude: prompt, schema, batches, results
+  extract/              skill extraction with Claude: prompt, batches, spending limit,
+                        daily step, quality numbers, silver table rows
   storage.py            atomic writes, private folders, JSON lines
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
@@ -129,44 +131,60 @@ The keyword search is a simple baseline. The LLM extraction has to beat it.
 
 ## Skill extraction with Claude
 
-Each cleaned description is sent to Claude, which returns strict JSON: role, seniority,
-remote, required languages and skills (each marked required or nice to have). Requests go
-through the Batch API (half price) with a cached system prompt.
+Claude reads each cleaned posting and returns a short, fixed answer: the role, the
+seniority, home office, the languages asked for, and the skills (each one required or nice
+to have). Postings go out in batches, which cost half price and can take up to a few hours.
+
+Apprenticeships (Ausbildung) are left out: they ask for school grades, not skills.
 
 ```sh
-uv run skillradar-extract estimate             # postings to do and rough cost (free)
-uv run skillradar-extract try --refnr <refnr>  # one posting now, to check the prompt
-uv run skillradar-extract submit --limit 200   # send a batch
-uv run skillradar-extract collect              # save answers of finished batches
-uv run skillradar-extract status               # free
-uv run skillradar-extract quality              # answer quality per prompt version (free)
+uv run skillradar-extract estimate --open-only   # how many postings and what it would cost (free)
+uv run skillradar-extract try --refnr <refnr>    # one posting now, to check the answer
+uv run skillradar-extract submit --open-only     # send open postings without an answer
+uv run skillradar-extract collect                # save the answers of finished batches
+uv run skillradar-extract status                 # batches and money spent this month (free)
+uv run skillradar-extract quality                # how good the answers look (free)
 ```
 
-Put the API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). A batch can take
-hours, so `submit` saves it as pending and `collect` can run later, also after a restart.
-Answers are stored with model and prompt version; changing either sends postings again.
+Put your API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). Every answer is
+saved with the model and prompt version. When you change either one, postings count as
+not done and are sent again.
 
-`skillradar-transform` (and the daily job, after new answers) loads the answers into
-three tables. Only answers to the current model and prompt version are used.
+### Every day
+
+You don't need to run these commands by hand. The daily job (see below) collects finished
+batches and sends the new open postings, about 110 a day for about $0.75 a month. Set
+`daily: false` in `config/llm.yaml` to turn this off.
+
+### Spending limit
+
+`monthly_budget_usd` in `config/llm.yaml` is the most SkillRadar may spend on Claude in one
+calendar month (UTC). It is set to $2.00, about 2 EUR with VAT.
+
+Before anything is sent, SkillRadar adds the worst possible cost to what was spent this
+month and only sends what fits. So the limit can't be passed, even if every answer is as
+long as allowed. A batch that is still running counts at its worst cost until it is
+collected, then at its real cost. When the month's money is used up, the rest waits for
+the next month. `status` shows what is left.
+
+### The tables
+
+`skillradar-transform` (and the daily job, after new answers) puts the answers into three
+tables. Only answers to the current model and prompt version are used.
 
 | Table | One row per |
 |---|---|
-| `silver_posting_extractions` | posting: role, seniority, remote |
+| `silver_posting_extractions` | posting: role, seniority, home office |
 | `silver_posting_skills` | posting and skill: required, in the skill list, `in_text` |
 | `silver_posting_languages` | posting and language: level |
 
-`in_text` is false when the posting does not name the skill or one of its spellings. That
-is fine for general skills ("Networking" for "Netzwerk"), but a product name that is not
-in the text was most likely added by the model, so filter those out when counting.
+`in_text` says if the posting really names the skill. For a general skill it's fine if it
+doesn't ("Networking" for "Netzwerk"). But a product name that isn't in the text was most
+likely made up by the model, so leave those out when counting.
 
-`quality` shows, per model and prompt version: answer status, how often seniority or
-remote is `unknown`, skills per posting, the share of skills in `config/skills.yaml` and
-the languages found. Use it to compare prompt versions before a large run.
-
-Spending is capped by `budget_usd` in `config/llm.yaml`. Before sending, `try` and `submit`
-add the worst case (every byte a token, all of `max_tokens` used) to what was already spent,
-and send only what fits. Pending batches count at their worst case until collected, then at
-their real cost. `estimate` and `status` show what is left.
+`quality` shows, per prompt version: how many answers came back, how often seniority or
+home office is `unknown`, skills per posting, how many skills are in `config/skills.yaml`,
+and which languages were found. Use it to compare prompt versions before a large run.
 
 ## Daily schedule (macOS)
 
@@ -178,15 +196,22 @@ uv run skillradar-schedule uninstall
 ```
 
 launchd skips a fixed time when the Mac is off, so the job starts at login and then checks
-every hour. It runs `skillradar-daily`:
+every hour. Each check runs `skillradar-daily`:
 
-1. snapshot, once per day: nothing happens when today (UTC) already has a full `ok` or
-   `partial` run; a `failed` day is tried again at the next check
-2. `dbt build` when a run finished after the last build, so a failed build is retried too
+1. **Snapshot**, once per day. Nothing happens when today (UTC) already has a full `ok` or
+   `partial` run. A `failed` day is tried again at the next check.
+2. **Collect** Claude's finished batches (free).
+3. **Rebuild silver** when there are new postings or new answers. A failed build is tried
+   again at the next check.
+4. **Send** new open postings to Claude, within the monthly limit. Postings that already
+   have an answer or are in a running batch are never sent twice.
 
-While the job runs, `caffeinate` keeps the Mac awake.
+Problems with Claude (no key, limit reached, API down) are written to the log and never
+stop steps 1 and 3. A rejected API key also shows a desktop alert.
 
-The log is in `data/logs/snapshot.log`. You get a desktop alert when a run is not `ok`.
+While the job runs, `caffeinate` keeps the Mac awake. The log is in
+`data/logs/snapshot.log` and only you can read it. You get a desktop alert when a snapshot
+is not `ok`.
 
 ## Data source
 

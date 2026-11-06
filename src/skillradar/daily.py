@@ -1,6 +1,10 @@
 """Command line: uv run skillradar-daily
 
-The scheduled job: snapshot once per day, then rebuild silver when there is new data.
+The scheduled job, every hour while the Mac is on:
+1. snapshot once per day
+2. collect Claude's finished batches
+3. rebuild silver when there is new data (postings or answers)
+4. send new open postings to Claude, within the monthly budget
 """
 
 import argparse
@@ -8,6 +12,7 @@ import logging
 from pathlib import Path
 
 from skillradar.config import DATA_DIR
+from skillradar.extract import auto
 from skillradar.ingestion import cli as snapshot_cli
 from skillradar.logs import setup_logging
 from skillradar.notify import notify
@@ -45,19 +50,30 @@ def main(argv: list[str] | None = None) -> int:
     if code == SNAPSHOT_FAILED:
         return code
 
-    if not needs_transform(data_dir):
-        logger.info("silver is up to date")
-        return code
+    _claude_step(auto.collect_step, data_dir)
 
-    logger.info("new data, rebuilding silver")
-    try:
-        build(data_dir)
-    except TransformError as error:
-        logger.error("transform failed: %s", error)
-        notify("SkillRadar transform failed", "See data/logs/snapshot.log")
-        return 1
-    logger.info("silver rebuilt")
+    if needs_transform(data_dir):
+        logger.info("new data, rebuilding silver")
+        try:
+            build(data_dir)
+        except TransformError as error:
+            logger.error("transform failed: %s", error)
+            notify("SkillRadar transform failed", "See data/logs/snapshot.log")
+            return 1
+        logger.info("silver rebuilt")
+    else:
+        logger.info("silver is up to date")
+
+    _claude_step(auto.submit_step, data_dir)
     return code
+
+
+def _claude_step(step, data_dir: Path) -> None:
+    """Run a Claude step. A bug there must not stop the snapshot or silver."""
+    try:
+        step(data_dir)
+    except Exception:
+        logger.exception("claude step %s failed", step.__name__)
 
 
 if __name__ == "__main__":

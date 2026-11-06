@@ -17,3 +17,15 @@ def test_replaces_handlers_added_by_other_libraries():
     finally:
         root.handlers[:], _ = saved
         root.setLevel(saved[1])
+
+
+def test_http_request_lines_are_hidden():
+    root = logging.getLogger()
+    saved = root.handlers[:], root.level
+    try:
+        setup_logging()
+        for name in ("httpx", "httpx2"):
+            assert not logging.getLogger(name).isEnabledFor(logging.INFO)
+    finally:
+        root.handlers[:], _ = saved
+        root.setLevel(saved[1])

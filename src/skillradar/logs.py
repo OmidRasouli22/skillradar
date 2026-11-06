@@ -13,4 +13,6 @@ def setup_logging() -> None:
         stream=sys.stdout,
         force=True,
     )
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    # One line per HTTP request is too much for the hourly log. The Anthropic SDK uses httpx2.
+    for name in ("httpx", "httpx2"):
+        logging.getLogger(name).setLevel(logging.WARNING)

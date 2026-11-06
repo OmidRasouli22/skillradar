@@ -14,7 +14,7 @@ def touch(path, mtime):
 
 @pytest.fixture
 def calls(monkeypatch):
-    seen = {"snapshot": [], "build": [], "notify": []}
+    seen = {"snapshot": [], "build": [], "notify": [], "order": []}
 
     def fake_snapshot(argv):
         seen["snapshot"].append(argv)
@@ -22,11 +22,23 @@ def calls(monkeypatch):
 
     def fake_build(data_dir):
         seen["build"].append(data_dir)
+        seen["order"].append("build")
         if seen.get("build_error"):
             raise TransformError("dbt failed")
 
+    def fake_step(name):
+        def step(data_dir):
+            seen["order"].append(name)
+            if seen.get("claude_error"):
+                raise RuntimeError("bug in a Claude step")
+
+        step.__name__ = name
+        return step
+
     monkeypatch.setattr(daily.snapshot_cli, "main", fake_snapshot)
     monkeypatch.setattr(daily, "build", fake_build)
+    monkeypatch.setattr(daily.auto, "collect_step", fake_step("collect"))
+    monkeypatch.setattr(daily.auto, "submit_step", fake_step("submit"))
     monkeypatch.setattr(daily, "notify", lambda title, message: seen["notify"].append(title))
     return seen
 
@@ -92,3 +104,42 @@ def test_failed_build_alerts_and_is_retried(tmp_path, calls):
     calls["build_error"] = False
     assert daily.main(["--data-dir", str(tmp_path)]) == 0
     assert len(calls["build"]) == 2
+
+
+def test_claude_steps_run_around_the_build(tmp_path, calls):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 0
+    # Answers collected first so the build includes them; new postings sent after it.
+    assert calls["order"] == ["collect", "build", "submit"]
+
+
+def test_claude_steps_run_when_nothing_is_new(tmp_path, calls):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+    touch(tmp_path / "warehouse.duckdb", 200)
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 0
+    assert calls["order"] == ["collect", "submit"]
+
+
+def test_failed_snapshot_skips_claude(tmp_path, calls):
+    calls["snapshot_code"] = 1
+    assert daily.main(["--data-dir", str(tmp_path)]) == 1
+    assert calls["order"] == []
+
+
+def test_failed_build_skips_submit(tmp_path, calls):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+    calls["build_error"] = True
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 1
+    assert calls["order"] == ["collect", "build"]
+
+
+def test_bug_in_a_claude_step_does_not_stop_the_job(tmp_path, calls, capsys):
+    touch(tmp_path / "bronze/runs/run_1.json", 100)
+    calls["claude_error"] = True
+
+    assert daily.main(["--data-dir", str(tmp_path)]) == 0
+    assert calls["order"] == ["collect", "build", "submit"]
+    assert "claude step collect failed" in capsys.readouterr().out
