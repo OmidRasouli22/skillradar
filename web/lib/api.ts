@@ -19,11 +19,23 @@ export type Skill = {
   required_share: number;
 };
 
-export type SkillList = {
-  role: string;
+export type Part = { value: string; postings: number; share: number };
+
+export type Dashboard = {
   region: string;
+  as_of: string | null;
+  model: string;
+  prompt_version: string;
   total_postings: number;
-  skills: Skill[];
+  roles: Choice[];
+  skills: Record<string, Skill[]>;
+  heatmap: { skills: string[]; rows: (Choice & { shares: number[] })[] };
+  emerging_skills: { name: string; postings: number; share: number }[];
+  // role -> attribute (german, english, remote, seniority) -> parts
+  attributes: Record<string, Record<string, Part[]>>;
+  emerging: Record<string, { postings: number; share: number }>;
+  // role -> postings per German state
+  states: Record<string, Choice[]>;
 };
 
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -39,12 +51,6 @@ export function getOverview(signal?: AbortSignal): Promise<Overview> {
   return get<Overview>("/api/overview", signal);
 }
 
-export function getSkills(
-  role: string,
-  region: string,
-  limit: number,
-  signal?: AbortSignal,
-): Promise<SkillList> {
-  const query = new URLSearchParams({ role, region, limit: String(limit) });
-  return get<SkillList>(`/api/skills?${query}`, signal);
+export function getDashboard(region: string, signal?: AbortSignal): Promise<Dashboard> {
+  return get<Dashboard>(`/api/dashboard?${new URLSearchParams({ region })}`, signal);
 }

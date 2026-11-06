@@ -129,6 +129,8 @@ one name ("PySpark" → Spark, "K8s" → Kubernetes). Two marks matter:
 - `general`: the skill is a concept, not a product ("Networking", "CI/CD"). Postings often
   describe a concept in other words, so it counts even when its name is not in the text.
   A product counts only when the posting names it.
+- `emerging`: the skill only became mainstream in 2022 or later (LLM, RAG, GitHub
+  Copilot, Claude Code). The page shows how much of today's demand they make up.
 - `ambiguous`: the name is also a normal word ("REST", "Go", "CAN"). The keyword search
   then only uses the safe spellings ("REST-API", "Golang", "CAN-Bus").
 
@@ -212,6 +214,7 @@ page reads only these files, never the warehouse, so it can't block the daily bu
 |---|---|
 | `gold_skill_demand` | per role, region and skill: how many postings ask for it, how many require it, all postings in the group, and the share |
 | `gold_attribute_shares` | per role and region: share of each seniority, home office option, and German and English level ("not asked" when a posting does not mention the language) |
+| `gold_emerging_share` | per role and region: postings that ask for at least one skill from 2022 or later, and the share |
 | `gold_meta` | one row: date of the data, open postings, how many have an answer, how many are tech jobs, model and prompt version |
 | `gold_scope` | which posting belongs to which role and region (used by the others) |
 
@@ -226,9 +229,27 @@ Always show `total_postings` next to a share.
 
 ## Webpage
 
-One page that answers the main question: which skills do German tech employers ask for?
-Pick a role and a region, and see the most asked-for skills, split into required and nice
-to have, with the number of postings behind them. It runs on your Mac only.
+One page that answers the main question, which skills do German tech employers ask for,
+from a few angles. Pick a role and a region at the top; everything below follows.
+
+- **Headline numbers:** open postings, how many ask for fluent German, offer home office,
+  and ask for new AI skills
+- **What's in demand?** the top skills, split into required and nice to have
+- **What does each role need?** a heatmap of roles and the most asked-for skills
+- **Must-have or nice-to-have?** skills that are almost always required vs. often optional
+- **How big is the AI wave?** the share of postings asking for skills that only became
+  mainstream in 2022 or later (LLMs, RAG, AI coding tools), per role
+- **Do you need German?** language level per role
+- **What do the jobs look like?** home office and seniority
+- **Where are the jobs?** a small map of the German states; click a state to filter
+
+Every chart has a tooltip (mouse and keyboard) and a "Table" button with the same numbers.
+The page follows the Mac's light or dark mode and works on a phone. It runs on your Mac
+only.
+
+The data starts in October 2026, so the page can't compare with earlier years. The AI
+section shows the closest honest thing: how much of today's demand is for skills that
+barely existed in job postings before 2022. Real trends follow when more history exists.
 
 First time, build the page (needs Node.js):
 
@@ -250,8 +271,8 @@ To work on the page with live reload, run `uv run skillradar-web` in one termina
 
 Checks for the page: `npm run typecheck`, `npm run lint` and `npm run build` in `web/`.
 
-The API is at `/api/overview` and `/api/skills?role=data_engineer&region=BAYERN`
-(docs at `/api/docs`). It only reads data, only listens on 127.0.0.1, and only accepts
+The API is at `/api/dashboard?region=BAYERN` (everything the page shows for one region),
+`/api/overview` and `/api/skills?role=data_engineer&region=BAYERN` (docs at `/api/docs`). It only reads data, only listens on 127.0.0.1, and only accepts
 known roles and regions.
 
 ## Daily schedule (macOS)
