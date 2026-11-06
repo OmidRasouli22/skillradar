@@ -3,9 +3,28 @@ from datetime import date
 import duckdb
 import pytest
 
+from skillradar.extract.prompt import PROMPT_VERSION
+from skillradar.extract.settings import load_settings
 from skillradar.transform import cli
 from skillradar.transform.runner import TransformError, build, warehouse_path
 from tests.helpers import write_jsonl, write_run_log
+
+
+def llm_answer(refnr, prompt_version=PROMPT_VERSION):
+    return {
+        "refnr": refnr,
+        "model": load_settings().model,
+        "prompt_version": prompt_version,
+        "status": "ok",
+        "extracted_at": "2026-11-06T10:00:00",
+        "output": {
+            "role": "data_engineer",
+            "seniority": "mid",
+            "remote": "hybrid",
+            "languages": [{"language": "German", "level": "fluent"}],
+            "skills": [{"name": "SQL", "required": True}, {"name": "AWS", "required": False}],
+        },
+    }
 
 
 def details(refnr, **fields):
@@ -71,6 +90,9 @@ def data_dir(tmp_path_factory):
     write_run_log(data / "bronze", run2, status="ok", full_scope=True)
     search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl.gz"
     write_jsonl(search, [{"run_id": run2, "posting": {"referenznummer": "b"}}])
+
+    answers = [llm_answer("a"), llm_answer("b", prompt_version="v0"), llm_answer("not-a-posting")]
+    write_jsonl(data / "llm/extractions/msgbatch_1.jsonl", answers)
 
     build(data)
     return data
@@ -150,6 +172,26 @@ class TestSilverTexts:
     def test_one_row_per_posting(self, data_dir):
         sql = "select refnr from silver_posting_texts order by refnr"
         assert query(data_dir, sql) == [("a",), ("b",), ("noplace",)]
+
+
+class TestSkillTables:
+    def test_only_current_prompt_and_known_postings(self, data_dir):
+        rows = query(data_dir, "select refnr, role, seniority from silver_posting_extractions")
+        assert rows == [("a", "data_engineer", "mid")]
+
+    def test_skills_are_checked_against_the_text(self, data_dir):
+        rows = query(
+            data_dir,
+            "select skill, required, in_skill_list, in_text from silver_posting_skills "
+            "order by skill",
+        )
+        # The text names SQL but not AWS.
+        assert rows == [("AWS", False, True, False), ("SQL", True, True, True)]
+
+    def test_languages(self, data_dir):
+        assert query(data_dir, "select * from silver_posting_languages") == [
+            ("a", "German", "fluent")
+        ]
 
 
 def test_city_names_are_cleaned(data_dir):

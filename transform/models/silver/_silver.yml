@@ -68,3 +68,74 @@ models:
         data_tests: [not_null]
       - name: is_open
         data_tests: [not_null]
+
+  - name: silver_posting_extractions
+    description: >
+      Role, seniority and remote per posting from Claude. Only answers to the current
+      model and prompt version, so all rows come from the same instructions.
+    columns:
+      - name: refnr
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_postings')
+                field: refnr
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [data_engineer, data_scientist, data_analyst, ml_engineer,
+                         backend_developer, frontend_developer, fullstack_developer,
+                         mobile_developer, devops_engineer, embedded_engineer,
+                         software_engineer, it_security, it_administration, sap_erp,
+                         it_project_manager, other_tech, not_tech]
+      - name: seniority
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [student, junior, mid, senior, lead, unknown]
+      - name: remote
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [onsite, hybrid, remote, unknown]
+
+  - name: silver_posting_skills
+    description: >
+      One row per posting and skill. skill is the name from config/skills.yaml when it is
+      in the list. in_text is false when the posting does not name the skill or one of its
+      spellings: fine for general skills ("Networking" for "Netzwerk"), but a product name
+      that is not in the text was most likely added by the model.
+    columns:
+      - name: refnr
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_posting_extractions')
+                field: refnr
+      - name: skill
+        data_tests: [not_null]
+      - name: required
+        data_tests: [not_null]
+      - name: in_text
+        data_tests: [not_null]
+
+  - name: silver_posting_languages
+    description: Human languages a posting asks for, with the level, in English names.
+    columns:
+      - name: refnr
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_posting_extractions')
+                field: refnr
+      - name: level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [basic, good, fluent, native, unknown]

@@ -31,8 +31,9 @@ def build(data_dir: Path, select: str | None = None) -> None:
         if not any(bronze.glob(pattern)):
             raise TransformError(f"no {pattern} in {bronze}, run skillradar-snapshot first")
 
-    # dbt reads these in profiles.yml and in the bronze_files macro.
+    # dbt reads these in profiles.yml, the bronze_files macro and the skill models.
     os.environ["SKILLRADAR_BRONZE_DIR"] = str(bronze)
+    os.environ["SKILLRADAR_LLM_DIR"] = str(data_dir / "llm")
     os.environ["SKILLRADAR_WAREHOUSE"] = str(warehouse_path(data_dir))
     os.environ["DO_NOT_TRACK"] = "1"
 

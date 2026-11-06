@@ -19,15 +19,19 @@ SNAPSHOT_FAILED = 1
 
 
 def needs_transform(data_dir: Path) -> bool:
-    """True if a run finished after the last build, so a failed build is retried later."""
+    """True if a run or Claude's answers came after the last build.
+
+    A failed build is retried on the next check.
+    """
     warehouse = warehouse_path(data_dir)
     run_logs = list((data_dir / "bronze" / "runs").glob("run_*.json"))
     if not run_logs:
         return False
     if not warehouse.exists():
         return True
-    newest_run = max(path.stat().st_mtime for path in run_logs)
-    return newest_run > warehouse.stat().st_mtime
+    answers = list((data_dir / "llm" / "extractions").glob("*.jsonl"))
+    newest = max(path.stat().st_mtime for path in [*run_logs, *answers])
+    return newest > warehouse.stat().st_mtime
 
 
 def main(argv: list[str] | None = None) -> int:

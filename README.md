@@ -20,7 +20,8 @@ region. A CV gap analyser compares your CV with that demand.
 | Run once a day when the Mac is on, compress search files | done |
 | Skill list (taxonomy) + keyword baseline | done |
 | LLM skill extraction (code, tests) | done |
-| First extraction run, dbt models for skills | next |
+| dbt models for skills, test runs on 200 postings | done |
+| Full extraction run (all postings) | next |
 | Evaluation (precision, recall) | planned |
 | Gold tables, Postgres export | planned |
 | FastAPI + Next.js app | planned |
@@ -52,7 +53,7 @@ src/skillradar/         Python package
   storage.py            atomic writes, private folders, JSON lines
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
-  models/silver/        postings, locations, daily open postings, history
+  models/silver/        postings, locations, daily open postings, history, skills
 tests/                  unit tests, no network needed
   fixtures/             saved API responses
 data/                   local snapshots (git-ignored)
@@ -144,6 +145,19 @@ uv run skillradar-extract quality              # answer quality per prompt versi
 Put the API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). A batch can take
 hours, so `submit` saves it as pending and `collect` can run later, also after a restart.
 Answers are stored with model and prompt version; changing either sends postings again.
+
+`skillradar-transform` (and the daily job, after new answers) loads the answers into
+three tables. Only answers to the current model and prompt version are used.
+
+| Table | One row per |
+|---|---|
+| `silver_posting_extractions` | posting: role, seniority, remote |
+| `silver_posting_skills` | posting and skill: required, in the skill list, `in_text` |
+| `silver_posting_languages` | posting and language: level |
+
+`in_text` is false when the posting does not name the skill or one of its spellings. That
+is fine for general skills ("Networking" for "Netzwerk"), but a product name that is not
+in the text was most likely added by the model, so filter those out when counting.
 
 `quality` shows, per model and prompt version: answer status, how often seniority or
 remote is `unknown`, skills per posting, the share of skills in `config/skills.yaml` and

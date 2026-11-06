@@ -44,6 +44,12 @@ class TestNeedsTransform:
         touch(tmp_path / "bronze/runs/run_1.json", 200)
         assert daily.needs_transform(tmp_path) is True
 
+    def test_new_answers_from_claude(self, tmp_path):
+        touch(tmp_path / "bronze/runs/run_1.json", 100)
+        touch(tmp_path / "warehouse.duckdb", 200)
+        touch(tmp_path / "llm/extractions/msgbatch_1.jsonl", 300)
+        assert daily.needs_transform(tmp_path) is True
+
     def test_warehouse_up_to_date(self, tmp_path):
         touch(tmp_path / "bronze/runs/run_1.json", 100)
         touch(tmp_path / "warehouse.duckdb", 200)
