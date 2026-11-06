@@ -4,6 +4,7 @@ Layout under the root folder (data/llm):
     batches/pending/<batch_id>.json   sent, not collected yet
     batches/done/<batch_id>.json      collected
     extractions/<batch_id>.jsonl      one answer per posting
+    tries.jsonl                       usage of single try calls, for the budget
 """
 
 import json
@@ -25,6 +26,7 @@ class PendingBatch(BaseModel):
     model: str
     prompt_version: str
     refnrs: dict[str, str]  # custom_id -> refnr
+    max_cost_usd: float  # worst case, counted as spent until collected
 
 
 class ExtractionStore:
@@ -70,6 +72,15 @@ class ExtractionStore:
             for path in sorted(self.root.glob("extractions/*.jsonl"))
             for r in read_json_lines(path)
         ]
+
+    def save_try(self, record: Record) -> None:
+        path = self.root / "tries.jsonl"
+        old = [json_line(r) for r in self.tries()]
+        atomic_write(path, "".join([*old, json_line(record)]).encode("utf-8"))
+
+    def tries(self) -> list[Record]:
+        path = self.root / "tries.jsonl"
+        return list(read_json_lines(path)) if path.exists() else []
 
     def _batch_file(self, state: str, batch_id: str) -> Path:
         return self.root / "batches" / state / f"{_safe(batch_id)}.json"

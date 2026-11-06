@@ -6,11 +6,12 @@ import duckdb
 import pytest
 from pydantic import ValidationError
 
-from skillradar.extract import cli
+from skillradar.extract import budget, cli
 from skillradar.extract.batch import (
     PostingText,
     collect,
     custom_id,
+    extract_one,
     read_answer,
     request_params,
     submit,
@@ -214,6 +215,7 @@ class TestSubmitAndCollect:
             "input_tokens": 1200,
             "output_tokens": 300,
             "cache_read_tokens": 900,
+            "cache_write_tokens": 0,
         }
 
     def test_only_new_postings_are_sent(self, settings, taxonomy, store):
@@ -285,16 +287,120 @@ class TestSubmitAndCollect:
         assert client.batches.sent == []
 
 
+class TestBudget:
+    def test_usage_cost(self, settings):
+        price = settings.prices["claude-haiku-5-5"]
+        usage = {
+            "input_tokens": 1_000_000,
+            "cache_write_tokens": 1_000_000,
+            "cache_read_tokens": 1_000_000,
+            "output_tokens": 1_000_000,
+        }
+        full = 0.10 + 0.10 * 1.25 + 0.10 * 0.1 + 0.50
+        assert budget.usage_cost(usage, price, batch=False) == pytest.approx(full)
+        assert budget.usage_cost(usage, price, batch=True) == pytest.approx(full / 2)
+
+    def test_worst_case_counts_every_byte_and_all_output(self, settings, taxonomy):
+        params = request_params(postings("a")[0], settings, system_prompt(taxonomy))
+        prompt = len(json.dumps(params, ensure_ascii=False).encode()) + budget.OVERHEAD_TOKENS
+        usage = {"cache_write_tokens": prompt, "output_tokens": settings.max_tokens}
+        price = settings.prices[settings.model]
+        assert budget.worst_case(params, settings, batch=True) == pytest.approx(
+            budget.usage_cost(usage, price, batch=True)
+        )
+
+    def test_long_prompt_counts_double(self, settings, taxonomy):
+        short = PostingText("a", "t", "x")
+        long = PostingText("b", "t", "x" * budget.LONG_PROMPT_TOKENS)
+        system = system_prompt(taxonomy)
+        short_cost = budget.worst_case(request_params(short, settings, system), settings, True)
+        long_cost = budget.worst_case(request_params(long, settings, system), settings, True)
+        assert long_cost > 2 * short_cost
+
+    @pytest.mark.parametrize(
+        "costs, room, fits", [([1, 1, 1], 2.5, 2), ([1, 1], 5, 2), ([3], 2, 0), ([], 1, 0)]
+    )
+    def test_affordable(self, costs, room, fits):
+        assert budget.affordable(costs, room) == fits
+
+    def test_submit_sends_only_what_fits(self, settings, taxonomy, store):
+        params = request_params(postings("a")[0], settings, system_prompt(taxonomy))
+        one = budget.worst_case(params, settings, batch=True)
+        small = settings.model_copy(update={"budget_usd": one * 2.5})
+        client = FakeClient()
+
+        batch = submit(client, postings("a", "b", "c"), small, taxonomy, store)
+
+        assert len(client.batches.sent[0]) == 2
+        assert batch.max_cost_usd == pytest.approx(one * 2)
+        assert budget.spent(small, store) == pytest.approx(one * 2)
+        with pytest.raises(budget.OverBudget):
+            submit(client, postings("a", "b", "c"), small, taxonomy, store)
+        assert len(client.batches.sent) == 1
+
+    def test_collected_answers_count_at_real_cost(self, settings, taxonomy, store):
+        client = FakeClient()
+        submit(client, postings("a"), settings, taxonomy, store)
+        client.batches.finish("msgbatch_1", [succeeded(custom_id("a"))])
+        collect(client, store)
+
+        usage = store.results()[0]["usage"]
+        price = settings.prices[settings.model]
+        assert budget.spent(settings, store) == pytest.approx(
+            budget.usage_cost(usage, price, batch=True)
+        )
+
+    def test_try_over_budget_is_not_sent(self, settings, taxonomy, store):
+        tiny = settings.model_copy(update={"budget_usd": 0.0001})
+        client = FakeClient()
+        with pytest.raises(budget.OverBudget):
+            extract_one(client, postings("a")[0], tiny, taxonomy, store)
+        assert client.calls == []
+
+    def test_try_is_counted_at_full_price(self, settings, taxonomy, store):
+        extract_one(FakeClient(), postings("a")[0], settings, taxonomy, store, FakeClock())
+        extract_one(FakeClient(), postings("a")[0], settings, taxonomy, store, FakeClock())
+
+        tries = store.tries()
+        price = settings.prices[settings.model]
+        one = budget.usage_cost(tries[0]["usage"], price, batch=False)
+        assert len(tries) == 2
+        assert budget.spent(settings, store) == pytest.approx(2 * one)
+
+    def test_unknown_model_in_saved_answers_stops(self, settings, store):
+        store.save_try({"refnr": "a", "model": "gone-model", "at": "t", "usage": {}})
+        with pytest.raises(budget.OverBudget, match="no price"):
+            budget.spent(settings, store)
+
+    @pytest.mark.parametrize("value", [0, -1, 101])
+    def test_budget_must_be_sane(self, settings, value):
+        with pytest.raises(ValidationError):
+            LlmSettings.model_validate(settings.model_dump() | {"budget_usd": value})
+
+    def test_real_config_allows_a_200_posting_test(self, settings, taxonomy):
+        system = system_prompt(taxonomy)
+        long = PostingText("a", "x" * 200, "ä" * 10_000)  # longest texts are about 10 KB
+        one = budget.worst_case(request_params(long, settings, system), settings, batch=True)
+        assert 200 * one < settings.budget_usd
+
+
 class TestStore:
     @pytest.mark.parametrize("bad", ["../../etc/x", "a/b", "", "x" * 101])
     def test_unsafe_batch_id(self, store, bad):
-        batch = PendingBatch(batch_id=bad, created_at="t", model="m", prompt_version="v", refnrs={})
+        batch = PendingBatch(
+            batch_id=bad, created_at="t", model="m", prompt_version="v", refnrs={}, max_cost_usd=0
+        )
         with pytest.raises(ValueError, match="unexpected batch id"):
             store.save_pending(batch)
 
     def test_files_are_private(self, store):
         batch = PendingBatch(
-            batch_id="msgbatch_1", created_at="t", model="m", prompt_version="v", refnrs={}
+            batch_id="msgbatch_1",
+            created_at="t",
+            model="m",
+            prompt_version="v",
+            refnrs={},
+            max_cost_usd=0,
         )
         path = store.save_pending(batch)
         assert path.stat().st_mode & 0o777 == 0o600
@@ -345,6 +451,20 @@ class TestCli:
         client.batches.finish("msgbatch_1", [succeeded(custom_id("a"))])
         assert cli.main(["--data-dir", str(data_dir), "collect"], client=client) == 0
         assert "{'ok': 1}" in capsys.readouterr().out
+
+    def test_over_budget(self, data_dir, capsys, monkeypatch):
+        tiny = load_settings().model_copy(update={"budget_usd": 0.0001})
+        monkeypatch.setattr(cli, "load_settings", lambda: tiny)
+        client = FakeClient()
+
+        assert cli.main(["--data-dir", str(data_dir), "submit"], client=client) == 1
+        assert "budget" in capsys.readouterr().err
+        assert client.batches.sent == []
+
+    def test_status_shows_budget(self, tmp_path, capsys):
+        assert cli.main(["--data-dir", str(tmp_path), "status"]) == 0
+        expected = f"budget ${load_settings().budget_usd:.2f}, spent $0.0000"
+        assert expected in capsys.readouterr().out
 
     def test_wrong_api_key(self, data_dir, capsys):
         import anthropic

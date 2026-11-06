@@ -1,6 +1,7 @@
 """Command line: uv run skillradar-extract estimate|try|submit|collect|status
 
 estimate and status are free. try, submit and collect call the Claude API.
+try and submit never send more than budget_usd in config/llm.yaml allows.
 The API key is read from .env (ANTHROPIC_API_KEY) or the environment.
 """
 
@@ -17,6 +18,7 @@ import duckdb
 from dotenv import load_dotenv
 
 from skillradar.config import DATA_DIR, PROJECT_ROOT
+from skillradar.extract import budget
 from skillradar.extract.batch import PostingText, collect, extract_one, submit
 from skillradar.extract.prompt import PROMPT_VERSION, system_prompt
 from skillradar.extract.settings import load_settings
@@ -70,7 +72,7 @@ def main(argv: list[str] | None = None, client: Any = None) -> int:
     store = ExtractionStore(data_dir / "llm")
 
     if args.command == "status":
-        return _status(store)
+        return _status(store, settings)
 
     warehouse = warehouse_path(data_dir)
     if args.command in ("estimate", "try", "submit") and not warehouse.exists():
@@ -83,7 +85,7 @@ def main(argv: list[str] | None = None, client: Any = None) -> int:
     try:
         client = client or anthropic.Anthropic()
         if args.command == "try":
-            return _try(client, load_postings(warehouse), args.refnr, settings)
+            return _try(client, load_postings(warehouse), args.refnr, settings, store)
         if args.command == "submit":
             if args.limit:
                 settings = settings.model_copy(update={"batch_limit": args.limit})
@@ -101,6 +103,9 @@ def main(argv: list[str] | None = None, client: Any = None) -> int:
             f"still running: {summary.still_running}, retry later: {summary.retry_later}"
         )
         return 0
+    except budget.OverBudget as error:
+        print(f"{error} (budget_usd in config/llm.yaml)", file=sys.stderr)
+        return 1
     except anthropic.AuthenticationError:
         print("API key missing or wrong: set ANTHROPIC_API_KEY in .env", file=sys.stderr)
         return 1
@@ -127,21 +132,23 @@ def _estimate(postings: list[PostingText], store: ExtractionStore, settings) -> 
         print(
             f"  {model:<20} ${settings.batch_cost(input_tokens, output_tokens, model):8.2f}{mark}"
         )
+    print()
+    _print_budget(store, settings)
     return 0
 
 
-def _try(client: Any, postings: list[PostingText], refnr: str, settings) -> int:
+def _try(client: Any, postings: list[PostingText], refnr: str, settings, store) -> int:
     posting = next((p for p in postings if p.refnr == refnr), None)
     if posting is None:
         print(f"no posting {refnr}", file=sys.stderr)
         return 1
-    status, output, usage = extract_one(client, posting, settings, load_taxonomy())
+    status, output, usage = extract_one(client, posting, settings, load_taxonomy(), store)
     print(f"{posting.title}\nstatus: {status}, usage: {usage}")
     print(json.dumps(output, ensure_ascii=False, indent=2))
     return 0 if status == "ok" else 1
 
 
-def _status(store: ExtractionStore) -> int:
+def _status(store: ExtractionStore, settings) -> int:
     for batch in store.pending():
         print(f"pending {batch.batch_id}: {len(batch.refnrs)} postings, sent {batch.created_at}")
     results = store.results()
@@ -150,7 +157,16 @@ def _status(store: ExtractionStore) -> int:
         print(f"saved {model} {version} {status}: {count}")
     if not results and not store.pending():
         print("no batches yet")
+    _print_budget(store, settings)
     return 0
+
+
+def _print_budget(store: ExtractionStore, settings) -> None:
+    spent = budget.spent(settings, store)
+    print(
+        f"budget ${settings.budget_usd:.2f}, spent ${spent:.4f} "
+        f"(pending batches at worst case), left ${settings.budget_usd - spent:.4f}"
+    )
 
 
 if __name__ == "__main__":

@@ -4,6 +4,9 @@ model: claude-haiku-5-5
 effort: low          # low | medium | high; extraction is a simple task
 max_tokens: 8000     # includes the model's thinking
 batch_limit: 2000    # most postings in one batch
+# Hard cap in USD for all calls from skillradar-extract, counted with the worst case
+# before sending. 1.60 USD plus 19% VAT is about 1.90 USD, under 2 EUR.
+budget_usd: 1.60
 
 # USD per million tokens at normal price. Batch requests cost half.
 prices:

@@ -144,6 +144,11 @@ Put the API key in `.env` as `ANTHROPIC_API_KEY` (see `.env.example`). A batch c
 hours, so `submit` saves it as pending and `collect` can run later, also after a restart.
 Answers are stored with model and prompt version; changing either sends postings again.
 
+Spending is capped by `budget_usd` in `config/llm.yaml`. Before sending, `try` and `submit`
+add the worst case (every byte a token, all of `max_tokens` used) to what was already spent,
+and send only what fits. Pending batches count at their worst case until collected, then at
+their real cost. `estimate` and `status` show what is left.
+
 ## Daily schedule (macOS)
 
 ```sh

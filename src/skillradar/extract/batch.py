@@ -3,6 +3,7 @@
 submit: one batch with every posting that has no answer yet, saved as pending.
 collect: for each pending batch that has ended, save the answers.
 A batch can take hours, so the two steps are separate and survive restarts.
+Nothing is sent that could go over the budget (see budget.py).
 """
 
 import hashlib
@@ -14,6 +15,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from skillradar.extract import budget
 from skillradar.extract.prompt import PROMPT_VERSION, system_prompt, user_message
 from skillradar.extract.schema import OUTPUT_SCHEMA, Extraction
 from skillradar.extract.settings import LlmSettings
@@ -82,15 +84,30 @@ def usage_of(message: Any) -> dict[str, int]:
         "input_tokens": usage.input_tokens,
         "output_tokens": usage.output_tokens,
         "cache_read_tokens": getattr(usage, "cache_read_input_tokens", 0) or 0,
+        "cache_write_tokens": getattr(usage, "cache_creation_input_tokens", 0) or 0,
     }
 
 
-def extract_one(client: Any, posting: PostingText, settings: LlmSettings, taxonomy: Taxonomy):
+def extract_one(
+    client: Any,
+    posting: PostingText,
+    settings: LlmSettings,
+    taxonomy: Taxonomy,
+    store: ExtractionStore,
+    clock: Clock = utc_now,
+):
     """One posting without a batch, at full price. For trying the prompt."""
     params = request_params(posting, settings, system_prompt(taxonomy))
+    room = budget.room_left(settings, store)
+    if budget.worst_case(params, settings, batch=False) > room:
+        raise budget.OverBudget(f"not sent: only ${room:.4f} of the budget is left")
     message = client.messages.create(**params)
+    usage = usage_of(message)
+    store.save_try(
+        {"refnr": posting.refnr, "model": settings.model, "at": clock().isoformat(), "usage": usage}
+    )
     status, output = read_answer(message)
-    return status, output, usage_of(message)
+    return status, output, usage
 
 
 def submit(
@@ -107,18 +124,27 @@ def submit(
         return None
 
     system = system_prompt(taxonomy)
-    ids = {custom_id(p.refnr): p.refnr for p in todo}
     requests = [
         {"custom_id": custom_id(p.refnr), "params": request_params(p, settings, system)}
         for p in todo
     ]
+    costs = [budget.worst_case(r["params"], settings, batch=True) for r in requests]
+    room = budget.room_left(settings, store)
+    fits = budget.affordable(costs, room)
+    if fits == 0:
+        raise budget.OverBudget(f"not sent: only ${room:.4f} of the budget is left")
+    if fits < len(todo):
+        logger.info("budget: sending %d of %d postings", fits, len(todo))
+    todo, requests = todo[:fits], requests[:fits]
+
     created = client.messages.batches.create(requests=requests)
     batch = PendingBatch(
         batch_id=created.id,
         created_at=clock().isoformat(),
         model=settings.model,
         prompt_version=PROMPT_VERSION,
-        refnrs=ids,
+        refnrs={custom_id(p.refnr): p.refnr for p in todo},
+        max_cost_usd=sum(costs[:fits]),
     )
     store.save_pending(batch)
     logger.info("sent batch %s with %d postings", created.id, len(todo))
