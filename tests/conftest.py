@@ -9,6 +9,16 @@ from skillradar.ingestion.client import JobsucheClient
 Handler = Callable[[httpx.Request], httpx.Response]
 
 
+@pytest.fixture(autouse=True)
+def isolated_git(monkeypatch):
+    """Git in tests ignores the user's git config and always has a commit identity."""
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    for role in ("AUTHOR", "COMMITTER"):
+        monkeypatch.setenv(f"GIT_{role}_NAME", "SkillRadar Tests")
+        monkeypatch.setenv(f"GIT_{role}_EMAIL", "tests@skillradar.invalid")
+
+
 @pytest.fixture
 def api_config():
     return load_config().api
