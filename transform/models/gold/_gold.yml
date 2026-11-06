@@ -3,8 +3,8 @@ version: 2
 models:
   - name: gold_scope
     description: >
-      Open postings with an answer from Claude, one row per posting, role and region.
-      role and region can be 'all'.
+      Open tech postings with an answer from Claude, one row per posting, role and region.
+      role and region can be 'all'. Postings that are not tech work (not_tech) are left out.
     columns:
       - name: refnr
         data_tests: [not_null]
@@ -41,4 +41,5 @@ models:
   - name: gold_meta
     description: >
       Date of the newest snapshot (as_of), open postings without apprenticeships, how many
-      of them have an answer, and the model and prompt version behind the answers.
+      of them have an answer, how many of those are tech jobs (tech_postings, the base of
+      every share), and the model and prompt version behind the answers.

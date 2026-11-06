@@ -6,7 +6,7 @@ import pytest
 from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import load_settings
 from skillradar.transform import cli
-from skillradar.transform.runner import TransformError, build, warehouse_path
+from skillradar.transform.runner import TransformError, build, serve_dir, warehouse_path
 from tests.helpers import write_jsonl, write_run_log
 
 DEFAULT_SKILLS = [{"name": "SQL", "required": True}, {"name": "AWS", "required": False}]
@@ -91,7 +91,13 @@ def data_dir(tmp_path_factory):
     write_jsonl(day2 / "run_20261024T070000Z.jsonl.part", [{"run_id": "p", "refnr": "unfinished"}])
     write_run_log(data / "bronze", run2, status="ok", full_scope=True)
     search = data / f"bronze/search/snapshot_date=2026-10-24/run_{run2}.jsonl.gz"
-    write_jsonl(search, [{"run_id": run2, "posting": {"referenznummer": "b"}}])
+    write_jsonl(
+        search,
+        [
+            {"run_id": run2, "posting": {"referenznummer": "b"}},
+            {"run_id": run2, "posting": {"referenznummer": "noplace"}},
+        ],
+    )
 
     # b is the only open posting. Its text names Python and Kafka, not AWS or "Networking".
     open_answer = llm_answer(
@@ -108,6 +114,7 @@ def data_dir(tmp_path_factory):
         llm_answer("a"),
         llm_answer("b", prompt_version="v0"),
         open_answer,
+        llm_answer("noplace", role="not_tech"),  # open, but not a tech job
         llm_answer("not-a-posting"),
     ]
     write_jsonl(data / "llm/extractions/msgbatch_1.jsonl", answers)
@@ -195,7 +202,11 @@ class TestSilverTexts:
 class TestSkillTables:
     def test_only_current_prompt_and_known_postings(self, data_dir):
         sql = "select refnr, role from silver_posting_extractions order by refnr"
-        assert query(data_dir, sql) == [("a", "data_engineer"), ("b", "backend_developer")]
+        assert query(data_dir, sql) == [
+            ("a", "data_engineer"),
+            ("b", "backend_developer"),
+            ("noplace", "not_tech"),
+        ]
 
     def test_skills_are_checked_against_the_text(self, data_dir):
         rows = query(
@@ -210,13 +221,30 @@ class TestSkillTables:
         assert query(data_dir, "select * from silver_posting_languages order by refnr") == [
             ("a", "German", "fluent"),
             ("b", "German", "fluent"),
+            ("noplace", "German", "fluent"),
         ]
+
+
+def test_gold_tables_are_exported_for_the_api(data_dir):
+    folder = serve_dir(data_dir)
+    names = sorted(path.name for path in folder.iterdir())
+    assert names == [
+        "gold_attribute_shares.parquet",
+        "gold_meta.parquet",
+        "gold_scope.parquet",
+        "gold_skill_demand.parquet",
+    ]
+    assert folder.stat().st_mode & 0o777 == 0o700
+    with duckdb.connect() as con:
+        exported = len(con.read_parquet(str(folder / "gold_skill_demand.parquet")).fetchall())
+    assert exported == query(data_dir, "select count(*) from gold_skill_demand")[0][0]
 
 
 class TestGoldTables:
     def test_scope_has_open_postings_per_role_and_region(self, data_dir):
         rows = query(data_dir, "select refnr, role, region from gold_scope order by role")
-        # b is open and has no region, so it is only in 'all'. a is closed.
+        # b is open and has no region, so it is only in 'all'. a is closed, and noplace is
+        # open but not a tech job.
         assert rows == [("b", "all", "all"), ("b", "backend_developer", "all")]
 
     def test_skill_demand_leaves_out_made_up_products(self, data_dir):
@@ -246,12 +274,14 @@ class TestGoldTables:
         ]
 
     def test_meta(self, data_dir):
-        [(as_of, open_postings, with_answers, _, version)] = query(
+        [(as_of, open_postings, with_answers, tech, _, version)] = query(
             data_dir, "select * from gold_meta"
         )
-        assert (str(as_of), open_postings, with_answers, version) == (
+        # Two open postings have an answer; only b is a tech job.
+        assert (str(as_of), open_postings, with_answers, tech, version) == (
             "2026-10-24",
-            1,
+            2,
+            2,
             1,
             PROMPT_VERSION,
         )
