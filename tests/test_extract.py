@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 from types import SimpleNamespace as NS
 from typing import get_args
 
@@ -34,6 +35,7 @@ ANSWER = {
 
 
 ANSWER_JSON = json.dumps(ANSWER)
+THIS_MONTH = datetime.now(UTC).strftime("%Y-%m")
 
 
 def message(text=ANSWER_JSON, stop_reason="end_turn"):
@@ -334,14 +336,14 @@ class TestBudget:
     def test_submit_sends_only_what_fits(self, settings, taxonomy, store):
         params = request_params(postings("a")[0], settings, system_prompt(taxonomy))
         one = budget.worst_case(params, settings, batch=True)
-        small = settings.model_copy(update={"budget_usd": one * 2.5})
+        small = settings.model_copy(update={"monthly_budget_usd": one * 2.5})
         client = FakeClient()
 
         batch = submit(client, postings("a", "b", "c"), small, taxonomy, store)
 
         assert len(client.batches.sent[0]) == 2
         assert batch.max_cost_usd == pytest.approx(one * 2)
-        assert budget.spent(small, store) == pytest.approx(one * 2)
+        assert budget.spent(small, store, THIS_MONTH) == pytest.approx(one * 2)
         with pytest.raises(budget.OverBudget):
             submit(client, postings("a", "b", "c"), small, taxonomy, store)
         assert len(client.batches.sent) == 1
@@ -354,12 +356,12 @@ class TestBudget:
 
         usage = store.results()[0]["usage"]
         price = settings.prices[settings.model]
-        assert budget.spent(settings, store) == pytest.approx(
+        assert budget.spent(settings, store, THIS_MONTH) == pytest.approx(
             budget.usage_cost(usage, price, batch=True)
         )
 
     def test_try_over_budget_is_not_sent(self, settings, taxonomy, store):
-        tiny = settings.model_copy(update={"budget_usd": 0.0001})
+        tiny = settings.model_copy(update={"monthly_budget_usd": 0.0001})
         client = FakeClient()
         with pytest.raises(budget.OverBudget):
             extract_one(client, postings("a")[0], tiny, taxonomy, store)
@@ -373,23 +375,41 @@ class TestBudget:
         price = settings.prices[settings.model]
         one = budget.usage_cost(tries[0]["usage"], price, batch=False)
         assert len(tries) == 2
-        assert budget.spent(settings, store) == pytest.approx(2 * one)
+        assert budget.spent(settings, store, "2026-10") == pytest.approx(2 * one)
+
+    def test_only_this_months_spending_counts(self, settings, taxonomy, store):
+        october = FakeClock(datetime(2026, 10, 31, 23, 0, tzinfo=UTC))
+        extract_one(FakeClient(), postings("a")[0], settings, taxonomy, store, october)
+
+        assert budget.spent(settings, store, "2026-10") > 0
+        assert budget.spent(settings, store, "2026-11") == 0
+
+    def test_pending_batches_count_in_every_month(self, settings, taxonomy, store):
+        october = FakeClock(datetime(2026, 10, 31, 23, 0, tzinfo=UTC))
+        batch = submit(FakeClient(), postings("a"), settings, taxonomy, store, october)
+
+        assert budget.spent(settings, store, "2026-11") == pytest.approx(batch.max_cost_usd)
+
+    def test_month_is_utc(self):
+        late_in_berlin = datetime.fromisoformat("2026-11-01T00:30:00+01:00")
+        assert budget.month_of(late_in_berlin) == "2026-10"
 
     def test_unknown_model_in_saved_answers_stops(self, settings, store):
-        store.save_try({"refnr": "a", "model": "gone-model", "at": "t", "usage": {}})
+        record = {"refnr": "a", "model": "gone-model", "at": "2026-10-01T00:00", "usage": {}}
+        store.save_try(record)
         with pytest.raises(budget.OverBudget, match="no price"):
-            budget.spent(settings, store)
+            budget.spent(settings, store, "2026-10")
 
     @pytest.mark.parametrize("value", [0, -1, 101])
     def test_budget_must_be_sane(self, settings, value):
         with pytest.raises(ValidationError):
-            LlmSettings.model_validate(settings.model_dump() | {"budget_usd": value})
+            LlmSettings.model_validate(settings.model_dump() | {"monthly_budget_usd": value})
 
     def test_real_config_allows_a_200_posting_test(self, settings, taxonomy):
         system = system_prompt(taxonomy)
         long = PostingText("a", "x" * 200, "ä" * 10_000)  # longest texts are about 10 KB
         one = budget.worst_case(request_params(long, settings, system), settings, batch=True)
-        assert 200 * one < settings.budget_usd
+        assert 200 * one < settings.monthly_budget_usd
 
 
 class TestQuality:
@@ -509,7 +529,7 @@ class TestCli:
         assert "{'ok': 2}" in capsys.readouterr().out
 
     def test_over_budget(self, data_dir, capsys, monkeypatch):
-        tiny = load_settings().model_copy(update={"budget_usd": 0.0001})
+        tiny = load_settings().model_copy(update={"monthly_budget_usd": 0.0001})
         monkeypatch.setattr(cli, "load_settings", lambda: tiny)
         client = FakeClient()
 
@@ -519,7 +539,8 @@ class TestCli:
 
     def test_status_shows_budget(self, tmp_path, capsys):
         assert cli.main(["--data-dir", str(tmp_path), "status"]) == 0
-        expected = f"budget ${load_settings().budget_usd:.2f}, spent $0.0000"
+        budget_usd = load_settings().monthly_budget_usd
+        expected = f"budget {THIS_MONTH}: ${budget_usd:.2f}, spent $0.0000"
         assert expected in capsys.readouterr().out
 
     def test_quality(self, tmp_path, capsys):

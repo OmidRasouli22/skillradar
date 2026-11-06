@@ -1,15 +1,18 @@
-"""Spending cap for the Claude API.
+"""Monthly spending cap for the Claude API.
 
-Before a request is sent, its worst case cost is added to what is already spent.
-If the total would go over budget_usd in config/llm.yaml, it is not sent.
+Before a request is sent, its worst case cost is added to what is already spent this
+month (UTC). If the total would go over monthly_budget_usd in config/llm.yaml, it is
+not sent.
 
-Spent = saved batch answers + single try calls + worst case of pending batches.
+Spent this month = answers saved this month + try calls this month + worst case of all
+pending batches (they count until they are collected, whatever month they were sent).
 
 Worst case for one request: every byte of the request is one token (a token is at
 least one byte), all of it is written to the cache, and the answer uses max_tokens.
 """
 
 import json
+from datetime import UTC, datetime
 from typing import Any
 
 from skillradar.extract.settings import LlmSettings, Price
@@ -47,14 +50,21 @@ def worst_case(params: dict[str, Any], settings: LlmSettings, batch: bool) -> fl
     return cost * 2 if prompt_tokens > LONG_PROMPT_TOKENS else cost
 
 
-def spent(settings: LlmSettings, store: ExtractionStore) -> float:
-    total = sum(_cost(settings, r, batch=True) for r in store.results())
-    total += sum(_cost(settings, r, batch=False) for r in store.tries())
+def month_of(moment: datetime) -> str:
+    """The budget month, e.g. "2026-11"."""
+    return moment.astimezone(UTC).strftime("%Y-%m")
+
+
+def spent(settings: LlmSettings, store: ExtractionStore, month: str) -> float:
+    answers = [r for r in store.results() if r["extracted_at"].startswith(month)]
+    tries = [r for r in store.tries() if r["at"].startswith(month)]
+    total = sum(_cost(settings, r, batch=True) for r in answers)
+    total += sum(_cost(settings, r, batch=False) for r in tries)
     return total + sum(batch.max_cost_usd for batch in store.pending())
 
 
-def room_left(settings: LlmSettings, store: ExtractionStore) -> float:
-    return settings.budget_usd - spent(settings, store)
+def room_left(settings: LlmSettings, store: ExtractionStore, month: str) -> float:
+    return settings.monthly_budget_usd - spent(settings, store, month)
 
 
 def affordable(costs: list[float], room: float) -> int:

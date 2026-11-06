@@ -98,9 +98,9 @@ def extract_one(
 ):
     """One posting without a batch, at full price. For trying the prompt."""
     params = request_params(posting, settings, system_prompt(taxonomy))
-    room = budget.room_left(settings, store)
+    room = budget.room_left(settings, store, budget.month_of(clock()))
     if budget.worst_case(params, settings, batch=False) > room:
-        raise budget.OverBudget(f"not sent: only ${room:.4f} of the budget is left")
+        raise budget.OverBudget(f"not sent: only ${room:.4f} of this month's budget is left")
     message = client.messages.create(**params)
     usage = usage_of(message)
     store.save_try(
@@ -129,10 +129,10 @@ def submit(
         for p in todo
     ]
     costs = [budget.worst_case(r["params"], settings, batch=True) for r in requests]
-    room = budget.room_left(settings, store)
+    room = budget.room_left(settings, store, budget.month_of(clock()))
     fits = budget.affordable(costs, room)
     if fits == 0:
-        raise budget.OverBudget(f"not sent: only ${room:.4f} of the budget is left")
+        raise budget.OverBudget(f"not sent: only ${room:.4f} of this month's budget is left")
     if fits < len(todo):
         logger.info("budget: sending %d of %d postings", fits, len(todo))
     todo, requests = todo[:fits], requests[:fits]

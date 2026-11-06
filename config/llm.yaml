@@ -2,11 +2,13 @@
 
 model: claude-haiku-5-5
 effort: low          # low | medium | high; extraction is a simple task
-max_tokens: 3000     # includes the model's thinking; longest answer so far: 1260
+max_tokens: 3000     # includes the model's thinking; longest answer so far: 2153
 batch_limit: 2000    # most postings in one batch
-# Hard cap in USD for all calls from skillradar-extract, counted with the worst case
-# before sending. 1.60 USD plus 19% VAT is about 1.90 USD, under 2 EUR.
-budget_usd: 1.60
+# Spending cap in USD per calendar month (UTC), for all Claude calls from SkillRadar.
+# Checked with the worst case before anything is sent. 2.00 USD + 19% VAT is about 2 EUR.
+monthly_budget_usd: 2.00
+# Send new open postings to Claude in the daily job (skillradar-daily).
+daily: true
 
 # USD per million tokens at normal price. Batch requests cost half.
 prices:

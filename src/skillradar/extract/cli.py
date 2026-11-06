@@ -1,7 +1,7 @@
 """Command line: uv run skillradar-extract estimate|try|submit|collect|status|quality
 
 estimate, status and quality are free. try, submit and collect call the Claude API.
-try and submit never send more than budget_usd in config/llm.yaml allows.
+try and submit never send more than monthly_budget_usd in config/llm.yaml allows.
 The API key is read from .env (ANTHROPIC_API_KEY) or the environment.
 """
 
@@ -14,12 +14,12 @@ from pathlib import Path
 from typing import Any
 
 import anthropic
-import duckdb
 from dotenv import load_dotenv
 
 from skillradar.config import DATA_DIR, PROJECT_ROOT
 from skillradar.extract import budget
-from skillradar.extract.batch import PostingText, collect, extract_one, submit
+from skillradar.extract.batch import PostingText, collect, extract_one, submit, utc_now
+from skillradar.extract.postings import load_postings
 from skillradar.extract.prompt import PROMPT_VERSION, system_prompt
 from skillradar.extract.quality import summary
 from skillradar.extract.settings import load_settings
@@ -34,15 +34,6 @@ logger = logging.getLogger(__name__)
 # (the JSON plus some thinking at low effort).
 CHARS_PER_TOKEN = 3.5
 ANSWER_TOKENS = 600
-
-POSTINGS_SQL = """
-    select t.refnr, coalesce(p.title, ''), t.description
-    from silver_posting_texts t
-    join silver_postings p using (refnr)
-    where p.posting_type is distinct from 'AUSBILDUNG' {only_open}
-    order by p.first_published desc nulls last, t.refnr
-"""
-ONLY_OPEN = "and t.refnr in (select refnr from silver_posting_history where is_open)"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -60,12 +51,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     commands.add_parser("status", help="pending batches and saved answers (free)")
     commands.add_parser("quality", help="quality numbers per prompt version (free)")
     return parser.parse_args(argv)
-
-
-def load_postings(warehouse: Path, only_open: bool = False) -> list[PostingText]:
-    sql = POSTINGS_SQL.format(only_open=ONLY_OPEN if only_open else "")
-    with duckdb.connect(str(warehouse), read_only=True) as con:
-        return [PostingText(*row) for row in con.execute(sql).fetchall()]
 
 
 def main(argv: list[str] | None = None, client: Any = None) -> int:
@@ -112,7 +97,7 @@ def main(argv: list[str] | None = None, client: Any = None) -> int:
         )
         return 0
     except budget.OverBudget as error:
-        print(f"{error} (budget_usd in config/llm.yaml)", file=sys.stderr)
+        print(f"{error} (monthly_budget_usd in config/llm.yaml)", file=sys.stderr)
         return 1
     except anthropic.AuthenticationError:
         print("API key missing or wrong: set ANTHROPIC_API_KEY in .env", file=sys.stderr)
@@ -192,10 +177,12 @@ def _quality(store: ExtractionStore) -> int:
 
 
 def _print_budget(store: ExtractionStore, settings) -> None:
-    spent = budget.spent(settings, store)
+    month = budget.month_of(utc_now())
+    spent = budget.spent(settings, store, month)
+    left = settings.monthly_budget_usd - spent
     print(
-        f"budget ${settings.budget_usd:.2f}, spent ${spent:.4f} "
-        f"(pending batches at worst case), left ${settings.budget_usd - spent:.4f}"
+        f"budget {month}: ${settings.monthly_budget_usd:.2f}, spent ${spent:.4f} "
+        f"(pending batches at worst case), left ${left:.4f}"
     )
 
 

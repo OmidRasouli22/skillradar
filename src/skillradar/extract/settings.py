@@ -21,7 +21,8 @@ class LlmSettings(BaseModel):
     effort: Literal["low", "medium", "high"]
     max_tokens: int = Field(ge=1000, le=64000)
     batch_limit: int = Field(ge=1, le=100_000)
-    budget_usd: float = Field(gt=0, le=100)
+    monthly_budget_usd: float = Field(gt=0, le=100)
+    daily: bool  # send new postings in the daily job
     prices: dict[str, Price]
 
     @model_validator(mode="after")
