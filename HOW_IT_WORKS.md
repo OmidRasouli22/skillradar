@@ -23,6 +23,7 @@ The technical reference: every part, command and setting. For the short version,
 | Gold tables (skill demand per role and region) | done |
 | Webpage: one page, local (FastAPI + Next.js) | done |
 | Public website on GitHub Pages, updated daily | done |
+| CI on GitHub Actions: lint, tests, dbt, site build, dependency audit | done |
 | Skill trends over time | planned |
 | Evaluation (precision, recall) | planned |
 | Postgres export, hosting | planned |
@@ -31,6 +32,7 @@ The technical reference: every part, command and setting. For the short version,
 ## Layout
 
 ```
+.github/                CI workflow and weekly Dependabot updates
 config/search.yaml      search terms, cities, API settings
 config/skills.yaml      skill list: one name per skill, with category and other spellings
 config/llm.yaml         model, prices, monthly spending limit, daily on/off
@@ -74,7 +76,27 @@ Requires [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run pytest
 uv run ruff check .
+uv run ruff format --check .
 ```
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request, in three
+parallel jobs:
+
+| Job | What it checks |
+|---|---|
+| Python and dbt | ruff lint and format, then pytest. The transform tests build the real dbt project on small test data, so a broken model fails here. |
+| Website | eslint, typecheck, and `npm run build:public`, the same build that goes to GitHub Pages. |
+| Dependency audit | `pip-audit` on the locked Python packages. `npm audit`: any known issue in what the site ships fails, for build tools only high or worse. |
+
+No secrets are used: tests need no network and no API key. The workflow can only read the
+repository, and every action is pinned to a commit. Dependabot opens grouped update pull
+requests once a week for the actions, Python and npm packages, and CI checks them like any
+other change.
+
+CI only checks. The daily data run and the site upload still happen on the Mac (see
+[Daily schedule](#daily-schedule-macos)).
 
 ## Daily snapshot
 

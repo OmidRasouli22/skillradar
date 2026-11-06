@@ -1,5 +1,7 @@
 # SkillRadar
 
+[![CI](https://github.com/OmidRasouli22/skillradar/actions/workflows/ci.yml/badge.svg)](https://github.com/OmidRasouli22/skillradar/actions/workflows/ci.yml)
+
 **Which skills do German tech employers really ask for?**
 
 **[Open the live site →](https://omidrasouli22.github.io/skillradar/)** · updated every day
