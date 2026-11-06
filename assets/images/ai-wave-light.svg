@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="626" viewBox="0 0 760 626" role="img" aria-label="How many postings ask for new AI skills, by role" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="760.0" height="626" rx="14" fill="#fcfcfb"/>
+<text x="24" y="38" font-size="18" fill="#0b0b0b" font-weight="650">How many postings ask for new AI skills, by role</text>
+<text x="24" y="60" font-size="13" fill="#52514e">Postings that ask for a skill mainstream only since 2022 (LLMs, RAG, AI coding tools), 6 Nov 2026</text>
+<text x="176" y="87" font-size="13" fill="#0b0b0b" font-weight="650" text-anchor="end">ML / AI Engineer</text>
+<rect x="190" y="76" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="76" width="367.4" height="14" rx="4" fill="#2a78d6"/>
+<text x="736" y="87" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">73%</text>
+<text x="176" y="117" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Data Scientist</text>
+<rect x="190" y="106" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="106" width="101.2" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="117" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">20%</text>
+<text x="176" y="147" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Full-Stack Developer</text>
+<rect x="190" y="136" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="136" width="69.8" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="147" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">14%</text>
+<text x="176" y="177" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">IT Project Manager</text>
+<rect x="190" y="166" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="166" width="63.7" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="177" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">13%</text>
+<text x="176" y="207" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Mobile Developer</text>
+<rect x="190" y="196" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="196" width="63.2" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="207" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">12%</text>
+<text x="176" y="237" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Data Engineer</text>
+<rect x="190" y="226" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="226" width="57.7" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="237" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">11%</text>
+<text x="176" y="267" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Backend Developer</text>
+<rect x="190" y="256" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="256" width="54.0" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="267" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">11%</text>
+<text x="176" y="297" font-size="13" fill="#0b0b0b" font-weight="650" text-anchor="end">All tech roles</text>
+<rect x="190" y="286" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="286" width="53.3" height="14" rx="4" fill="#2a78d6"/>
+<text x="736" y="297" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">11%</text>
+<text x="176" y="327" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Data Analyst</text>
+<rect x="190" y="316" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="316" width="42.1" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="327" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">8%</text>
+<text x="176" y="357" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Frontend Developer</text>
+<rect x="190" y="346" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="346" width="40.5" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="357" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">8%</text>
+<text x="176" y="387" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Software Engineer</text>
+<rect x="190" y="376" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="376" width="38.7" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="387" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">8%</text>
+<text x="176" y="417" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Other tech roles</text>
+<rect x="190" y="406" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="406" width="37.8" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="417" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">7%</text>
+<text x="176" y="447" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">IT Security</text>
+<rect x="190" y="436" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="436" width="32.2" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="447" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">6%</text>
+<text x="176" y="477" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">DevOps / Cloud Engineer</text>
+<rect x="190" y="466" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="466" width="26.0" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="477" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">5%</text>
+<text x="176" y="507" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">Embedded Engineer</text>
+<rect x="190" y="496" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="496" width="16.5" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="507" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">3%</text>
+<text x="176" y="537" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">SAP / ERP</text>
+<rect x="190" y="526" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="526" width="9.1" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="537" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">2%</text>
+<text x="176" y="567" font-size="13" fill="#0b0b0b" font-weight="550" text-anchor="end">IT Administration</text>
+<rect x="190" y="556" width="506.0" height="14" rx="4" fill="#f0efec"/>
+<rect x="190" y="556" width="5.5" height="14" rx="4" fill="#c3c2b7"/>
+<text x="736" y="567" font-size="13" fill="#0b0b0b" font-weight="600" text-anchor="end">1%</text>
+<text x="24" y="608" font-size="11" fill="#898781">Source: Bundesagentur für Arbeit, read by Claude. SkillRadar.</text>
+</svg>
