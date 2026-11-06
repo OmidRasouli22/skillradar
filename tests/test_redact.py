@@ -199,3 +199,90 @@ def test_contact_word_does_not_reach_over_blank_lines():
 def test_job_title_line_near_contact_data_stays(title):
     text = f"{title}\n(m/w/d)\n\nbewerbung@firma.de"
     assert clean(text) == f"{title}\n(m/w/d)\n\n[email]"
+
+
+class TestNamesInRunningText:
+    """Names in a sentence shortly before a phone or email (cases from real postings)."""
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            (
+                "melde dich gern bei: Melina Jacobs (Recruiting)Telefon: 0711 123456",
+                "melde dich gern bei: [name] (Recruiting)Telefon: [phone]",
+            ),
+            (
+                "steht Dir gerne Kristina Novak unter der Telefonnummer 0711 123456 zur Verfügung",
+                "steht Dir gerne [name] unter der Telefonnummer [phone] zur Verfügung",
+            ),
+            ("Catrin Porwik | 0711 123456 | cp@firma.de", "[name] | [phone] | [email]"),
+            (
+                "offenen Fragen. Rene Münsch\nSenior Recruitment Consultant\n---- E: rm@firma.de",
+                "offenen Fragen. [name]\nSenior Recruitment Consultant\n---- E: [email]",
+            ),
+        ],
+    )
+    def test_name_before_contact_data(self, text, expected):
+        assert clean(text) == expected
+
+    def test_nouns_next_to_the_name_stay(self):
+        text = "Fragen an Luisa Thiele Teamleitung, luisa@firma.de"
+        assert clean(text) == "Fragen an [name] Teamleitung, [email]"
+
+    def test_last_name_after_a_pronoun_is_found(self):
+        text = "Unsere Recruiterin Svenja Hofmann ist für Sie da: sh@firma.de"
+        assert "Hofmann" not in clean(text) and "Svenja" not in clean(text)
+
+    @pytest.mark.parametrize("name", ["Dr. Johannes Hornung", "Christiane Meier-Anding"])
+    def test_last_names_with_noun_endings(self, name):
+        assert clean(f"Fragen beantwortet {name}, Tel. 0711 123456") == (
+            "Fragen beantwortet [name], Tel. [phone]"
+        )
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("Weitere Informationen unter 0711 123456", "Weitere Informationen unter [phone]"),
+            (
+                "Bitte mit Angabe Ihrer Gehaltsvorstellung an jobs@firma.de",
+                "Bitte mit Angabe Ihrer Gehaltsvorstellung an [email]",
+            ),
+            (
+                "Erfahrung mit Apache Kafka und Microsoft Azure. Bewerbung an jobs@firma.de",
+                "Erfahrung mit Apache Kafka und Microsoft Azure. Bewerbung an [email]",
+            ),
+        ],
+    )
+    def test_text_and_skills_stay(self, text, expected):
+        assert clean(text) == expected
+
+    def test_name_far_before_contact_data_stays(self):
+        text = "Anna Weber hat das Team aufgebaut. " + "x" * 200 + " jobs@firma.de"
+        assert "Anna Weber" in clean(text)
+
+    def test_name_in_another_paragraph_stays(self):
+        text = "Das Projekt leitet Anna Weber seit 2020.\n\nBewerbung an jobs@firma.de"
+        assert "Anna Weber" in clean(text)
+
+    def test_count(self):
+        assert redact("Fragen an Melina Jacobs, Tel. 0711 123456").names == 1
+
+
+class TestNameLinesFurtherAway:
+    def test_name_line_four_lines_above_email(self):
+        text = "Heidrun Schwab\nPeople and Culture\nHauptstr. 39\n70567 Stuttgart\n\nhs@x.de"
+        assert clean(text).startswith("[name]\n")
+
+    def test_list_items_near_contact_data_stay(self):
+        text = "* Globales Netzwerk\n* Flexible Arbeitszeiten\n\nTel: 0711 123456"
+        assert clean(text) == "* Globales Netzwerk\n* Flexible Arbeitszeiten\n\nTel: [phone]"
+
+    def test_skill_line_near_contact_data_stays(self):
+        assert clean("Apache Kafka\njobs@firma.de") == "Apache Kafka\n[email]"
+
+
+def test_many_names_and_emails_are_fast():
+    text = ("Anna Weber Tom Berg " * 50 + "a@b.de\n") * 200
+    start = time.perf_counter()
+    redact(text)
+    assert time.perf_counter() - start < 2

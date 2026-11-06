@@ -5,6 +5,9 @@ Uses rules, not a name model. A name model would also remove skills like "Kafka"
 
 import re
 from dataclasses import dataclass
+from functools import cache
+
+from skillradar.skills.taxonomy import load_taxonomy
 
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 LINK = re.compile(r"(?:https?://|www\.)[^\s)\]>]+", re.IGNORECASE)
@@ -43,6 +46,27 @@ NOT_NAMES = {
 }  # fmt: skip
 
 CONTACT_MARKERS = ("[phone]", "[email]")
+BULLET = re.compile(r"[ \t]*[*\-•][ \t]")
+MARKER = re.compile(r"\[(?:phone|email)\]")
+# "melde dich bei Melina Jacobs (Recruiting) Telefon: [phone]": a first and last name in
+# running text, at most this many characters before a phone or email, same paragraph.
+NEAR_MARKER = 150
+NAME_IN_TEXT = re.compile(rf"(?<![\w-]){FIRST_AND_LAST}(?!\w)")
+BLANK_LINE = re.compile(r"\n[ \t]*\n")
+# Running text has many capitalised nouns next to names: "Vergütung Marko Martinovic",
+# "Luisa Thiele Teamleitung". These words and endings are trimmed from a match.
+NOT_NAMES_IN_TEXT = {
+    "Angabe", "Basis", "Bewirb", "Dein", "Deine", "Deinem", "Deinen", "Deiner", "Deines",
+    "Dich", "Dir", "Euch", "Euer", "Eure", "Ihnen", "Ihrem", "Ihren", "Ihrer", "Ihres",
+    "Kein", "Keine", "Starte", "Stelle", "Weitere", "Zum", "Zur",
+}  # fmt: skip
+NOUN_ENDINGS = (
+    "ung", "ungen", "heit", "keit", "schaft", "tät", "ion", "ionen", "nis", "isse",
+    "ment", "ence", "ance", "ing", "ity", "ness", "ship", "ions", "ems", "ces",
+)  # fmt: skip
+# Surnames have these endings too (Hornung, Kuckling), so after a first name only long
+# words count as nouns.
+LONG_NOUN = 10
 
 
 @dataclass(frozen=True)
@@ -61,7 +85,8 @@ def redact(text: str) -> Redacted:
     text, salutations = SALUTATION.subn(r"\1 [name]", text)
     text, contacts = _replace(CONTACT, _contact, text)
     text, lines = _name_lines(text)
-    return Redacted(text, emails, phones, links, salutations + contacts + lines)
+    text, near = _names_near_markers(text)
+    return Redacted(text, emails, phones, links, salutations + contacts + lines + near)
 
 
 def _replace(pattern: re.Pattern[str], replace, text: str) -> tuple[str, int]:
@@ -96,16 +121,95 @@ def _name_lines(text: str) -> tuple[str, int]:
     count = 0
     for i, line in enumerate(lines):
         match = NAME_LINE.fullmatch(line)
-        if not match or _looks_like_text(match.group(1)):
+        if not match or _looks_like_text(match.group(1)) or _has_skill(match.group(1)):
             continue
+        if BULLET.match(line):
+            continue  # "* Globales Netzwerk" is a list item, not a name
         if any(marker in near for near in _neighbours(lines, i) for marker in CONTACT_MARKERS):
             lines[i] = "[name]"
             count += 1
     return "\n".join(lines), count
 
 
-def _neighbours(lines: list[str], i: int, reach: int = 2) -> list[str]:
+def _neighbours(lines: list[str], i: int, reach: int = 4) -> list[str]:
     """The closest non-empty lines above and below, `reach` on each side."""
     above = [line for line in reversed(lines[:i]) if line.strip()][:reach]
     below = [line for line in lines[i + 1 :] if line.strip()][:reach]
     return above + below
+
+
+def _names_near_markers(text: str) -> tuple[str, int]:
+    """Replace names in running text shortly before [phone] or [email]."""
+    spans = set()
+    for marker in MARKER.finditer(text):
+        start = max(0, marker.start() - NEAR_MARKER)
+        blanks = list(BLANK_LINE.finditer(text, start, marker.start()))
+        if blanks:
+            start = blanks[-1].end()
+        pos = start
+        while match := NAME_IN_TEXT.search(text, pos, marker.start()):
+            first = _after_nouns(match)
+            if first > match.start():
+                # "Unsere Recruiterin Svenja Hofmann": match again without "Unsere",
+                # so the match can reach the last name
+                pos = first
+                continue
+            span = _name_span(match)
+            if span:
+                spans.add(span)
+            pos = match.end()
+    merged = _merge(spans)
+    for begin, end in reversed(merged):
+        text = text[:begin] + "[name]" + text[end:]
+    return text, len(merged)
+
+
+def _after_nouns(match: re.Match[str]) -> int:
+    """Where the match starts once nouns at its start are skipped."""
+    for word in re.finditer(r"\S+", match.group(0)):
+        if not _is_noun(word.group(0), after_name=False):
+            return match.start() + word.start()
+    return match.end()
+
+
+def _name_span(match: re.Match[str]) -> tuple[int, int] | None:
+    """Where the name is in the match, without nouns at its end. None if no name."""
+    words = list(re.finditer(r"\S+", match.group(0)))
+    while words and _is_noun(words[-1].group(0), after_name=True):
+        words.pop()
+    if any(_is_noun(w.group(0), after_name=True) for w in words):
+        return None
+    if sum(bool(re.fullmatch(NAME_WORD, w.group(0))) for w in words) < 2:
+        return None
+    begin, end = match.start() + words[0].start(), match.start() + words[-1].end()
+    return None if _has_skill(match.string[begin:end]) else (begin, end)
+
+
+def _is_noun(word: str, after_name: bool) -> bool:
+    if word in NOT_NAMES or word in NOT_NAMES_IN_TEXT:
+        return True
+    if word.endswith(NOUN_ENDINGS):
+        # "Meier-Anding": only the last part of a double name counts
+        return not after_name or len(word.split("-")[-1]) >= LONG_NOUN
+    return False
+
+
+def _merge(spans: set[tuple[int, int]]) -> list[tuple[int, int]]:
+    merged: list[tuple[int, int]] = []
+    for begin, end in sorted(spans):
+        if merged and begin <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+        else:
+            merged.append((begin, end))
+    return merged
+
+
+@cache
+def _has_skill(words: str) -> bool:
+    """Skills like "Apache Kafka" look like names, so they stay."""
+    return bool(_skills().find_in_text(words))
+
+
+@cache
+def _skills():
+    return load_taxonomy()
