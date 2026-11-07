@@ -203,6 +203,10 @@ export default function Home() {
             model most likely added them. Jobs that are not tech work are not counted. A posting
             with places in two states counts in both.
           </p>
+          <p>
+            <a href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/health`}>Pipeline health</a>: is the data fresh, did the
+            last runs and data tests pass, and how good are the answers.
+          </p>
         </footer>
       </main>
     </TooltipProvider>

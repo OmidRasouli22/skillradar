@@ -2137,3 +2137,131 @@ button {
     max-height: none;
   }
 }
+
+/* Pipeline health page */
+
+.health .brand {
+  text-decoration: none;
+}
+
+.health-status {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  font-size: 15px;
+  color: var(--secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.health-status strong {
+  color: var(--text);
+}
+
+.health-status .dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 99px;
+  background: var(--gray-2);
+}
+
+.health-status.fresh .dot {
+  background: var(--mark-office-line);
+  box-shadow: 0 0 0 4px var(--mark-office);
+}
+
+.health-status.late .dot {
+  background: var(--warn-text);
+  box-shadow: 0 0 0 4px var(--warn-bg);
+}
+
+.health-status.stale .dot {
+  background: var(--mark-language-line);
+  box-shadow: 0 0 0 4px var(--mark-language);
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.health-grid .card {
+  margin-bottom: 16px;
+}
+
+.health .kpi-value {
+  font-size: 28px;
+  text-transform: capitalize;
+}
+
+.health .card-head {
+  margin-bottom: 12px;
+}
+
+.run-status {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 99px;
+  background: var(--track);
+}
+
+.run-status.ok {
+  color: var(--mark-office-line);
+  background: var(--mark-office);
+}
+
+.run-status.partial {
+  color: var(--warn-text);
+  background: var(--warn-bg);
+}
+
+.run-status.failed {
+  color: var(--mark-language-line);
+  background: var(--mark-language);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.facts dt {
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.facts dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.facts code,
+.health .table-wrap code {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .health-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.health .bar-row {
+  grid-template-columns: minmax(120px, 190px) 1fr 44px;
+}
+
+.health .fill {
+  background: var(--accent);
+}

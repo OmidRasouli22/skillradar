@@ -6,8 +6,10 @@
 /api/postings   open postings for a role and region, newest first
 /api/postings/{refnr}  one posting with the important parts marked
 /api/labels     the review page for the evaluation labels (see labeling.py)
+/api/health     pipeline health: freshness, runs, tests, Claude cost, coverage, scores
 /               the page, built from web/ with `npm run build`
 /label          the review page
+/health         the health page
 """
 
 from pathlib import Path
@@ -23,12 +25,13 @@ from skillradar.api.labels import ALL, REGIONS, ROLES
 from skillradar.api.postings import REFNR
 from skillradar.config import DATA_DIR, PROJECT_ROOT
 from skillradar.evaluate.labels import LABELS_PATH, LabelStore
+from skillradar.health import build_health
 from skillradar.skills.taxonomy import load_taxonomy
 from skillradar.transform.runner import serve_dir
 
 WEB_BUILD = PROJECT_ROOT / "web" / "out"
 # Pages besides the start page. The static build writes them as <name>.html.
-PAGES = ("label",)
+PAGES = ("label", "health")
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -98,6 +101,10 @@ def create_app(
         if found is None:
             raise HTTPException(status_code=404, detail="no open posting with this number")
         return found
+
+    @app.get("/api/health")
+    def health() -> dict:
+        return build_health(data_dir)
 
     app.include_router(labeling_router(LabelStore(labels), data_dir, taxonomy))
 

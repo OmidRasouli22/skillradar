@@ -17,9 +17,10 @@ from pydantic import BaseModel, Field
 
 from skillradar.api.data import GoldData, NoData
 from skillradar.config import DATA_DIR, PROJECT_ROOT
+from skillradar.health import build_health
 from skillradar.logs import setup_logging
 from skillradar.publish.git import PublishError, push, remote_url
-from skillradar.publish.site import export_data
+from skillradar.publish.site import export_data, write_health
 from skillradar.skills.taxonomy import load_taxonomy
 from skillradar.transform.runner import serve_dir
 
@@ -82,6 +83,7 @@ def build_site(data_dir: Path) -> tuple[Path, dict[str, int]]:
         shutil.rmtree(site)
     shutil.copytree(page, site)
     counts = export_data(GoldData(serve_dir(data_dir), load_taxonomy()), site)
+    write_health(build_health(data_dir), site)
     # GitHub Pages runs Jekyll by default, which hides folders like _next.
     (site / ".nojekyll").touch()
     return site, counts

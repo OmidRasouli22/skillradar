@@ -28,6 +28,7 @@ The technical reference: every part, command and setting. For the short version,
 | Skill trends over time | planned |
 | Evaluation: sample, review page, report | done |
 | Evaluation: verify the 150 drafted labels | in progress |
+| Pipeline health page (local and public) | done |
 | Postgres export, hosting | planned |
 | Forecasting | planned |
 
@@ -49,6 +50,7 @@ src/skillradar/         Python package
     cli.py              command line entry point
   schedule/             daily job on macOS (launchd)
   daily.py              the scheduled job: snapshot, Claude, rebuild silver
+  health.py             the pipeline health page's data
   lock.py               stops two runs at the same time
   logs.py               logging setup for all commands
   notify.py             desktop alert when a run fails
@@ -324,6 +326,34 @@ postings that were still open then: coverage is 71% and 74% for the two weeks be
 87% for the week of 2 November. From then on the daily job sends each new posting while it
 is open. A new prompt version lowers coverage the same way, until the open postings are
 sent again.
+
+## Pipeline health
+
+`/health` on the local page and on the public site shows whether the pipeline works:
+
+- **Freshness:** when the last run that saved data started. Fresh up to 30 hours, late up
+  to 54, stale after that. The browser works this out again from the time, so a public
+  copy that stopped updating shows as late or stale on its own.
+- **Recent runs:** status, duration, open and new postings, failed searches, number of
+  problems (never the error texts).
+- **Last build:** dbt models and data tests by status, and the names of failed tests.
+- **Claude:** model and prompt, spending this month against the limit, answers saved and
+  failed, waiting batches, and the cost of each recent batch.
+- **Answers per week:** coverage from `gold_weeks`.
+- **Data layers:** bronze files and size, and rows per silver and gold table
+  (`data/serve/table_counts.json`, written by each build).
+- **Answer quality:** the evaluation's scores, shown only from verified labels.
+
+`skillradar.health` builds it from files only (run logs, `dbt/target/run_results.json`,
+the batch files, the gold Parquet files, `data/eval/report.json`), never the warehouse.
+Each part is built on its own, so a broken file empties one part and never stops the
+site from being published. Locally the page asks `/api/health`; the public site gets
+`data/health.json` with every publish. It holds counts, dates and costs only: no file
+paths, no error texts, no batch ids.
+
+The public copy is updated when the site is published, which happens after a run that
+changed the data. A failed run does not publish, so the page shows it by going late or
+stale. Failed runs still send a desktop alert on this Mac (`notify.py`).
 
 ## Webpage
 

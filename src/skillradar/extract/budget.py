@@ -77,6 +77,11 @@ def affordable(costs: list[float], room: float) -> int:
     return len(costs)
 
 
+def answer_cost(settings: LlmSettings, record: Record) -> float:
+    """USD for one saved answer from a batch."""
+    return _cost(settings, record, batch=True)
+
+
 def _cost(settings: LlmSettings, record: Record, batch: bool) -> float:
     price = settings.prices.get(record["model"])
     if price is None:

@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import duckdb
@@ -7,7 +8,13 @@ from skillradar.extract.postings import load_postings
 from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import load_settings
 from skillradar.transform import cli
-from skillradar.transform.runner import TransformError, build, serve_dir, warehouse_path
+from skillradar.transform.runner import (
+    TransformError,
+    build,
+    serve_dir,
+    table_counts_path,
+    warehouse_path,
+)
 from tests.helpers import write_jsonl, write_run_log
 
 DEFAULT_SKILLS = [{"name": "SQL", "required": True}, {"name": "AWS", "required": False}]
@@ -242,11 +249,20 @@ def test_gold_tables_are_exported_for_the_api(data_dir):
         "gold_skill_demand.parquet",
         "gold_skill_weekly.parquet",
         "gold_weeks.parquet",
+        "table_counts.json",
     ]
     assert folder.stat().st_mode & 0o777 == 0o700
     with duckdb.connect() as con:
         exported = len(con.read_parquet(str(folder / "gold_skill_demand.parquet")).fetchall())
     assert exported == query(data_dir, "select count(*) from gold_skill_demand")[0][0]
+
+
+def test_row_counts_are_saved_for_the_health_page(data_dir):
+    counts = json.loads(table_counts_path(data_dir).read_text())
+    [(postings,)] = query(data_dir, "select count(*) from silver_postings")
+    assert counts["silver_postings"] == postings
+    assert counts["gold_meta"] == 1
+    assert not any(name.startswith("stg_") for name in counts)  # views are not counted
 
 
 def test_postings_load_right_after_a_build(data_dir):
