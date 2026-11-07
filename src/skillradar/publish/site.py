@@ -5,6 +5,7 @@ Layout under the site folder:
     data/dashboard/<region>.json       the charts for one region
     data/postings/<role>/<region>.json the job list for one role and region
     data/jobs/<refnr>.json             one job's profile, without its text
+    data/health.json                   pipeline health (skillradar.health)
 
 Full posting texts stay local: employers own them, and a contact name can slip through
 the cleaning. The public job view links to the original posting instead.
@@ -43,6 +44,10 @@ def export_data(gold: GoldData, folder: Path) -> dict[str, int]:
         _write(data / "jobs" / f"{refnr}.json", {**profile, "text": "", "marks": []})
         jobs += 1
     return {"regions": len(REGIONS), "lists": lists, "jobs": jobs}
+
+
+def write_health(health: dict, folder: Path) -> None:
+    _write(folder / "data" / "health.json", health)
 
 
 def _write(path: Path, content: dict) -> None:

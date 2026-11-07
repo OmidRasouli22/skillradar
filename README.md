@@ -4,7 +4,7 @@
 
 **Which skills do German tech employers really ask for?**
 
-**[Open the live site →](https://omidrasouli22.github.io/skillradar/)** · updated every day
+**[Open the live site →](https://omidrasouli22.github.io/skillradar/)** · updated every day · [pipeline health](https://omidrasouli22.github.io/skillradar/health)
 
 ![The SkillRadar page: headline numbers, the most asked-for skills for Data Engineers, and the list of open jobs](assets/images/page.png)
 
