@@ -26,7 +26,8 @@ The technical reference: every part, command and setting. For the short version,
 | CI on GitHub Actions: lint, tests, dbt, site build, dependency audit | done |
 | Weekly skill history (base for trends) | done |
 | Skill trends over time | planned |
-| Evaluation (precision, recall) | planned |
+| Evaluation: sample, review page, report | done |
+| Evaluation: verify the 150 drafted labels | in progress |
 | Postgres export, hosting | planned |
 | Forecasting | planned |
 
@@ -57,6 +58,7 @@ src/skillradar/         Python package
   extract/              skill extraction with Claude: prompt, batches, spending limit,
                         daily step, quality numbers, silver table rows
   api/                  web API over the gold tables, and the command that starts the page
+  evaluate/             labels, scores and the report for the extraction (eval/)
   publish/              the public website: data files and the push to GitHub Pages
   storage.py            atomic writes, private folders, JSON lines
 web/                    the page (Next.js), built into static files in web/out
@@ -224,6 +226,57 @@ likely made up by the model, so leave those out when counting.
 `quality` shows, per prompt version: how many answers came back, how often seniority or
 home office is `unknown`, skills per posting, how many skills are in `config/skills.yaml`,
 and which languages were found. Use it to compare prompt versions before a large run.
+
+## Evaluation
+
+How good is the extraction? `eval/labels.jsonl` holds the correct answer for a random
+sample of 150 postings, written by the rules in [eval/GUIDE.md](eval/GUIDE.md). The
+report compares three systems with these labels, on the same postings:
+
+- the keyword search over `config/skills.yaml` (the baseline Claude has to beat),
+- Claude's answers to the current prompt, every skill it named,
+- the same answers as the site counts them (product names not in the text left out).
+
+```sh
+uv run skillradar-eval sample            # draw the sample (once; a fixed seed)
+uv run skillradar-eval status            # labels per status
+uv run skillradar-eval texts             # write the sample's texts for the review page
+uv run skillradar-eval report            # score everything against verified labels
+uv run skillradar-eval report --drafts   # also use unchecked drafts, marked as such
+```
+
+All commands are free: nothing is sent to Claude.
+
+### How a label is made
+
+Each label starts as a draft written by a model from the posting text alone, without
+Claude's answer. A person then checks and corrects it on the review page and marks it
+verified. Only verified labels count in the report, so the numbers say
+"model-drafted, human-verified". The drafts were written by Claude Opus 5.5, a larger
+model than the one being measured.
+
+The review page runs locally: `uv run skillradar-web`, then open
+`http://127.0.0.1:8000/label`. It shows the posting with the label's skills marked in the
+text, a "not in text" hint for skills it can't find, and the choices for role,
+seniority, home office and languages. ⌘/Ctrl + Enter verifies and opens the next
+posting. The texts come from `data/eval/texts.jsonl` (local only, like all texts);
+the labels file holds reference numbers and answers only, so it can live in the
+repository. The page is left out of the public build.
+
+### What the numbers mean
+
+- Skills: micro precision and recall over all (posting, skill) pairs. The main number
+  counts only skills in `config/skills.yaml`, where names match reliably. "All skills"
+  also counts other skills by exact name, so "OIDC" and "OpenID Connect" differ: it is a
+  lower bound.
+- Required: for skills both sides found, how often required / nice to have agree.
+- Role, seniority, home office: accuracy, with the most common mistakes.
+- Languages: precision and recall of the language list, and accuracy of the level.
+- Every number has a 95% bootstrap interval: the postings are drawn again with
+  replacement 1,000 times, and the interval holds the middle 95% of the results. With
+  150 postings an accuracy of 80% is roughly ±6 points.
+
+The report goes to `data/eval/report.json`.
 
 ## Gold tables
 
