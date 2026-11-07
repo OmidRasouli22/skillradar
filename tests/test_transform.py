@@ -3,6 +3,7 @@ from datetime import date
 import duckdb
 import pytest
 
+from skillradar.extract.postings import load_postings
 from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import load_settings
 from skillradar.transform import cli
@@ -244,6 +245,12 @@ def test_gold_tables_are_exported_for_the_api(data_dir):
     with duckdb.connect() as con:
         exported = len(con.read_parquet(str(folder / "gold_skill_demand.parquet")).fetchall())
     assert exported == query(data_dir, "select count(*) from gold_skill_demand")[0][0]
+
+
+def test_postings_load_right_after_a_build(data_dir):
+    # The daily job builds, then reads postings for Claude in the same process.
+    postings = load_postings(warehouse_path(data_dir), only_open=True)
+    assert [p.refnr for p in postings] == ["b", "noplace"]
 
 
 class TestGoldTables:

@@ -19,5 +19,7 @@ ONLY_OPEN = "and t.refnr in (select refnr from silver_posting_history where is_o
 
 def load_postings(warehouse: Path, only_open: bool = False) -> list[PostingText]:
     sql = POSTINGS_SQL.format(only_open=ONLY_OPEN if only_open else "")
-    with duckdb.connect(str(warehouse), read_only=True) as con:
+    # Not read_only: the daily job calls this right after dbt, whose connection is still
+    # open in this process, and DuckDB refuses a second one with other settings.
+    with duckdb.connect(str(warehouse)) as con:
         return [PostingText(*row) for row in con.execute(sql).fetchall()]
