@@ -36,7 +36,9 @@ def main(argv: list[str] | None = None, agent: LaunchAgent | None = None) -> int
         try:
             hour, minute = _time_of_day(args.at)
             job = Job(
-                uv=Path(uv).resolve(),
+                # absolute(), not resolve(): Homebrew's bin/uv is a link to a versioned
+                # folder that is removed when uv is upgraded.
+                uv=Path(uv).absolute(),
                 project_dir=PROJECT_ROOT,
                 log_file=DATA_DIR / "logs" / "snapshot.log",
                 hour=hour,

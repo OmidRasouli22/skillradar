@@ -1,3 +1,5 @@
+import plistlib
+
 import pytest
 
 from skillradar.schedule import cli
@@ -38,6 +40,21 @@ def test_missing_uv(agent, monkeypatch, capsys):
 
     assert cli.main(["install"], agent=agent) == 1
     assert "uv not found" in capsys.readouterr().err
+
+
+def test_uv_symlink_is_kept(agent, monkeypatch, tmp_path):
+    # Homebrew links bin/uv to a versioned folder that goes away when uv is upgraded.
+    real = tmp_path / "Cellar" / "uv" / "1.0" / "uv"
+    real.parent.mkdir(parents=True)
+    real.touch()
+    link = tmp_path / "bin" / "uv"
+    link.parent.mkdir()
+    link.symlink_to(real)
+    monkeypatch.setattr(cli.shutil, "which", lambda name: str(link))
+
+    assert cli.main(["install"], agent=agent) == 0
+    plist = plistlib.loads(agent.plist_path.read_bytes())
+    assert plist["ProgramArguments"][2] == str(link)
 
 
 def test_command_is_required():
