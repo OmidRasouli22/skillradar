@@ -24,6 +24,7 @@ The technical reference: every part, command and setting. For the short version,
 | Webpage: one page, local (FastAPI + Next.js) | done |
 | Public website on GitHub Pages, updated daily | done |
 | CI on GitHub Actions: lint, tests, dbt, site build, dependency audit | done |
+| Weekly skill history (base for trends) | done |
 | Skill trends over time | planned |
 | Evaluation (precision, recall) | planned |
 | Postgres export, hosting | planned |
@@ -131,6 +132,7 @@ the data tests in `transform/`, so a broken table stops the build.
 | `silver_postings` | posting: title, employer, type, salary, home office, first published date |
 | `silver_posting_texts` | posting: description without personal data |
 | `silver_posting_locations` | posting and place, with cleaned city name (a posting can list up to 10 places) |
+| `silver_posting_regions` | posting and German state it lists (used for every region count) |
 | `silver_posting_days` | posting and day it was open in our snapshots |
 | `silver_posting_history` | posting: first seen, last seen, days seen, closed on |
 
@@ -242,6 +244,8 @@ page reads only these files, never the warehouse, so it can't block the daily bu
 | `gold_posting_texts` | the cleaned text of each posting (contact details removed) |
 | `gold_meta` | one row: date of the data, open postings, how many have an answer, how many are tech jobs, model and prompt version |
 | `gold_scope` | which posting belongs to which role and region (used by the others) |
+| `gold_skill_weekly` | per week, role, region and skill: the same counts as `gold_skill_demand`, for the postings open that week |
+| `gold_weeks` | per week: days with data, whether the week is over, open postings, how many have an answer (coverage) |
 
 Two rules make the numbers honest:
 
@@ -251,6 +255,22 @@ Two rules make the numbers honest:
 
 Some groups are small (for example one role in one state), so a share can jump a lot.
 Always show `total_postings` next to a share.
+
+### Weekly history
+
+`gold_skill_weekly` is the history for trends and, later, forecasts. A week runs Monday to
+Sunday, and a posting counts in every week it was open on at least one day. A skill that a
+group ever asked for has a row in every week the group had postings, with 0 when nobody
+asked for it, so a series has no gaps. The table is rebuilt from bronze every time, so it
+always uses the current skill list and the current answers.
+
+Check `coverage` in `gold_weeks` before comparing weeks. Only postings with an answer to the
+current prompt are counted, and a posting that closed before Claude read it never gets one.
+The answers to prompt v4 were made on 6 November 2026, so earlier weeks only hold the
+postings that were still open then: coverage is 71% and 74% for the two weeks before, and
+87% for the week of 2 November. From then on the daily job sends each new posting while it
+is open. A new prompt version lowers coverage the same way, until the open postings are
+sent again.
 
 ## Webpage
 

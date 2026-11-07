@@ -25,6 +25,35 @@ models:
       - name: share
         data_tests: [not_null]
 
+  - name: gold_skill_weekly
+    description: >
+      Skill demand per week (week_start, a Monday), role and region: the history for
+      trends and forecasts. A posting counts in each week it was open on at least one day.
+      A skill a group ever asked for has a row in every week the group had postings, with
+      postings = 0 when nobody asked for it. Check coverage in gold_weeks first.
+    columns:
+      - name: week_start
+        data_tests: [not_null]
+      - name: role
+        data_tests: [not_null]
+      - name: region
+        data_tests: [not_null]
+      - name: skill
+        data_tests: [not_null]
+      - name: share
+        data_tests: [not_null]
+
+  - name: gold_weeks
+    description: >
+      One row per week with snapshots: days with data, whether the week is over, open
+      postings (without apprenticeships), how many have an answer from Claude, how many of
+      those are tech jobs, and answered / open (coverage).
+    columns:
+      - name: week_start
+        data_tests: [unique, not_null]
+      - name: coverage
+        data_tests: [not_null]
+
   - name: gold_attribute_shares
     description: >
       Per role and region: how open postings split by seniority, remote (home office),

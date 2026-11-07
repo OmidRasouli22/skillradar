@@ -47,6 +47,21 @@ models:
         description: Order of the location in the posting, starting at 1.
         data_tests: [not_null]
 
+  - name: silver_posting_regions
+    description: >
+      The federal states each posting lists, one row per posting and state. Places
+      without a state are left out.
+    columns:
+      - name: refnr
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_postings')
+                field: refnr
+      - name: region
+        data_tests: [not_null]
+
   - name: silver_posting_days
     description: One row per posting and day it was open in our snapshots.
     columns:

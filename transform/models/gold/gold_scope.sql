@@ -10,10 +10,9 @@ with postings as (
 ),
 
 regions as (
-    select distinct l.refnr, l.region
-    from {{ ref('silver_posting_locations') }} as l
+    select r.refnr, r.region
+    from {{ ref('silver_posting_regions') }} as r
     join postings as p using (refnr)
-    where l.region is not null
     union all
     select refnr, 'all' from postings
 ),
