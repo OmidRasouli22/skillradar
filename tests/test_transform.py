@@ -240,6 +240,8 @@ def test_gold_tables_are_exported_for_the_api(data_dir):
         "gold_postings.parquet",
         "gold_scope.parquet",
         "gold_skill_demand.parquet",
+        "gold_skill_weekly.parquet",
+        "gold_weeks.parquet",
     ]
     assert folder.stat().st_mode & 0o777 == 0o700
     with duckdb.connect() as con:
