@@ -8,7 +8,7 @@ from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import load_settings
 from skillradar.health import build_health, freshness
 from skillradar.storage import json_line
-from skillradar.transform.runner import serve_dir, table_counts_path
+from skillradar.transform.runner import serve_dir
 from tests.helpers import write_run_log
 
 NOW = datetime(2026, 11, 7, 12, 0, tzinfo=UTC)
@@ -84,14 +84,6 @@ def data_dir(tmp_path):
             "96 as postings_with_answers, 80 as tech_postings) "
             f"to '{serve / 'gold_meta.parquet'}' (format parquet)"
         )
-        con.execute(
-            "copy (select date '2026-11-02' as week_start, false as week_ended, "
-            "110 as open_postings, 85 as tech_postings, 0.87 as coverage) "
-            f"to '{serve / 'gold_weeks.parquet'}' (format parquet)"
-        )
-    table_counts_path(tmp_path).write_text(
-        json.dumps({"gold_meta": 1, "silver_postings": 5000, "gold_skill_demand": 37000})
-    )
     return tmp_path
 
 
@@ -127,13 +119,6 @@ def test_no_good_run_is_stale():
     assert freshness([{"status": "failed", "started_at": NOW.isoformat()}], NOW)["state"] == "stale"
 
 
-def test_layers(health):
-    layers = health["layers"]
-    assert layers["bronze"]["runs"]["files"] == 3
-    assert layers["silver"] == {"silver_postings": 5000}
-    assert layers["gold"] == {"gold_meta": 1, "gold_skill_demand": 37000}
-
-
 def test_dbt_results(health):
     tests = health["tests"]
     assert tests["models"] == {"success": 1} and tests["tests"] == {"pass": 1, "fail": 1}
@@ -157,50 +142,11 @@ def test_coverage(health):
     coverage = health["coverage"]
     assert (coverage["open_postings"], coverage["with_answer"]) == (100, 96)
     assert coverage["share"] == 0.96
-    assert coverage["weeks"] == [
-        {"week_start": "2026-11-02", "ended": False, "open_postings": 110,
-         "tech_postings": 85, "coverage": 0.87}
-    ]  # fmt: skip
 
 
-def write_report(data_dir, includes_drafts, verified):
-    systems = [
-        {"id": "keywords", "name": "Keyword search", "postings": 150,
-         "skills": {"precision": {"value": 0.9}, "recall": {"value": 0.8}, "f1": {"value": 0.85},
-                    "tp": 1, "fp": 1, "fn": 1},
-         "role": None, "seniority": None, "remote": None, "required": None},
-        {"id": f"{MODEL}/v4", "name": "Claude", "postings": 150, "skills": None},
-        {"id": f"{MODEL}/v4/counted", "name": "Claude as counted", "postings": 150,
-         "skills": {"precision": {"value": 0.94}, "recall": {"value": 0.75}, "f1": {"value": 0.83}},
-         "role": {"accuracy": {"value": 0.81}}, "seniority": {"accuracy": {"value": 0.8}},
-         "remote": {"accuracy": {"value": 0.87}}, "required": {"accuracy": {"value": 0.92}}},
-    ]  # fmt: skip
-    report = {"generated_at": "2026-11-07T11:00:00+00:00", "includes_drafts": includes_drafts,
-              "sample": {"size": 150, "todo": 0, "draft": 150 - verified, "verified": verified},
-              "labels": 150, "systems": systems}  # fmt: skip
-    path = data_dir / "eval" / "report.json"
-    path.parent.mkdir(exist_ok=True)
-    path.write_text(json.dumps(report))
-
-
-def test_no_evaluation_yet(health):
-    assert health["evaluation"] is None
-
-
-def test_scores_from_drafts_are_never_shown(data_dir):
-    write_report(data_dir, includes_drafts=True, verified=20)
-    evaluation = build_health(data_dir, NOW)["evaluation"]
-    assert evaluation["systems"] == [] and evaluation["sample"]["verified"] == 20
-
-
-def test_verified_scores(data_dir):
-    write_report(data_dir, includes_drafts=False, verified=150)
-    systems = build_health(data_dir, NOW)["evaluation"]["systems"]
-    assert [s["id"] for s in systems] == ["keywords", f"{MODEL}/v4/counted"]
-    counted = systems[1]
-    assert counted["skills"]["recall"] == {"value": 0.75}
-    assert counted["fields"]["required"] == {"value": 0.92}
-    assert "tp" not in systems[0]["skills"]
+def test_only_the_shown_parts_are_published(health):
+    parts = {"generated_at", "thresholds", "freshness", "runs", "tests", "claude", "coverage"}
+    assert set(health) == parts
 
 
 def test_nothing_private_is_published(data_dir, health):

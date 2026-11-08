@@ -339,13 +339,12 @@ sent again.
 - **Last build:** dbt models and data tests by status, and the names of failed tests.
 - **Claude:** model and prompt, spending this month against the limit, answers saved and
   failed, waiting batches, and the cost of each recent batch.
-- **Answers per week:** coverage from `gold_weeks`.
-- **Data layers:** bronze files and size, and rows per silver and gold table
-  (`data/serve/table_counts.json`, written by each build).
-- **Answer quality:** the evaluation's scores, shown only from verified labels.
+- **Answers:** the share of open postings that have an answer from Claude (`gold_meta`).
+
+The evaluation's scores are not on this page; `skillradar-eval report` prints them.
 
 `skillradar.health` builds it from files only (run logs, `dbt/target/run_results.json`,
-the batch files, the gold Parquet files, `data/eval/report.json`), never the warehouse.
+the batch files, the gold Parquet files), never the warehouse.
 Each part is built on its own, so a broken file empties one part and never stops the
 site from being published. Locally the page asks `/api/health`; the public site gets
 `data/health.json` with every publish. It holds counts, dates and costs only: no file
