@@ -321,7 +321,7 @@ skills:
   - {name: Power Apps, category: enterprise, aliases: [PowerApps]}
   - {name: Google Workspace, category: enterprise, aliases: [G Suite]}
   - {name: SAP BTP, category: enterprise, aliases: [SAP Business Technology Platform]}
-  - {name: SAP Fiori, category: enterprise, aliases: [Fiori, SAPUI5]}
+  - {name: SAP Fiori, category: enterprise, aliases: [Fiori, SAPUI5, SAP UI5, UI5, OpenUI5, Fiori Elements]}
   - {name: Business Central, category: enterprise, aliases: [Dynamics 365 Business Central]}
   - {name: ERP, category: enterprise, general: true}
   - {name: Camunda, category: enterprise}

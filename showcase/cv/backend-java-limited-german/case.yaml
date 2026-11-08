@@ -1,0 +1,49 @@
+title: Senior Java backend engineer with B1 German
+person: Arash Karimi (fictional)
+language: English
+target: {role: backend_developer, region: all}
+story: >
+  Strong technical fit, but most German postings ask for fluent German. The analysis
+  should see that his skills match and that the language, not a framework, is what holds
+  him back: German should rank as his most valuable thing to improve.
+checks:
+  - kind: role
+    values: [backend_developer]
+    why: Seven years of Java microservices and APIs.
+  - kind: seniority
+    values: [senior]
+    why: More than 5 years of experience and "Senior" in the current title.
+  - kind: years
+    min: 6.5
+    max: 7.8
+    why: 09/2019 to today (11/2026) is about 7.2 years.
+  - kind: language
+    language: German
+    values: [basic]
+    why: B1 is basic in the prompt's scale (A1 to B1).
+  - kind: language
+    language: English
+    values: [fluent]
+    why: C1 is fluent.
+  - kind: has
+    skills: [Java, Spring, Kafka, PostgreSQL, Docker, Kubernetes, AWS, Jenkins, JUnit, Hibernate]
+    why: All are named in his experience or skills ("Spring Boot" is the skill Spring).
+  - kind: evidence
+    skill: Kafka
+    values: [work]
+    why: He processes card transactions with Kafka in his current job.
+  - kind: best_role
+    values: [backend_developer]
+    top: 3
+    why: His skills are a backend developer's skills.
+  - kind: covered
+    skill: Spring
+    values: [have]
+    why: Spring Boot is on the CV.
+  - kind: gap
+    skill: German (fluent, C1)
+    top: 3
+    why: His technical skills fit; the German level is what most postings ask for and he lacks.
+  - kind: no_gap
+    skill: Java
+    why: He has it.

@@ -1,0 +1,42 @@
+title: Principal architect with a long CV
+person: Katharina Vogel (fictional)
+language: English
+target: {role: software_engineer, region: HAMBURG}
+story: >
+  A long, dense CV with 16 years of experience and around 50 skills. Tests that a long CV
+  is read completely (no cut-off answer), that the PhD is studies and not work, that
+  leading architects is read as lead, and that many skills keep their evidence.
+checks:
+  - kind: seniority
+    values: [lead]
+    why: She leads an architecture guild and led a team of architects.
+  - kind: years
+    min: 15.8
+    max: 16.4
+    why: 10/2010 to 11/2026 is 194 months, 16.2 years; the doctorate is studies.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: C2 is fluent.
+  - kind: language
+    language: French
+    values: [basic]
+    why: A2 is basic.
+  - kind: has
+    skills: [Java, Kotlin, TypeScript, Go, Python, SQL, AWS, Azure, Kubernetes, OpenShift, Docker, Terraform, Helm, ArgoCD, PostgreSQL, Oracle Database, MongoDB, Redis, Kafka, RabbitMQ, Elasticsearch, React, Angular, Spring, JUnit, Cypress, SonarQube, Prometheus, Grafana, Jenkins, Scrum, SAFe, Kanban, TOGAF]
+    why: All are named in her competencies or experience.
+  - kind: has
+    skills: [Microservices, Event-Driven Architecture, Domain-Driven Design, REST, gRPC, GraphQL, OpenAPI, Software Architecture, TDD, GitOps]
+    why: Named as competencies and described in her work.
+  - kind: evidence
+    skill: Kafka
+    values: [work]
+    why: She designed the move to Kafka-based microservices in her current job.
+  - kind: evidence
+    skill: C++
+    values: [work, project, education]
+    why: C++ appears only in her doctoral research prototypes, never in an industry job.
+  - kind: best_role
+    values: [software_engineer, backend_developer, fullstack_developer, devops_engineer]
+    top: 3
+    why: Her skills cover software architecture, backend and platform work.

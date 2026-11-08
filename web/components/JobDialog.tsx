@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Parts, tone } from "@/components/cv/CvResults";
 import { PostingText } from "@/components/PostingText";
 import { getPosting, type Mark, type PostingDetail } from "@/lib/api";
+import { BAND_LABEL, matchPosting, type CvProfile, type Match } from "@/lib/cv";
 import { day, percent } from "@/lib/format";
 import { GERMAN, label, REMOTE, SENIORITY } from "@/lib/labels";
 
@@ -23,8 +25,15 @@ const KINDS: { kind: Kind; label: string }[] = [
 // One posting as a job profile: what it asks for, how that compares with other jobs in
 // the same role, and the text with the important parts marked. It grows out of the card
 // that was clicked and shrinks back into it.
-export function JobDialog(props: { refnr: string; origin: Origin | null; onClose: () => void }) {
-  const { refnr, origin, onClose } = props;
+export function JobDialog(props: {
+  refnr: string;
+  origin: Origin | null;
+  onClose: () => void;
+  // A loaded CV (local page only): the dialog then shows how it matches this posting.
+  profile?: CvProfile | null;
+}) {
+  const { refnr, origin, onClose, profile } = props;
+  const [fit, setFit] = useState<{ refnr: string; data: Match & { scored: boolean } } | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<{ refnr: string; data?: PostingDetail; error?: string } | null>(null);
@@ -57,6 +66,15 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
     return () => controller.abort();
   }, [refnr]);
 
+  useEffect(() => {
+    if (!profile) return;
+    const controller = new AbortController();
+    matchPosting(profile, refnr, controller.signal)
+      .then((data) => setFit({ refnr, data }))
+      .catch(() => undefined); // the posting still shows without the match
+    return () => controller.abort();
+  }, [refnr, profile]);
+
   function close() {
     if (closing) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -87,6 +105,8 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
   }
 
   const job = state?.refnr === refnr ? state.data : undefined;
+  const match = profile && fit?.refnr === refnr ? fit.data : null;
+  const coverage = new Map((match?.skills ?? []).map((k) => [k.skill.toLowerCase(), k.coverage]));
   const error = state?.refnr === refnr ? state.error : undefined;
 
   return (
@@ -159,6 +179,7 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
         ) : (
           <div className="profile-body" ref={body}>
             <aside className="profile-side">
+              {match && <HowYouMatch match={match} />}
               <section className="insights">
                 <h3>Key points</h3>
                 <ul>
@@ -189,6 +210,7 @@ export function JobDialog(props: { refnr: string; origin: Origin | null; onClose
                           title={!job.text ? undefined : first < 0 ? "Described in other words in the text" : "Show in the text"}
                         >
                           <span className="skill-name">
+                            {match && <CoverageMark kind={coverage.get(skill.name.toLowerCase())} />}
                             {skill.name}
                             {skill.emerging && <span className="badge">new</span>}
                           </span>
@@ -375,5 +397,43 @@ function MiniMap(props: { text: string; marks: Mark[]; hidden: Set<Kind>; onJump
         ),
       )}
     </div>
+  );
+}
+
+// The CV's match with this posting, like a "how you match" box on a job site.
+function HowYouMatch({ match }: { match: Match & { scored: boolean } }) {
+  const required = match.skills.filter((k) => k.required);
+  const have = required.filter((k) => tone(k.coverage) === "have").length;
+  const missing = required.filter((k) => tone(k.coverage) === "missing").map((k) => k.skill);
+  return (
+    <section className={`how-match ${match.band}`} aria-label="How your CV matches">
+      <div className="how-match-head">
+        <strong>{percent(match.match)}</strong>
+        <span>
+          {match.scored ? BAND_LABEL[match.band] : "Few skills named"}
+          <small>
+            {required.length ? `You have ${have} of ${required.length} required skills` : "No required skills named"}
+          </small>
+        </span>
+      </div>
+      <Parts parts={match.parts} />
+      {missing.length > 0 && <p>Missing: {missing.join(", ")}</p>}
+      {match.parts.language < 1 &&
+        match.languages.map((l) => (
+          <p key={l.language}>
+            Asks {l.language} {l.needed === "unknown" ? "(no level given)" : l.needed}, you have {l.have ?? "none"}.
+          </p>
+        ))}
+    </section>
+  );
+}
+
+function CoverageMark({ kind }: { kind: Match["skills"][number]["coverage"] | undefined }) {
+  const t = kind ? tone(kind) : "missing";
+  const text = t === "have" ? "on your CV" : t === "partly" ? `partly, through ${kind?.via}` : "not on your CV";
+  return (
+    <span className={`cover-mark ${t}`} title={text} aria-label={text}>
+      {t === "have" ? "✓" : t === "partly" ? "~" : "✗"}
+    </span>
   );
 }

@@ -1,0 +1,165 @@
+{
+  "read_at": "2026-11-08T10:49:52+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001491,
+  "notes": [],
+  "profile": {
+    "headline": "Data Scientist",
+    "role": "data_scientist",
+    "seniority": "mid",
+    "years_experience": 3.7,
+    "languages": [
+      {
+        "language": "Chinese",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      },
+      {
+        "language": "German",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 8.0,
+        "last_used": 2026,
+        "context": "Data Scientist at Mainufer Retail Analytics, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "R",
+        "evidence": "project",
+        "years": 5.0,
+        "last_used": 2023,
+        "context": "PhD thesis data analysis at Goethe-Universität, 2018-2023",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Queries on PostgreSQL for training data, Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Pandas",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Demand forecasting models at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "NumPy",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list only",
+        "source": "claude"
+      },
+      {
+        "name": "scikit-learn",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Demand forecasting models at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "PyTorch",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Deep learning product image tagging at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "MLflow",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Experiment tracking at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Tableau",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Management dashboards at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list only",
+        "source": "claude"
+      },
+      {
+        "name": "Jupyter",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list only",
+        "source": "claude"
+      },
+      {
+        "name": "Statistics",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "A/B test analysis and causal inference at Mainufer",
+        "source": "claude"
+      },
+      {
+        "name": "Machine Learning",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Forecasting and segmentation models at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Deep Learning",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Product image tagging models at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Forecasting",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Demand forecasting for 300 stores at Mainufer",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Company databases queried at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "SageMaker model training and serving at Mainufer",
+        "source": "claude"
+      }
+    ]
+  }
+}

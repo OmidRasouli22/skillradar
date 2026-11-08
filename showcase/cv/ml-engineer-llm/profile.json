@@ -1,0 +1,213 @@
+{
+  "read_at": "2026-11-08T11:47:25+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001617,
+  "notes": [],
+  "profile": {
+    "headline": "Machine Learning Engineer",
+    "role": "ml_engineer",
+    "seniority": "mid",
+    "years_experience": 4.2,
+    "languages": [
+      {
+        "language": "Turkish",
+        "level": "native"
+      },
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2026,
+        "context": "Data Scientist and ML Engineer at Isarlicht AI, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "PyTorch",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2026,
+        "context": "Text classification and fine-tuning at Isarlicht AI, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "Hugging Face",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Fine-tuned open models at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "LangChain",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "RAG assistant at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "LlamaIndex",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list",
+        "source": "claude"
+      },
+      {
+        "name": "RAG",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "RAG assistant over 200,000 documents, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "LLM",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Language model production work at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Generative AI",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "GPT and Claude based assistant at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Machine Learning",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2026,
+        "context": "ML engineering and data science roles, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "Deep Learning",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Fine-tuning models with PyTorch at Isarlicht AI",
+        "source": "claude"
+      },
+      {
+        "name": "NLP",
+        "evidence": "work",
+        "years": 0.8,
+        "last_used": 2023,
+        "context": "Text classification and spaCy preprocessing, Isarlicht AI 2022-2023",
+        "source": "claude"
+      },
+      {
+        "name": "scikit-learn",
+        "evidence": "work",
+        "years": 0.8,
+        "last_used": 2023,
+        "context": "Text classification at Isarlicht AI, 2022-2023",
+        "source": "claude"
+      },
+      {
+        "name": "Pandas",
+        "evidence": "work",
+        "years": 0.8,
+        "last_used": 2023,
+        "context": "Data preparation at Isarlicht AI, 2022-2023",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": 0.8,
+        "last_used": 2023,
+        "context": "Data preparation at Isarlicht AI, 2022-2023",
+        "source": "claude"
+      },
+      {
+        "name": "FastAPI",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Model serving services at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Model services in Docker at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Model services on Kubernetes at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "AWS EKS model serving at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "MLflow",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Experiment tracking and model registry, Isarlicht AI",
+        "source": "claude"
+      },
+      {
+        "name": "CI/CD",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "Pipelines with GitHub Actions at Isarlicht AI",
+        "source": "claude"
+      },
+      {
+        "name": "GitHub Actions",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2026,
+        "context": "CI/CD at Isarlicht AI, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list",
+        "source": "claude"
+      },
+      {
+        "name": "Prompt Engineering",
+        "evidence": "education",
+        "years": null,
+        "last_used": 2022,
+        "context": "M.Sc. thesis on prompt engineering, TU München",
+        "source": "claude"
+      }
+    ]
+  }
+}

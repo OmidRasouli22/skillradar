@@ -1,0 +1,56 @@
+title: DevOps engineer on Azure, German CV
+person: Murat Yılmaz (fictional)
+language: German
+target: {role: devops_engineer, region: all}
+story: >
+  A cloud platform engineer who knows Azure but not AWS. Tests partial credit across
+  cloud platforms (Azure covers part of AWS), that products prove concepts (Terraform
+  proves Infrastructure as Code, Argo CD proves GitOps), and two native languages.
+checks:
+  - kind: role
+    values: [devops_engineer]
+    why: Five years building a Kubernetes platform with infrastructure as code.
+  - kind: seniority
+    values: [mid, senior]
+    why: About 5.1 years since 10/2021, right at the 5-year line between mid and senior.
+  - kind: years
+    min: 4.5
+    max: 5.5
+    why: 10/2021 to today (11/2026) is about 5.1 years; the working student job is left out.
+  - kind: language
+    language: German
+    values: [native]
+    why: Deutsch Muttersprache.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: Verhandlungssicher is fluent.
+  - kind: has
+    skills: [Azure, Kubernetes, Docker, Helm, ArgoCD, Terraform, GitLab CI, Prometheus, Grafana, Loki, Python, Bash, Linux]
+    why: All are named in his experience or skills ("Argo CD" is the skill ArgoCD).
+  - kind: lacks
+    skills: [AWS, GCP, Ansible, Jenkins]
+    why: The CV never names them.
+  - kind: best_role
+    values: [devops_engineer]
+    top: 2
+    why: His skills are DevOps and cloud skills.
+  - kind: covered
+    skill: AWS
+    values: [substitute]
+    via: Azure
+    why: Azure and AWS are cloud platforms of the same kind; Azure covers part of an AWS requirement.
+  - kind: covered
+    skill: Infrastructure as Code
+    values: [have, proven]
+    why: Terraform at work proves infrastructure as code.
+  - kind: covered
+    skill: CI/CD
+    values: [have, proven]
+    why: He builds CI/CD pipelines with GitLab CI.
+  - kind: no_gap
+    skill: Kubernetes
+    why: He has it.
+  - kind: good_share
+    min: 0.2
+    why: An experienced DevOps engineer with native German should fit a fair share of DevOps jobs.

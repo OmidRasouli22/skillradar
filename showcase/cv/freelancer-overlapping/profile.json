@@ -1,0 +1,193 @@
+{
+  "read_at": "2026-11-08T10:50:13+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001619,
+  "notes": [],
+  "profile": {
+    "headline": "Full-Stack-Entwicklerin",
+    "role": "fullstack_developer",
+    "seniority": "senior",
+    "years_experience": 9.3,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "TypeScript",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Online-Händler, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "JavaScript",
+        "evidence": "work",
+        "years": 8.0,
+        "last_used": 2026,
+        "context": "Webentwicklerin und Full-Stack, Projekte, 2017-heute",
+        "source": "claude"
+      },
+      {
+        "name": "React",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Online-Händler, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Next.js",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Online-Händler, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Angular",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Stadtwerke Kundenportal, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "Vue.js",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2022,
+        "context": "Webentwicklerin, Agentur für Kultur, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "Node.js",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Backend, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "NestJS",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Backend, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Java",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Stadtwerke Kundenportal, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "Spring",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Spring Boot, Stadtwerke, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "PHP",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2022,
+        "context": "Webentwicklerin, Agentur für Kultur, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "Laravel",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2022,
+        "context": "Webentwicklerin, Agentur für Kultur, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Online-Händler, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "MySQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2022,
+        "context": "Webentwicklerin, Agentur für Kultur, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Deployment auf AWS, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Full-Stack-Entwicklerin, Deployment, Online-Händler, 2023-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Keycloak",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Stadtwerke, OAuth-Anmeldung, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "OAuth",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Stadtwerke, OAuth-Anmeldung, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Full-Stack-Entwicklerin, Stadtwerke, REST-Schnittstellen, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "WordPress",
+        "evidence": "work",
+        "years": 1.5,
+        "last_used": 2019,
+        "context": "Junior-Webentwicklerin, Elstertal Medien, 2017-2019",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Kenntnisse-Liste ohne Zeitangabe",
+        "source": "claude"
+      }
+    ]
+  }
+}

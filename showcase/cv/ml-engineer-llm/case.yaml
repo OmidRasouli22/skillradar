@@ -1,0 +1,37 @@
+title: ML engineer with LLM and RAG experience
+person: Aylin Demir (fictional)
+language: English
+target: {role: ml_engineer, region: all}
+story: >
+  The newest skills in the market (LLM, RAG, LangChain). Tests that these emerging skills
+  are found, that the junior data science job counts towards experience, and that machine
+  learning roles come out as her best fit.
+checks:
+  - kind: role
+    values: [ml_engineer, data_scientist]
+    why: She builds and runs machine learning and LLM systems.
+  - kind: seniority
+    values: [mid]
+    why: About 4.2 years since 10/2022, between 2 and 5 years.
+  - kind: years
+    min: 3.8
+    max: 4.5
+    why: 10/2022 to 11/2026 is 50 months; both jobs are tech jobs.
+  - kind: has
+    skills: [Python, PyTorch, Hugging Face, LangChain, LlamaIndex, RAG, LLM, NLP, scikit-learn, FastAPI, Docker, Kubernetes, AWS, MLflow, GitHub Actions]
+    why: All are named in her work or skills.
+  - kind: evidence
+    skill: RAG
+    values: [work]
+    why: She built a RAG assistant in her current job.
+  - kind: best_role
+    values: [ml_engineer, data_scientist]
+    top: 2
+    why: Her skills are machine learning skills.
+  - kind: covered
+    skill: Machine Learning
+    values: [have, proven]
+    why: PyTorch and scikit-learn at work prove machine learning.
+  - kind: no_gap
+    skill: Python
+    why: She has it.

@@ -1,0 +1,123 @@
+{
+  "read_at": "2026-11-08T11:47:31+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.000754,
+  "notes": [
+    "Added 4 skill(s) found by keyword search: AWS, Java, Kubernetes, Rust."
+  ],
+  "profile": {
+    "headline": "Junior Python Developer",
+    "role": "backend_developer",
+    "seniority": "junior",
+    "years_experience": 1.2,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "good"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "FastAPI",
+        "evidence": "work",
+        "years": 0.5,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Django",
+        "evidence": "work",
+        "years": 1.5,
+        "last_used": 2025,
+        "context": "Working Student at Pleißeblick Software UG, 2024-2025",
+        "source": "claude"
+      },
+      {
+        "name": "pytest",
+        "evidence": "work",
+        "years": 0.5,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 0.5,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "work",
+        "years": 0.5,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "work",
+        "years": 0.5,
+        "last_used": 2026,
+        "context": "Junior Python Developer at Pleißeblick Software UG, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Linux",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Listed in skills section",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      },
+      {
+        "name": "Java",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      },
+      {
+        "name": "Rust",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      }
+    ]
+  }
+}
