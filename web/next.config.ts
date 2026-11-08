@@ -10,6 +10,8 @@ const publicSite = process.env.NEXT_PUBLIC_DATA_MODE === "static";
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Pages named page.local.tsx (the label review) exist only in the local build.
+  pageExtensions: publicSite ? ["tsx", "ts"] : ["local.tsx", "tsx", "ts"],
   ...(dev
     ? {
         async rewrites() {

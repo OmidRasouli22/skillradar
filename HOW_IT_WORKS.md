@@ -24,8 +24,11 @@ The technical reference: every part, command and setting. For the short version,
 | Webpage: one page, local (FastAPI + Next.js) | done |
 | Public website on GitHub Pages, updated daily | done |
 | CI on GitHub Actions: lint, tests, dbt, site build, dependency audit | done |
+| Weekly skill history (base for trends) | done |
 | Skill trends over time | planned |
-| Evaluation (precision, recall) | planned |
+| Evaluation: sample, review page, report | done |
+| Evaluation: verify the 150 drafted labels | in progress |
+| Pipeline health page (local and public) | done |
 | Postgres export, hosting | planned |
 | Forecasting | planned |
 
@@ -47,6 +50,7 @@ src/skillradar/         Python package
     cli.py              command line entry point
   schedule/             daily job on macOS (launchd)
   daily.py              the scheduled job: snapshot, Claude, rebuild silver
+  health.py             the pipeline health page's data
   lock.py               stops two runs at the same time
   logs.py               logging setup for all commands
   notify.py             desktop alert when a run fails
@@ -56,6 +60,7 @@ src/skillradar/         Python package
   extract/              skill extraction with Claude: prompt, batches, spending limit,
                         daily step, quality numbers, silver table rows
   api/                  web API over the gold tables, and the command that starts the page
+  evaluate/             labels, scores and the report for the extraction (eval/)
   publish/              the public website: data files and the push to GitHub Pages
   storage.py            atomic writes, private folders, JSON lines
 web/                    the page (Next.js), built into static files in web/out
@@ -131,6 +136,7 @@ the data tests in `transform/`, so a broken table stops the build.
 | `silver_postings` | posting: title, employer, type, salary, home office, first published date |
 | `silver_posting_texts` | posting: description without personal data |
 | `silver_posting_locations` | posting and place, with cleaned city name (a posting can list up to 10 places) |
+| `silver_posting_regions` | posting and German state it lists (used for every region count) |
 | `silver_posting_days` | posting and day it was open in our snapshots |
 | `silver_posting_history` | posting: first seen, last seen, days seen, closed on |
 
@@ -223,6 +229,57 @@ likely made up by the model, so leave those out when counting.
 home office is `unknown`, skills per posting, how many skills are in `config/skills.yaml`,
 and which languages were found. Use it to compare prompt versions before a large run.
 
+## Evaluation
+
+How good is the extraction? `eval/labels.jsonl` holds the correct answer for a random
+sample of 150 postings, written by the rules in [eval/GUIDE.md](eval/GUIDE.md). The
+report compares three systems with these labels, on the same postings:
+
+- the keyword search over `config/skills.yaml` (the baseline Claude has to beat),
+- Claude's answers to the current prompt, every skill it named,
+- the same answers as the site counts them (product names not in the text left out).
+
+```sh
+uv run skillradar-eval sample            # draw the sample (once; a fixed seed)
+uv run skillradar-eval status            # labels per status
+uv run skillradar-eval texts             # write the sample's texts for the review page
+uv run skillradar-eval report            # score everything against verified labels
+uv run skillradar-eval report --drafts   # also use unchecked drafts, marked as such
+```
+
+All commands are free: nothing is sent to Claude.
+
+### How a label is made
+
+Each label starts as a draft written by a model from the posting text alone, without
+Claude's answer. A person then checks and corrects it on the review page and marks it
+verified. Only verified labels count in the report, so the numbers say
+"model-drafted, human-verified". The drafts were written by Claude Opus 5.5, a larger
+model than the one being measured.
+
+The review page runs locally: `uv run skillradar-web`, then open
+`http://127.0.0.1:8000/label`. It shows the posting with the label's skills marked in the
+text, a "not in text" hint for skills it can't find, and the choices for role,
+seniority, home office and languages. ⌘/Ctrl + Enter verifies and opens the next
+posting. The texts come from `data/eval/texts.jsonl` (local only, like all texts);
+the labels file holds reference numbers and answers only, so it can live in the
+repository. The page is left out of the public build.
+
+### What the numbers mean
+
+- Skills: micro precision and recall over all (posting, skill) pairs. The main number
+  counts only skills in `config/skills.yaml`, where names match reliably. "All skills"
+  also counts other skills by exact name, so "OIDC" and "OpenID Connect" differ: it is a
+  lower bound.
+- Required: for skills both sides found, how often required / nice to have agree.
+- Role, seniority, home office: accuracy, with the most common mistakes.
+- Languages: precision and recall of the language list, and accuracy of the level.
+- Every number has a 95% bootstrap interval: the postings are drawn again with
+  replacement 1,000 times, and the interval holds the middle 95% of the results. With
+  150 postings an accuracy of 80% is roughly ±6 points.
+
+The report goes to `data/eval/report.json`.
+
 ## Gold tables
 
 The numbers the webpage shows. They cover open tech postings that have an answer from
@@ -242,6 +299,8 @@ page reads only these files, never the warehouse, so it can't block the daily bu
 | `gold_posting_texts` | the cleaned text of each posting (contact details removed) |
 | `gold_meta` | one row: date of the data, open postings, how many have an answer, how many are tech jobs, model and prompt version |
 | `gold_scope` | which posting belongs to which role and region (used by the others) |
+| `gold_skill_weekly` | per week, role, region and skill: the same counts as `gold_skill_demand`, for the postings open that week |
+| `gold_weeks` | per week: days with data, whether the week is over, open postings, how many have an answer (coverage) |
 
 Two rules make the numbers honest:
 
@@ -251,6 +310,50 @@ Two rules make the numbers honest:
 
 Some groups are small (for example one role in one state), so a share can jump a lot.
 Always show `total_postings` next to a share.
+
+### Weekly history
+
+`gold_skill_weekly` is the history for trends and, later, forecasts. A week runs Monday to
+Sunday, and a posting counts in every week it was open on at least one day. A skill that a
+group ever asked for has a row in every week the group had postings, with 0 when nobody
+asked for it, so a series has no gaps. The table is rebuilt from bronze every time, so it
+always uses the current skill list and the current answers.
+
+Check `coverage` in `gold_weeks` before comparing weeks. Only postings with an answer to the
+current prompt are counted, and a posting that closed before Claude read it never gets one.
+The answers to prompt v4 were made on 6 November 2026, so earlier weeks only hold the
+postings that were still open then: coverage is 71% and 74% for the two weeks before, and
+87% for the week of 2 November. From then on the daily job sends each new posting while it
+is open. A new prompt version lowers coverage the same way, until the open postings are
+sent again.
+
+## Pipeline health
+
+`/health` on the local page and on the public site shows whether the pipeline works:
+
+- **Freshness:** when the last run that saved data started. Fresh up to 30 hours, late up
+  to 54, stale after that. The browser works this out again from the time, so a public
+  copy that stopped updating shows as late or stale on its own.
+- **Recent runs:** status, duration, open and new postings, failed searches, number of
+  problems (never the error texts).
+- **Last build:** dbt models and data tests by status, and the names of failed tests.
+- **Claude:** model and prompt, spending this month against the limit, answers saved and
+  failed, waiting batches, and the cost of each recent batch.
+- **Answers per week:** coverage from `gold_weeks`.
+- **Data layers:** bronze files and size, and rows per silver and gold table
+  (`data/serve/table_counts.json`, written by each build).
+- **Answer quality:** the evaluation's scores, shown only from verified labels.
+
+`skillradar.health` builds it from files only (run logs, `dbt/target/run_results.json`,
+the batch files, the gold Parquet files, `data/eval/report.json`), never the warehouse.
+Each part is built on its own, so a broken file empties one part and never stops the
+site from being published. Locally the page asks `/api/health`; the public site gets
+`data/health.json` with every publish. It holds counts, dates and costs only: no file
+paths, no error texts, no batch ids.
+
+The public copy is updated when the site is published, which happens after a run that
+changed the data. A failed run does not publish, so the page shows it by going late or
+stale. Failed runs still send a desktop alert on this Mac (`notify.py`).
 
 ## Webpage
 

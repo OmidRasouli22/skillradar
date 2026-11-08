@@ -25,3 +25,7 @@ updates:
     groups:
       web:
         update-types: [minor, patch]
+    # typescript-eslint does not support TypeScript 7 yet. Remove this when it does.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]

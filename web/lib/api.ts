@@ -162,3 +162,74 @@ export async function getPosting(refnr: string, signal?: AbortSignal): Promise<P
     throw error;
   }
 }
+
+// Pipeline health (src/skillradar/health.py). Numbers only, never paths or error texts.
+export type Score = { value: number | null; low?: number | null; high?: number | null } | null;
+
+export type Health = {
+  generated_at: string;
+  thresholds: { fresh_hours: number; late_hours: number };
+  freshness: { last_success: string | null; hours: number | null; state: "fresh" | "late" | "stale" };
+  runs: {
+    run_id: string;
+    started_at: string | null;
+    minutes: number | null;
+    status: string;
+    full_scope: boolean | null;
+    queries: number | null;
+    failed_queries: number | null;
+    unique_postings: number | null;
+    new_postings: number | null;
+    details_saved: number | null;
+    failed_details: number | null;
+    errors: number;
+  }[];
+  layers: {
+    bronze: Record<string, { files: number; megabytes: number }>;
+    silver: Record<string, number>;
+    gold: Record<string, number>;
+  } | null;
+  tests: {
+    finished_at: string | null;
+    seconds: number;
+    models: Record<string, number>;
+    tests: Record<string, number>;
+    failures: { name: string; status: string }[];
+  } | null;
+  claude: {
+    model: string;
+    prompt_version: string;
+    month: string;
+    spent_usd: number | null;
+    budget_usd: number;
+    pending_batches: number;
+    pending_postings: number;
+    answers: number;
+    failed_answers: number;
+    batches: { created_at: string | null; postings: number; answers: number; failed: number; cost_usd: number | null }[];
+  } | null;
+  coverage: {
+    as_of: string | null;
+    open_postings: number;
+    with_answer: number;
+    tech_postings: number;
+    share: number | null;
+    weeks: { week_start: string; ended: boolean; open_postings: number; tech_postings: number; coverage: number }[];
+  } | null;
+  evaluation: {
+    generated_at: string | null;
+    sample: { size?: number; todo?: number; draft?: number; verified?: number };
+    labels?: number;
+    systems: {
+      id: string;
+      name: string;
+      postings: number;
+      skills: { precision: Score; recall: Score; f1: Score } | null;
+      fields: Record<"role" | "seniority" | "remote" | "required", Score>;
+    }[];
+  } | null;
+};
+
+export function getHealth(signal?: AbortSignal): Promise<Health> {
+  return get<Health>(PUBLIC_SITE ? `${BASE}/data/health.json` : "/api/health", signal);
+}
