@@ -11,11 +11,13 @@ The CV text is never saved or logged. Only the token usage is saved, for the bud
 import io
 import logging
 import re
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from typing import Any
 
+import anthropic
 from pydantic import ValidationError
 from pypdf import PdfReader
 
@@ -45,8 +47,9 @@ from skillradar.skills.taxonomy import Taxonomy, key
 
 logger = logging.getLogger(__name__)
 
-CV_PROMPT_VERSION = "cv2"
-CV_MAX_TOKENS = 8000
+CV_PROMPT_VERSION = "cv3"
+# Room for long CVs with many skills, plus the model's thinking.
+CV_MAX_TOKENS = 16000
 # Reading a CV needs some reasoning (years from dates), more than a posting does.
 CV_EFFORT = "medium"
 MAX_PDF_BYTES = 5_000_000
@@ -70,6 +73,15 @@ CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 BLANK_LINES = re.compile(r"\n[ \t]*(?:\n[ \t]*){2,}")
 
 Clock = Callable[[], datetime]
+
+# A CV read takes 10 to 30 seconds. It is streamed, so a stalled connection is noticed
+# when no data comes for this long, instead of after the SDK's default of 10 minutes.
+CLIENT_TIMEOUT = anthropic.Timeout(60, connect=10)
+CLIENT_RETRIES = 1
+
+
+def make_client() -> anthropic.Anthropic:
+    return anthropic.Anthropic(timeout=CLIENT_TIMEOUT, max_retries=CLIENT_RETRIES)
 
 
 class CvError(Exception):
@@ -115,6 +127,8 @@ def pdf_text(data: bytes) -> tuple[str, int]:
 
 
 def tidy(text: str) -> str:
+    # NFKC splits the ligatures PDFs use ("Airﬂow" becomes "Airflow"), so skill names match.
+    text = unicodedata.normalize("NFKC", text)
     text = CONTROL.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
     return BLANK_LINES.sub("\n\n", text).strip()
 
@@ -173,8 +187,9 @@ internships, apprenticeships and theses. Not school or degrees.
 - title: the job title, short.
 - start, end: "YYYY-MM", or "YYYY" when the CV gives only the year. end is "present"
   for a current job ("heute", "now"). null when the CV gives no date.
-- kind: job (employed), freelance, working_student (Werkstudent), internship
-  (Praktikum), apprenticeship (Ausbildung), thesis, other.
+- kind: job (employed), freelance, working_student (Werkstudent, student assistant
+  or tutor during studies), internship (Praktikum), apprenticeship (Ausbildung),
+  thesis (also a PhD or doctoral research position), other.
 - tech: true when the work is IT, software or data work.
 
 languages: human languages the person speaks, with the level. language is the English
@@ -248,7 +263,9 @@ def read_with_claude(
     room = budget.room_left(settings, store, budget.month_of(now))
     if budget.worst_case(params, settings, batch=False) > room:
         raise budget.OverBudget(f"not sent: only ${room:.4f} of this month's budget is left")
-    message = client.messages.create(**params)
+    # Streamed: a non-streamed call sometimes hung for the whole timeout.
+    with client.messages.stream(**params) as stream:
+        message = stream.get_final_message()
     usage = usage_of(message)
     store.save_try({"refnr": "cv", "model": settings.model, "at": now.isoformat(), "usage": usage})
     cost = budget.usage_cost(usage, settings.prices[settings.model], batch=False)

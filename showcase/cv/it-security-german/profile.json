@@ -1,0 +1,140 @@
+{
+  "read_at": "2026-11-08T11:46:53+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001309,
+  "notes": [
+    "Left out 1 skill(s) the CV does not name: Windows Server.",
+    "Added 1 skill(s) found by keyword search: Windows."
+  ],
+  "profile": {
+    "headline": "IT-Sicherheitsanalyst",
+    "role": "it_security",
+    "seniority": "senior",
+    "years_experience": 7.2,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "good"
+      }
+    ],
+    "skills": [
+      {
+        "name": "SIEM",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "IT-Sicherheitsanalyst at Leinewerk Versicherung, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Splunk",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Security Operations Center at Leinewerk Versicherung, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Penetration Testing",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Interne Penetrationstests at Leinewerk Versicherung, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Linux",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Kali Linux for scans and tests at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "ISO 27001",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Certification work at Leinewerk; Foundation certificate 2023",
+        "source": "claude"
+      },
+      {
+        "name": "BSI IT-Grundschutz",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Security concepts at Leinewerk Versicherung, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Firewalls",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Palo Alto firewall hardening at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Active Directory",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Access rights maintenance at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "IT Security",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Security incident analysis at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Log evaluation scripts at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "PowerShell",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Log evaluation scripts at Leinewerk, 2022-heute",
+        "source": "claude"
+      },
+      {
+        "name": "VPN",
+        "evidence": "work",
+        "years": 2.5,
+        "last_used": 2022,
+        "context": "VPN access management at Maschsee Logistik, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "Networking",
+        "evidence": "work",
+        "years": 2.5,
+        "last_used": 2022,
+        "context": "Network administration at Maschsee Logistik, 2019-2022",
+        "source": "claude"
+      },
+      {
+        "name": "Windows",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      }
+    ]
+  }
+}

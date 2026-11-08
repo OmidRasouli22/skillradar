@@ -27,6 +27,7 @@ from skillradar.cv.profile import CvProfile
 from skillradar.cv.reader import (
     CV_PROMPT_VERSION,
     CvError,
+    make_client,
     pdf_text,
     read_with_claude,
     read_with_keywords,
@@ -55,6 +56,9 @@ def main(argv: list[str] | None = None) -> int:
 
     cases = commands.add_parser("showcase", help="check the example CVs, write the report")
     cases.add_argument("--refresh", action="store_true", help="read the CVs with Claude again")
+    cases.add_argument(
+        "--stale", action="store_true", help="read only CVs saved with an older prompt"
+    )
     cases.add_argument("--only", help="one example id")
     cases.add_argument("--folder", type=Path, default=showcase.SHOWCASE_DIR)
 
@@ -65,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "match":
             return _match(args)
         return _showcase(args)
-    except (CvError, NoMarket, budget.OverBudget) as error:
+    except (CvError, NoMarket, budget.OverBudget, anthropic.APIError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
 
@@ -120,11 +124,18 @@ def _showcase(args: argparse.Namespace) -> int:
         if not cases:
             print(f"error: no example {args.only}", file=sys.stderr)
             return 1
-    if args.refresh:
+    if args.refresh or args.stale:
         client, settings = _client(), load_settings()
         store = ExtractionStore(args.data_dir / "llm")
         for case in cases:
-            result = read_with_claude(client, case.text, settings, taxonomy, store)
+            if args.stale and case.saved.get("prompt_version") == CV_PROMPT_VERSION:
+                continue
+            # One failed read must not stop the others; its old reading stays.
+            try:
+                result = read_with_claude(client, case.text, settings, taxonomy, store)
+            except (CvError, anthropic.APIError) as error:
+                print(f"could not read {case.id}: {error}", file=sys.stderr)
+                continue
             showcase.save_profile(
                 folder,
                 case.id,
@@ -175,7 +186,7 @@ def _showcase(args: argparse.Namespace) -> int:
 
 def _client() -> anthropic.Anthropic:
     load_dotenv(PROJECT_ROOT / ".env")
-    return anthropic.Anthropic()
+    return make_client()
 
 
 def _year() -> int:

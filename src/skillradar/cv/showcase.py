@@ -29,7 +29,7 @@ from skillradar.skills.taxonomy import key
 SHOWCASE_DIR = PROJECT_ROOT / "showcase" / "cv"
 CASE_ID = re.compile(r"[a-z0-9][a-z0-9-]{1,40}")
 
-PROFILE_KINDS = ("role", "seniority", "years", "language", "has", "lacks", "evidence")
+PROFILE_KINDS = ("role", "seniority", "years", "no_years", "language", "has", "lacks", "evidence")
 MATCH_KINDS = ("best_role", "covered", "gap", "no_gap", "good_share")
 
 
@@ -39,7 +39,7 @@ class _Closed(BaseModel):
 
 class Check(_Closed):
     kind: Literal[
-        "role", "seniority", "years", "language", "has", "lacks", "evidence",
+        "role", "seniority", "years", "no_years", "language", "has", "lacks", "evidence",
         "best_role", "covered", "gap", "no_gap", "good_share",
     ]  # fmt: skip
     why: str = Field(min_length=10)
@@ -152,6 +152,9 @@ def check_profile(case: Case) -> list[Result]:
             years = profile.years_experience
             ok = years is not None and _between(years, c.min, c.max)
             results.append(Result(c, ok, "unknown" if years is None else f"{years:g}"))
+        elif c.kind == "no_years":
+            years = profile.years_experience
+            results.append(Result(c, years is None, "unknown" if years is None else f"{years:g}"))
         elif c.kind == "language":
             level = levels.get(c.language or "")
             results.append(Result(c, level in c.values, level or "not found"))
@@ -257,6 +260,8 @@ def describe(c: Check) -> str:
             return f"{c.kind} is {' or '.join(c.values)}"
         case "years":
             return f"years of experience {c.min:g} to {c.max:g}"
+        case "no_years":
+            return "years of experience stay unknown"
         case "language":
             return f"{c.language} is {' or '.join(c.values)}"
         case "has":

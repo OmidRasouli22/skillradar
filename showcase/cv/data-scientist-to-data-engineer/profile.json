@@ -1,11 +1,9 @@
 {
-  "read_at": "2026-11-08T10:04:01+00:00",
+  "read_at": "2026-11-08T10:49:52+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
-  "cost_usd": 0.001304,
-  "notes": [
-    "Added 1 skill(s) found by keyword search: PostgreSQL."
-  ],
+  "prompt_version": "cv3",
+  "cost_usd": 0.001491,
+  "notes": [],
   "profile": {
     "headline": "Data Scientist",
     "role": "data_scientist",
@@ -29,17 +27,17 @@
       {
         "name": "Python",
         "evidence": "work",
-        "years": 3.0,
+        "years": 8.0,
         "last_used": 2026,
-        "context": "Demand forecasting models at Mainufer Retail Analytics, 2023-present",
+        "context": "Data Scientist at Mainufer Retail Analytics, 2023-present",
         "source": "claude"
       },
       {
         "name": "R",
-        "evidence": "education",
+        "evidence": "project",
         "years": 5.0,
         "last_used": 2023,
-        "context": "Data analysis on computing cluster during PhD, 2018-2023",
+        "context": "PhD thesis data analysis at Goethe-Universität, 2018-2023",
         "source": "claude"
       },
       {
@@ -47,7 +45,7 @@
         "evidence": "work",
         "years": 3.0,
         "last_used": 2026,
-        "context": "Queries against PostgreSQL databases at Mainufer, 2023-present",
+        "context": "Queries on PostgreSQL for training data, Mainufer, 2023-present",
         "source": "claude"
       },
       {
@@ -55,7 +53,7 @@
         "evidence": "work",
         "years": 3.0,
         "last_used": 2026,
-        "context": "Forecasting and training data prep at Mainufer, 2023-present",
+        "context": "Demand forecasting models at Mainufer, 2023-present",
         "source": "claude"
       },
       {
@@ -63,7 +61,7 @@
         "evidence": "listed",
         "years": null,
         "last_used": null,
-        "context": "Named in CV skills list",
+        "context": "Named in skills list only",
         "source": "claude"
       },
       {
@@ -79,7 +77,7 @@
         "evidence": "work",
         "years": 3.0,
         "last_used": 2026,
-        "context": "Product image tagging deep learning models, 2023-present",
+        "context": "Deep learning product image tagging at Mainufer, 2023-present",
         "source": "claude"
       },
       {
@@ -103,7 +101,7 @@
         "evidence": "listed",
         "years": null,
         "last_used": null,
-        "context": "Named in CV skills list",
+        "context": "Named in skills list only",
         "source": "claude"
       },
       {
@@ -111,7 +109,7 @@
         "evidence": "listed",
         "years": null,
         "last_used": null,
-        "context": "Named in CV skills list",
+        "context": "Named in skills list only",
         "source": "claude"
       },
       {
@@ -127,7 +125,7 @@
         "evidence": "work",
         "years": 3.0,
         "last_used": 2026,
-        "context": "Models at Mainufer Retail Analytics, 2023-present",
+        "context": "Forecasting and segmentation models at Mainufer, 2023-present",
         "source": "claude"
       },
       {
@@ -147,20 +145,20 @@
         "source": "claude"
       },
       {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Company databases queried at Mainufer, 2023-present",
+        "source": "claude"
+      },
+      {
         "name": "AWS",
         "evidence": "work",
         "years": 3.0,
         "last_used": 2026,
-        "context": "Trained and served models on AWS SageMaker at Mainufer",
+        "context": "SageMaker model training and serving at Mainufer",
         "source": "claude"
-      },
-      {
-        "name": "PostgreSQL",
-        "evidence": "listed",
-        "years": null,
-        "last_used": null,
-        "context": "",
-        "source": "keyword"
       }
     ]
   }

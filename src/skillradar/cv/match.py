@@ -223,7 +223,27 @@ def analyse(
         "demand": demand(scope, credits, profile),
         "gaps": gaps(scope, credits, levels, profile, market.similarity),
         "matches": best_matches(scope, credits, levels),
+        # Every scored posting's match, for the badges in the job list.
+        "scores": {s.posting.refnr: round(s.match, 3) for s in scope},
     }
+
+
+def match_one(
+    profile: CvProfile,
+    market: Market,
+    families: SkillFamilies,
+    refnr: str,
+    this_year: int,
+    taxonomy: Taxonomy,
+) -> dict | None:
+    """How a profile matches one posting, for the posting view. None if it is not open."""
+    posting = next((p for p in market.postings if p.refnr == refnr), None)
+    if posting is None or posting.role == "not_tech":
+        return None
+    credits = Credits(profile, families, market.similarity, this_year, taxonomy)
+    levels = language_levels(profile)
+    scored = score(posting, credits, levels, profile.seniority)
+    return _match(scored, credits, levels) | {"scored": len(posting.skills) >= MIN_SKILLS}
 
 
 def role_fit(scored: list[Scored]) -> list[dict]:

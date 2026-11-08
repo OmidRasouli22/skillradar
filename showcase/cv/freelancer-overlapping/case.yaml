@@ -1,0 +1,37 @@
+title: Freelance full-stack developer with overlapping projects
+person: Clara Schmidt (fictional)
+language: German
+target: {role: fullstack_developer, region: all}
+story: >
+  A freelancer whose client projects overlap. Tests that overlapping months count once,
+  that freelance work counts as experience like a job, and that a broad web stack is read
+  as full-stack.
+checks:
+  - kind: years
+    min: 9
+    max: 9.6
+    why: 08/2017 to 11/2026 without gaps is 112 months, 9.3 years; the overlap of two projects counts once.
+  - kind: seniority
+    values: [senior]
+    why: More than 5 years of web development.
+  - kind: role
+    values: [fullstack_developer]
+    why: She builds both frontends (React, Angular, Vue.js) and backends (Node.js, Spring, Laravel).
+  - kind: has
+    skills: [TypeScript, React, Next.js, Angular, Vue.js, Node.js, NestJS, Java, Spring, PHP, Laravel, PostgreSQL, MySQL, Docker, AWS, Keycloak]
+    why: All are named in her projects or skills.
+  - kind: evidence
+    skill: Angular
+    values: [work]
+    why: Freelance client work counts as work.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: Verhandlungssicher is fluent.
+  - kind: best_role
+    values: [fullstack_developer, frontend_developer, backend_developer]
+    top: 2
+    why: Her skills are web development skills.
+  - kind: no_gap
+    skill: React
+    why: She has it.

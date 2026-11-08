@@ -75,15 +75,31 @@ def message(answer=None, stop_reason="end_turn", text=None):
 
 
 class FakeMessages:
+    """Answers like client.messages.stream(...): a context manager with the final message."""
+
     def __init__(self, reply):
         self.reply = reply
         self.sent = []
 
-    def create(self, **params):
+    def stream(self, **params):
         self.sent.append(params)
         if isinstance(self.reply, Exception):
             raise self.reply
-        return self.reply
+        return FakeStream(self.reply)
+
+
+class FakeStream:
+    def __init__(self, message):
+        self.message = message
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+    def get_final_message(self):
+        return self.message
 
 
 class FakeClient:
@@ -168,32 +184,32 @@ def write_market(data_dir):
         )
         con.execute(
             "create table gold_postings as select * from (values "
-            "('p1', 'Data Engineer', 'A', 'Berlin', date '2026-11-05', 'data_engineer', 'mid', "
+            "('job-1', 'Data Engineer', 'A', 'Berlin', date '2026-11-05', 'data_engineer', 'mid', "
             "'hybrid', 'fluent', 'not asked'), "
-            "('p2', 'Data Engineer', 'B', 'Berlin', date '2026-11-06', 'data_engineer', "
+            "('job-2', 'Data Engineer', 'B', 'Berlin', date '2026-11-06', 'data_engineer', "
             "'senior', 'remote', 'not asked', 'good'), "
-            "('p3', 'Backend Dev', 'C', 'München', null, 'backend_developer', 'junior', "
+            "('job-3', 'Backend Dev', 'C', 'München', null, 'backend_developer', 'junior', "
             "'onsite', 'good', 'not asked'), "
-            "('p4', 'IT Job', 'D', 'Wien', date '2026-11-01', 'other_tech', 'mid', 'unknown', "
+            "('job-4', 'IT Job', 'D', 'Wien', date '2026-11-01', 'other_tech', 'mid', 'unknown', "
             "'not asked', 'not asked')"
             ") t(refnr, title, employer, city, first_published, role, seniority, remote, "
             "german, english)"
         )
         con.execute(
             "create table gold_posting_skills as select * from (values "
-            "('p1', 'SQL', true), ('p1', 'Python', true), ('p1', 'Airflow', false), "
-            "('p2', 'Python', true), ('p2', 'Spark', true), ('p2', 'Azure', true), "
-            "('p2', 'Golang', false), ('p2', 'Go', true), "
-            "('p3', 'Java', true), ('p3', 'Spring', true), ('p3', 'PostgreSQL', false), "
-            "('p4', 'Excel', true)"
+            "('job-1', 'SQL', true), ('job-1', 'Python', true), ('job-1', 'Airflow', false), "
+            "('job-2', 'Python', true), ('job-2', 'Spark', true), ('job-2', 'Azure', true), "
+            "('job-2', 'Golang', false), ('job-2', 'Go', true), "
+            "('job-3', 'Java', true), ('job-3', 'Spring', true), ('job-3', 'PostgreSQL', false), "
+            "('job-4', 'Excel', true)"
             ") t(refnr, skill, required)"
         )
         con.execute(
             "create table gold_scope as select * from (values "
-            "('p1', 'data_engineer', 'BERLIN'), ('p1', 'data_engineer', 'all'), "
-            "('p2', 'data_engineer', 'BERLIN'), ('p2', 'data_engineer', 'all'), "
-            "('p3', 'backend_developer', 'BAYERN'), ('p3', 'backend_developer', 'all'), "
-            "('p4', 'other_tech', 'all')"
+            "('job-1', 'data_engineer', 'BERLIN'), ('job-1', 'data_engineer', 'all'), "
+            "('job-2', 'data_engineer', 'BERLIN'), ('job-2', 'data_engineer', 'all'), "
+            "('job-3', 'backend_developer', 'BAYERN'), ('job-3', 'backend_developer', 'all'), "
+            "('job-4', 'other_tech', 'all')"
             ") t(refnr, role, region)"
         )
         for name in ("gold_meta", "gold_postings", "gold_posting_skills", "gold_scope"):

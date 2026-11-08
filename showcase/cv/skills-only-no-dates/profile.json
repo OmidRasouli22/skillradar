@@ -1,0 +1,161 @@
+{
+  "read_at": "2026-11-08T11:47:48+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.000922,
+  "notes": [],
+  "profile": {
+    "headline": "Software Developer",
+    "role": "backend_developer",
+    "seniority": "unknown",
+    "years_experience": null,
+    "languages": [
+      {
+        "language": "English",
+        "level": "fluent"
+      },
+      {
+        "language": "German",
+        "level": "basic"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Go",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer building services in Go",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer building services in Python",
+        "source": "claude"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer running services on Kubernetes",
+        "source": "claude"
+      },
+      {
+        "name": "Prometheus",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer monitoring services with Prometheus",
+        "source": "claude"
+      },
+      {
+        "name": "Grafana",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer monitoring services with Grafana",
+        "source": "claude"
+      },
+      {
+        "name": "Monitoring",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Backend developer monitoring services in production",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: REST APIs",
+        "source": "claude"
+      },
+      {
+        "name": "gRPC",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: gRPC",
+        "source": "claude"
+      },
+      {
+        "name": "Microservices",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: microservices",
+        "source": "claude"
+      },
+      {
+        "name": "Bash",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Bash",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: PostgreSQL",
+        "source": "claude"
+      },
+      {
+        "name": "Redis",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Redis",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Docker",
+        "source": "claude"
+      },
+      {
+        "name": "Terraform",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Terraform",
+        "source": "claude"
+      },
+      {
+        "name": "Linux",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Linux",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: Git",
+        "source": "claude"
+      },
+      {
+        "name": "GitLab CI",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Technical skills list: GitLab CI",
+        "source": "claude"
+      }
+    ]
+  }
+}

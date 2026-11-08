@@ -1,0 +1,39 @@
+title: IT security analyst, German CV
+person: Felix Hartmann (fictional)
+language: German
+target: {role: it_security, region: all}
+story: >
+  A security specialist with German terms and a mobile number written the German way.
+  Tests that security concepts are found from descriptions (SIEM, penetration testing),
+  that the German phone number is removed but the dates are kept, and that IT security is
+  his best fit.
+checks:
+  - kind: role
+    values: [it_security]
+    why: He works in a security operations center.
+  - kind: seniority
+    values: [mid, senior]
+    why: About 7.2 years of IT work since 09/2019, the last 4.8 in security.
+  - kind: years
+    min: 6.8
+    max: 7.5
+    why: 09/2019 to 11/2026 is 87 months; the apprenticeship is training.
+  - kind: has
+    skills: [Splunk, SIEM, Penetration Testing, ISO 27001, BSI IT-Grundschutz, Active Directory, Python, PowerShell, Firewalls, VPN]
+    why: Named or clearly described in his experience.
+  - kind: evidence
+    skill: ISO 27001
+    values: [work, education]
+    why: He worked on the ISO 27001 certification and holds a certificate.
+  - kind: language
+    language: English
+    values: [good]
+    why: gut (B2) is good.
+  - kind: best_role
+    values: [it_security]
+    top: 2
+    why: His skills are security skills.
+  - kind: covered
+    skill: IT Security
+    values: [have, proven]
+    why: His whole current job is IT security.

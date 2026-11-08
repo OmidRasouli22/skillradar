@@ -286,19 +286,27 @@ The report goes to `data/eval/report.json`.
 
 ## CV analysis
 
-`/cv` on the local page (not on the public site, which has no server). Read a CV, check
-and fix what was read, then compare it with the open postings of a role and region.
+A panel on the local start page, below the role and region filters (not on the public
+site, which has no server). Add a CV, check and fix what was read, and compare it with
+the open postings of the role and region chosen in the filters. Once a CV is loaded,
+every card in the job list shows its match, and a posting's view shows how the CV
+matches it: the score, its parts and the missing skills, like the "how you match" box on
+job sites. Job sites like Jobscan compare a CV with one job ad at a time; this compares
+it with every open posting, and ranks what to learn by the jobs it would open.
 
 ```sh
-uv run skillradar-web                                      # then open /cv
+uv run skillradar-web                                      # the panel is on the start page
 uv run skillradar-cv read my_cv.pdf --out profile.json     # or on the command line
 uv run skillradar-cv match profile.json --role data_engineer --region BERLIN
 uv run skillradar-cv showcase                              # check the example CVs
-uv run skillradar-cv showcase --refresh                    # read them with Claude again (~$0.013)
+uv run skillradar-cv showcase --refresh                    # read them with Claude again (~$0.025)
+uv run skillradar-cv showcase --stale                      # only those read with an older prompt
 ```
 
-**Reading.** A PDF becomes text with pypdf (at most 5 MB and 10 pages); the person can
-fix the text before it is read. Emails, phone numbers, links and the name at the top are
+**Reading.** A PDF becomes text with pypdf (at most 5 MB and 10 pages; ligatures like
+"ﬂ" are split, so "Airﬂow" is Airflow); the person can fix the text before it is read.
+The call to Claude is streamed with a 60-second stall limit, because a plain call
+sometimes hung for the SDK's full ten minutes. Emails, phone numbers, links and the name at the top are
 replaced before the text goes to Claude (Haiku, about $0.002 a CV, counted in the monthly
 limit). Claude returns a profile like a posting's answer: role, seniority, languages and
 skills, each skill with where it shows (work, project, course, only listed). Like posting
@@ -326,9 +334,13 @@ the person learned it in a project (0.8), how many postings would become at leas
 Reaching fluent German or English is checked the same way. The list is ranked by that
 number, not by how often a skill is asked.
 
-**Example CVs** (`showcase/cv`). Nine fictional people, each built to test one thing: a
-strong reference case, a senior with B1 German, a junior after a career change, German
-CVs, a role switch, a team lead, an honest weak match and a CV with a prompt injection.
+**Example CVs** (`showcase/cv`). Fifteen fictional people, each built to test one thing:
+a strong reference case, a senior with B1 German, a junior after a career change, German
+CVs, a role switch, a team lead, an honest weak match, a CV with a prompt injection, a
+working student, an ML engineer with LLM skills, a freelancer with overlapping projects,
+an IT security analyst, a CV without any dates and a long CV with 16 years and about 50
+skills. `tests/fixtures/cv_two_column.pdf` is a two-column CV printed by Chrome, to test
+reading real PDFs.
 Each `case.yaml` lists checks with the reason a person reading the CV would expect them.
 Profile checks run in the tests on Claude's saved reading (`profile.json`); match checks
 need today's postings and run in `skillradar-cv showcase`, which writes `REPORT.md`. On

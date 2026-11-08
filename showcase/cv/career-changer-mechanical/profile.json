@@ -1,7 +1,7 @@
 {
-  "read_at": "2026-11-08T10:03:38+00:00",
+  "read_at": "2026-11-08T10:49:29+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
+  "prompt_version": "cv3",
   "cost_usd": 0.001246,
   "notes": [],
   "profile": {
@@ -23,9 +23,9 @@
       {
         "name": "CAD",
         "evidence": "work",
-        "years": 8.5,
+        "years": 8.3,
         "last_used": 2026,
-        "context": "Konstrukteurin Filstal and Entwicklungsingenieurin Neckarwerk, 2017-heute",
+        "context": "Konstrukteurin at Filstal and Entwicklungsingenieurin at Neckarwerk",
         "source": "claude"
       },
       {
@@ -33,7 +33,7 @@
         "evidence": "work",
         "years": 6.0,
         "last_used": 2026,
-        "context": "Berechnungen Getriebekomponenten, Neckarwerk Antriebe, 2020-heute",
+        "context": "Berechnungen für Getriebekomponenten at Neckarwerk, 2020-present",
         "source": "claude"
       },
       {
@@ -41,7 +41,7 @@
         "evidence": "work",
         "years": 6.0,
         "last_used": 2026,
-        "context": "Simulation Antriebsstränge, Neckarwerk Antriebe, 2020-heute",
+        "context": "Simulation von Antriebssträngen at Neckarwerk, 2020-present",
         "source": "claude"
       },
       {
@@ -49,7 +49,7 @@
         "evidence": "work",
         "years": 6.0,
         "last_used": 2026,
-        "context": "Auswertung Prüfstandsdaten, Neckarwerk Antriebe, 2020-heute",
+        "context": "Auswertung von Prüfstandsdaten at Neckarwerk, 2020-present",
         "source": "claude"
       },
       {
@@ -57,23 +57,15 @@
         "evidence": "work",
         "years": 1.0,
         "last_used": 2026,
-        "context": "Kleine Skripte Prüfstandsdaten, Neckarwerk seit 2025; Online-Kurs 2025",
+        "context": "Kleine Skripte for Prüfstandsdaten at Neckarwerk since 2025; course 2025",
         "source": "claude"
       },
       {
         "name": "SQL",
         "evidence": "education",
         "years": null,
-        "last_used": 2026,
+        "last_used": null,
         "context": "Online-Kurs SQL Grundlagen, 20 Stunden, 2026",
-        "source": "claude"
-      },
-      {
-        "name": "SAP",
-        "evidence": "work",
-        "years": 2.5,
-        "last_used": 2020,
-        "context": "Stücklisten in SAP, Filstal Fördertechnik, 2017-2020",
         "source": "claude"
       },
       {
@@ -81,7 +73,15 @@
         "evidence": "work",
         "years": 6.0,
         "last_used": 2026,
-        "context": "Erstellung FMEA, Neckarwerk Antriebe, 2020-heute",
+        "context": "Erstellung von FMEA at Neckarwerk, 2020-present",
+        "source": "claude"
+      },
+      {
+        "name": "SAP",
+        "evidence": "work",
+        "years": 2.3,
+        "last_used": 2020,
+        "context": "Stücklisten in SAP at Filstal Fördertechnik, 2017-2020",
         "source": "claude"
       }
     ]

@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import pytest
 from pypdf import PdfWriter
 
+from skillradar.config import PROJECT_ROOT
 from skillradar.cv.profile import CvAnswer
 from skillradar.cv.reader import (
     MAX_PAGES,
@@ -13,6 +14,7 @@ from skillradar.cv.reader import (
     CvError,
     check_text,
     clean,
+    make_client,
     pdf_text,
     read_with_claude,
     read_with_keywords,
@@ -111,7 +113,37 @@ class TestPdf:
             pdf_text(make_pdf(["", ""]))
 
 
+class TestRealPdf:
+    """A two-column CV printed to PDF by Chrome, like CVs made in Word or Canva."""
+
+    PDF = PROJECT_ROOT / "tests" / "fixtures" / "cv_two_column.pdf"
+
+    def test_text_in_reading_order_with_umlauts(self):
+        text, pages = pdf_text(self.PDF.read_bytes())
+        assert pages == 1
+        assert "Jürgen Weiß" in text and "fließend" in text  # the PDF stores "ﬂ" as one sign
+        assert text.index("KENNTNISSE") < text.index("BERUFSERFAHRUNG")
+        assert "03/2022 – heute" in text
+
+    def test_contact_details_are_removed(self):
+        text = redact_contacts(pdf_text(self.PDF.read_bytes())[0])
+        assert text.startswith("[name]")
+        assert "example.de" not in text and "9876543" not in text
+        assert "03/2022 – heute" in text and "08/2019 – 02/2022" in text
+
+    def test_skills_are_found(self):
+        text = pdf_text(self.PDF.read_bytes())[0]
+        names = {s.name for s in read_with_keywords(text, TAXONOMY).profile.skills}
+        assert {"SQL", "Power BI", "Tableau", "Python", "Pandas", "Excel", "SAP BW"} <= names
+
+
 class TestText:
+    def test_ligatures_are_split(self):
+        text = check_text("Erfahrung mit Airﬂow und Spark, Zertiﬁkate. " * 10)
+        assert "Airflow" in text and "Zertifikate" in text
+        names = {s.name for s in read_with_keywords(text, TAXONOMY).profile.skills}
+        assert "Airflow" in names
+
     def test_tidy(self):
         assert check_text("a\r\n\x00b" + "x" * 300 + "\n\n\n\n\nc").endswith("x\n\nc")
 
@@ -237,3 +269,9 @@ def test_today_is_used_for_present(tmp_path):
         FakeClient(), CV_TEXT, load_settings(), TAXONOMY, store, lambda: later
     )
     assert result.profile.years_experience == 3.1  # 05/2024 to 05/2027
+
+
+def test_the_client_gives_up_on_a_stalled_call():
+    client = make_client()
+    assert client.max_retries == 1
+    assert client.timeout.read == 60 and client.timeout.connect == 10

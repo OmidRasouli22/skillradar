@@ -149,9 +149,34 @@ class TestAnalyse:
             {"profile": PROFILE, "role": "data_engineer", "region": "BERLIN"},
         ).json()
         assert body["summary"]["scored"] == 2 and body["region_label"] == "Berlin"
-        assert [m["refnr"] for m in body["matches"]] == ["p1", "p2"]
+        assert [m["refnr"] for m in body["matches"]] == ["job-1", "job-2"]
         p1 = body["matches"][0]
         assert p1["band"] == "strong" and p1["match"] == pytest.approx(2 / 2.4, abs=1e-4)
+
+    def test_scores_for_every_scored_posting(self, setup):
+        client, _, _ = setup
+        body = post(
+            client, "/api/cv/analyse", {"profile": PROFILE, "role": "all", "region": "all"}
+        ).json()
+        # p4 names only one skill, so it is not scored.
+        assert set(body["scores"]) == {"job-1", "job-2", "job-3"}
+        assert body["scores"]["job-1"] == pytest.approx(2 / 2.4, abs=1e-3)
+
+    def test_one_posting(self, setup):
+        client, _, _ = setup
+        body = post(client, "/api/cv/posting/job-1", {"profile": PROFILE}).json()
+        assert body["refnr"] == "job-1" and body["scored"] is True and body["band"] == "strong"
+        assert {s["skill"]: s["coverage"]["kind"] for s in body["skills"]} == {
+            "SQL": "have",
+            "Python": "have",
+            "Airflow": "missing",
+        }
+        assert post(client, "/api/cv/posting/job-4", {"profile": PROFILE}).json()["scored"] is False
+
+    @pytest.mark.parametrize("refnr, status", [("nope-1", 404), ("x!y", 422)])
+    def test_one_posting_unknown(self, setup, refnr, status):
+        client, _, _ = setup
+        assert post(client, f"/api/cv/posting/{refnr}", {"profile": PROFILE}).status_code == status
 
     @pytest.mark.parametrize(
         "change",
@@ -225,10 +250,10 @@ class TestOnlyThisComputer:
 def test_pages_answer_get_and_head(tmp_path):
     build = tmp_path / "out"
     build.mkdir()
-    for name in ("index", "cv", "health"):
+    for name in ("index", "label", "health"):
         (build / f"{name}.html").write_text(f"<p>{name}</p>")
     client = TestClient(create_app(tmp_path, web_build=build), base_url=LOCAL)
-    for page in ("/cv", "/health"):
+    for page in ("/label", "/health"):
         assert client.get(page).status_code == 200
         assert client.head(page).status_code == 200
-    assert "<p>cv</p>" in client.get("/cv").text
+    assert "<p>health</p>" in client.get("/health").text

@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { ChartCard, Swatch, type Table } from "@/components/ChartCard";
 import { Heatmap, ScaleLegend } from "@/components/Heatmap";
 import { JobDialog, type Origin } from "@/components/JobDialog";
 import { JobList } from "@/components/JobList";
 import { KpiRow, type Kpi } from "@/components/KpiRow";
+import { Radar } from "@/components/Radar";
 import { RequiredLists } from "@/components/RequiredLists";
 import { RoleBars } from "@/components/RoleBars";
 import { SegmentedBar } from "@/components/SegmentedBar";
@@ -16,7 +17,12 @@ import { StateTiles } from "@/components/StateTiles";
 import { TooltipProvider } from "@/components/Tooltip";
 import { getDashboard, getOverview, PUBLIC_SITE, type Choice, type Dashboard, type Overview, type Part } from "@/lib/api";
 import { count, day, percent } from "@/lib/format";
+import type { CvProfile } from "@/lib/cv";
 import { GERMAN, REMOTE, SENIORITY } from "@/lib/labels";
+import { useCvAnalysis } from "@/lib/useCv";
+
+// Loaded only when shown, so the public page never downloads the local CV part.
+const CvPanel = dynamic(() => import("@/components/cv/CvPanel").then((m) => m.CvPanel), { ssr: false });
 
 const FIRST = 15;
 const MORE = 30;
@@ -39,6 +45,9 @@ export default function Home() {
   const [result, setResult] = useState<Result | null>(null);
   const [job, setJob] = useState<string | null>(null);
   const [origin, setOrigin] = useState<Origin | null>(null);
+  // The CV part exists only on the local page; the public site has no server for it.
+  const [cvProfile, setCvProfile] = useState<CvProfile | null>(null);
+  const cv = useCvAnalysis(PUBLIC_SITE ? null : cvProfile, role, region);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -95,6 +104,8 @@ export default function Home() {
   const where = region === "all" ? "in Germany" : `in ${regionLabel}`;
   const roleCounts = useMemo(() => Object.fromEntries((dash?.roles ?? []).map((r) => [r.id, r.postings])), [dash]);
   const total = roleCounts[role] ?? 0;
+  const whose = role === "all" ? "tech" : roleLabel;
+  const radarSkills = dash?.skills[role] ?? [];
 
   return (
     <TooltipProvider>
@@ -104,29 +115,48 @@ export default function Home() {
             Skill<span>Radar</span>
           </div>
           <div className="top-right">
-            {overview && <span>Data as of {day(overview.as_of)}</span>}
-            {/* The CV analysis runs locally only; the public site has no server for it. */}
+            {overview && (
+              <span className="live">
+                <i aria-hidden="true" />
+                Data as of {day(overview.as_of)}
+              </span>
+            )}
             {!PUBLIC_SITE && (
-              <Link className="top-link" href="/cv">
-                Analyse your CV →
-              </Link>
+              <a className="top-link" href="#cv">
+                Your CV
+              </a>
             )}
           </div>
         </header>
 
-        <section className="hero">
-          <h1>Which skills do German tech employers ask for?</h1>
-          <p>
-            {overview ? (
-              <>
-                <strong>{count(overview.tech_postings)} open tech job postings</strong> from the
-                Bundesagentur für Arbeit, each one read by an AI model that lists the skills, the
-                language level and the working model it asks for.
-              </>
-            ) : (
-              "Open tech job postings from the Bundesagentur für Arbeit, read one by one by an AI model."
-            )}
-          </p>
+        <section className="hero hero-grid">
+          <div className="hero-text">
+            <h1>
+              Which skills do <span className="grad">German tech employers</span> ask for?
+            </h1>
+            <p>
+              {overview ? (
+                <>
+                  <strong>{count(overview.tech_postings)} open tech job postings</strong> from the
+                  Bundesagentur für Arbeit, each one read by an AI model that lists the skills, the
+                  language level and the working model it asks for.
+                </>
+              ) : (
+                "Open tech job postings from the Bundesagentur für Arbeit, read one by one by an AI model."
+              )}
+            </p>
+            <div className="hero-actions">
+              {!PUBLIC_SITE && (
+                <a className="button" href="#cv">
+                  Check your CV <span aria-hidden="true">→</span>
+                </a>
+              )}
+              <a className={PUBLIC_SITE ? "button" : "button ghost"} href="#demand-title">
+                Explore the skills
+              </a>
+            </div>
+          </div>
+          {radarSkills.length > 0 && <Radar skills={radarSkills} />}
         </section>
 
         {overviewError ? (
@@ -154,6 +184,18 @@ export default function Home() {
                 onChange={(value) => choose({ region: value })}
               />
             </div>
+
+            {!PUBLIC_SITE && overview && (
+              <CvPanel
+                profile={cvProfile}
+                onProfile={setCvProfile}
+                analysis={cv}
+                whose={whose}
+                where={where}
+                onRole={(id) => choose({ role: id })}
+                onOpenJob={(refnr, from) => openJob(refnr, from)}
+              />
+            )}
 
             <div className="layout">
               <div className="main">
@@ -190,10 +232,13 @@ export default function Home() {
                   title={`${role === "all" ? "tech" : roleLabel} jobs ${where}`}
                   active={job}
                   onOpen={openJob}
+                  scores={cv.data?.role === role && cv.data?.region === region ? cv.data.scores : undefined}
                 />
               )}
             </div>
-            {job && <JobDialog key={job} refnr={job} origin={origin} onClose={() => openJob(null)} />}
+            {job && (
+              <JobDialog key={job} refnr={job} origin={origin} onClose={() => openJob(null)} profile={cvProfile} />
+            )}
           </>
         )}
 

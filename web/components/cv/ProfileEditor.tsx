@@ -5,8 +5,8 @@ import { EVIDENCE, LEVELS, SENIORITY, type Choice, type CvProfile, type CvSkill,
 
 const MAX_SKILLS = 150;
 
-// Step 2: what was read from the CV. Everything can be corrected; the comparison
-// updates as you edit.
+// What was read from the CV. Everything can be corrected; the comparison updates as
+// you edit.
 export function ProfileEditor(props: {
   profile: CvProfile;
   onChange: (profile: CvProfile) => void;
@@ -57,17 +57,10 @@ export function ProfileEditor(props: {
   }
 
   return (
-    <section className="card cv-step" aria-labelledby="cv-profile-title">
-      <div className="card-head">
-        <div>
-          <span className="cv-step-number">2</span>
-          <h2 id="cv-profile-title">Your profile</h2>
-          <p>
-            What was read from your CV ({from}). Check it and fix anything that is wrong: the comparison below
-            updates as you edit.
-          </p>
-        </div>
-      </div>
+    <div className="cv-profile">
+      <p className="cv-muted">
+        Read from your CV ({from}). Fix anything that is wrong: every number above updates as you edit.
+      </p>
 
       {notes.length > 0 && (
         <ul className="cv-notes">
@@ -232,7 +225,7 @@ export function ProfileEditor(props: {
         </form>
         {addError && <p className="cv-hint warn">{addError}</p>}
       </div>
-    </section>
+    </div>
   );
 }
 

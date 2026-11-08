@@ -67,10 +67,10 @@ class TestMarket:
         market = load_market(serve_dir(tmp_path), TAXONOMY)
         assert market.as_of == "2026-11-08"
         by_refnr = {p.refnr: p for p in market.postings}
-        assert by_refnr["p1"].regions == {"BERLIN"} and by_refnr["p4"].regions == frozenset()
-        assert by_refnr["p1"].published == "2026-11-05" and by_refnr["p3"].published is None
+        assert by_refnr["job-1"].regions == {"BERLIN"} and by_refnr["job-4"].regions == frozenset()
+        assert by_refnr["job-1"].published == "2026-11-05" and by_refnr["job-3"].published is None
         # "Golang" (nice) and "Go" (required) are one skill now, and required.
-        p2 = {s.name: s.required for s in by_refnr["p2"].skills}
+        p2 = {s.name: s.required for s in by_refnr["job-2"].skills}
         assert p2 == {"Azure": True, "Go": True, "Python": True, "Spark": True}
 
     def test_no_data(self, tmp_path):

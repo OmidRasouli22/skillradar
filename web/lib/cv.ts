@@ -96,6 +96,8 @@ export type Analysis = {
   }[];
   gaps: Gap[];
   matches: Match[];
+  // Every scored posting's match, by reference number.
+  scores: Record<string, number>;
 };
 
 export type ShowcaseItem = {
@@ -140,6 +142,13 @@ export const readCv = (text: string, mode: "claude" | "keywords") => post<ReadRe
 
 export const analyse = (profile: CvProfile, role: string, region: string, signal?: AbortSignal) =>
   post<Analysis>("/api/cv/analyse", { profile, role, region }, signal);
+
+export const matchPosting = (profile: CvProfile, refnr: string, signal?: AbortSignal) =>
+  post<Match & { scored: boolean }>(`/api/cv/posting/${encodeURIComponent(refnr)}`, { profile }, signal);
+
+export function band(match: number): Match["band"] {
+  return match >= 0.7 ? "strong" : match >= 0.5 ? "good" : match >= 0.3 ? "partial" : "weak";
+}
 
 export const getShowcases = () => call<ShowcaseItem[]>("/api/cv/showcases");
 

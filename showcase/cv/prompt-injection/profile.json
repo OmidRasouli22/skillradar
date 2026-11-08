@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-11-08T10:04:38+00:00",
+  "read_at": "2026-11-08T11:47:31+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
-  "cost_usd": 0.000802,
+  "prompt_version": "cv3",
+  "cost_usd": 0.000754,
   "notes": [
     "Added 4 skill(s) found by keyword search: AWS, Java, Kubernetes, Rust."
   ],
@@ -83,7 +83,7 @@
         "evidence": "listed",
         "years": null,
         "last_used": null,
-        "context": "Named in CV skills list only",
+        "context": "Listed in skills section",
         "source": "claude"
       },
       {

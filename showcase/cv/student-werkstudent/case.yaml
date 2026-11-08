@@ -1,0 +1,37 @@
+title: Computer science student, working student job
+person: Paul Neumann (fictional)
+language: English
+target: {role: software_engineer, region: all}
+story: >
+  A student who works part time. Tests that the working student job is not counted as
+  professional years, that he is read as a student, and that teaching Java (tutor) and a
+  seminar count as weaker evidence than the work he does.
+checks:
+  - kind: seniority
+    values: [student]
+    why: He is still studying; his only job is a working student job.
+  - kind: years
+    min: 0
+    max: 0.5
+    why: Working student jobs and tutoring are not counted as professional experience.
+  - kind: role
+    values: [software_engineer, fullstack_developer, frontend_developer, backend_developer]
+    why: He builds web features in React and small Python APIs.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: C1 is fluent.
+  - kind: has
+    skills: [Python, Java, TypeScript, React, Flask, pytest, Jest, Docker, PostgreSQL, Kotlin, Android]
+    why: All are named in his work, projects or skills.
+  - kind: evidence
+    skill: Kotlin
+    values: [project]
+    why: Kotlin appears only in a personal Android project.
+  - kind: evidence
+    skill: React
+    values: [work]
+    why: He builds React features in his working student job.
+  - kind: lacks
+    skills: [AWS, Kubernetes, Spring]
+    why: The CV never names them.

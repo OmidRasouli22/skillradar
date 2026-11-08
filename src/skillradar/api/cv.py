@@ -4,6 +4,7 @@ GET  /api/cv/status           can Claude read CVs, budget left, limits, skill na
 POST /api/cv/pdf              the text of a PDF (base64), so the person can check it
 POST /api/cv/read             a CV text as a profile, by Claude or by keyword search
 POST /api/cv/analyse          a profile compared with the open postings of a role and region
+POST /api/cv/posting/{refnr}  how a profile matches one posting (the posting view)
 GET  /api/cv/showcases        the example CVs in showcase/cv
 GET  /api/cv/showcases/{id}   one example: its text, saved profile and expected results
 GET  /api/cv/showcases/{id}/checks   the example's checks run now: passed or not, and why
@@ -26,18 +27,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import Field
 
 from skillradar.api.labels import REGIONS, ROLES
+from skillradar.api.postings import REFNR
 from skillradar.api.security import local_only, same_page_json
 from skillradar.config import PROJECT_ROOT
 from skillradar.cv import showcase
 from skillradar.cv.families import SkillFamilies
 from skillradar.cv.market import MarketCache, NoMarket
-from skillradar.cv.match import analyse
+from skillradar.cv.match import analyse, match_one
 from skillradar.cv.profile import CvProfile
 from skillradar.cv.reader import (
     MAX_PDF_BYTES,
     MAX_TEXT_CHARS,
     MIN_TEXT_CHARS,
     CvError,
+    make_client,
     pdf_text,
     read_with_claude,
     read_with_keywords,
@@ -66,6 +69,10 @@ class ReadRequest(Strict):
     mode: Literal["claude", "keywords"]
 
 
+class ProfileRequest(Strict):
+    profile: CvProfile
+
+
 class AnalyseRequest(Strict):
     profile: CvProfile
     role: str = Field(max_length=40)
@@ -83,7 +90,7 @@ def cv_router(
     families: SkillFamilies,
     market: MarketCache,
     showcase_dir: Path = showcase.SHOWCASE_DIR,
-    make_client: ClientFactory = anthropic.Anthropic,
+    make_client: ClientFactory = make_client,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/cv", dependencies=[Depends(local_only)])
     store = ExtractionStore(data_dir / "llm")
@@ -168,6 +175,20 @@ def cv_router(
             raise HTTPException(status_code=503, detail=str(error)) from error
         year = datetime.now(UTC).year
         return analyse(body.profile, current, families, body.role, body.region, year, taxonomy)
+
+    @router.post("/posting/{refnr}", dependencies=[Depends(same_page_json)])
+    def posting(refnr: str, body: ProfileRequest) -> dict:
+        if not REFNR.fullmatch(refnr):
+            raise HTTPException(status_code=422, detail="invalid reference number")
+        try:
+            current = market.get()
+        except NoMarket as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
+        year = datetime.now(UTC).year
+        found = match_one(body.profile, current, families, refnr, year, taxonomy)
+        if found is None:
+            raise HTTPException(status_code=404, detail="no open posting with this number")
+        return found
 
     @router.get("/showcases")
     def showcases() -> list[dict]:

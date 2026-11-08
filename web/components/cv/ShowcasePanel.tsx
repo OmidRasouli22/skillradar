@@ -26,12 +26,11 @@ export function ShowcasePanel({ showcase, edited }: { showcase: Showcase; edited
   const passed = results.filter((r) => r.passed).length;
 
   return (
-    <section className="card cv-showcase" aria-labelledby="cv-showcase-title">
-      <div className="card-head">
+    <div className="cv-showcase">
+      <div className="cv-showcase-head">
         <div>
-          <span className="cv-badge">Example</span>
-          <h2 id="cv-showcase-title">{showcase.title}</h2>
-          <p>
+          <h3>{showcase.title}</h3>
+          <p className="cv-muted">
             {showcase.person}. {showcase.story}
           </p>
         </div>
@@ -86,6 +85,6 @@ export function ShowcasePanel({ showcase, edited }: { showcase: Showcase; edited
         {showcase.read.read_at ? `on ${day(showcase.read.read_at.slice(0, 10))}` : ""}. Match checks use today&apos;s postings
         {current?.asOf ? ` (${day(current.asOf)})` : ""}, so they can change as the postings change.
       </p>
-    </section>
+    </div>
   );
 }

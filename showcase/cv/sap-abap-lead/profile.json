@@ -1,10 +1,11 @@
 {
-  "read_at": "2026-11-08T10:04:48+00:00",
+  "read_at": "2026-11-08T11:47:41+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
-  "cost_usd": 0.001368,
+  "prompt_version": "cv3",
+  "cost_usd": 0.001448,
   "notes": [
-    "Left out 2 skill(s) the CV does not name: BAPI, IDoc."
+    "Left out 2 skill(s) the CV does not name: BAPI, IDoc.",
+    "Added 1 skill(s) found by keyword search: SAP."
   ],
   "profile": {
     "headline": "Teamleiter SAP-Entwicklung",
@@ -23,11 +24,19 @@
     ],
     "skills": [
       {
+        "name": "ABAP",
+        "evidence": "work",
+        "years": 10.0,
+        "last_used": 2026,
+        "context": "Teamleiter at Isartal Maschinenbau, SAP-Entwickler at Alpenblick, 2016-present",
+        "source": "claude"
+      },
+      {
         "name": "SAP S/4HANA",
         "evidence": "work",
         "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, migration from SAP ECC, 2022-present",
+        "context": "Teamleiter at Isartal Maschinenbau, migration from ECC, 2022-present",
         "source": "claude"
       },
       {
@@ -35,15 +44,7 @@
         "evidence": "work",
         "years": null,
         "last_used": null,
-        "context": "Isartal Maschinenbau, migration from SAP ECC",
-        "source": "claude"
-      },
-      {
-        "name": "ABAP",
-        "evidence": "work",
-        "years": 9.5,
-        "last_used": 2026,
-        "context": "SAP developer Alpenblick 2016-2021, team lead Isartal 2022-present",
+        "context": "Teamleiter at Isartal Maschinenbau, migration to S/4HANA",
         "source": "claude"
       },
       {
@@ -51,7 +52,7 @@
         "evidence": "work",
         "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, Fiori apps development, 2022-present",
+        "context": "Teamleiter at Isartal Maschinenbau, Fiori apps, 2022-present",
         "source": "claude"
       },
       {
@@ -59,7 +60,7 @@
         "evidence": "work",
         "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, OData services for Fiori apps",
+        "context": "Teamleiter at Isartal Maschinenbau, OData services, 2022-present",
         "source": "claude"
       },
       {
@@ -67,7 +68,7 @@
         "evidence": "work",
         "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, extensions using Cloud Application Programming Model",
+        "context": "Teamleiter at Isartal Maschinenbau, extensions on BTP, 2022-present",
         "source": "claude"
       },
       {
@@ -75,47 +76,39 @@
         "evidence": "work",
         "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, performance optimization on SAP HANA",
+        "context": "Teamleiter at Isartal Maschinenbau, performance optimization, 2022-present",
         "source": "claude"
       },
       {
         "name": "SQL",
         "evidence": "work",
-        "years": null,
+        "years": 4.0,
         "last_used": 2026,
-        "context": "Isartal Maschinenbau, SQL performance optimization on HANA",
-        "source": "claude"
-      },
-      {
-        "name": "SAP",
-        "evidence": "work",
-        "years": 9.5,
-        "last_used": 2026,
-        "context": "SAP development roles at Alpenblick and Isartal Maschinenbau",
+        "context": "Teamleiter at Isartal Maschinenbau, SQL performance optimization, 2022-present",
         "source": "claude"
       },
       {
         "name": "RFC",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2021,
-        "context": "Alpenblick Consulting, interfaces via RFC",
+        "context": "SAP-Entwickler at Alpenblick Consulting, interfaces, 2016-2021",
         "source": "claude"
       },
       {
         "name": "Adobe Forms",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2021,
-        "context": "Alpenblick Consulting, forms created with Adobe Forms",
+        "context": "SAP-Entwickler at Alpenblick Consulting, forms, 2016-2021",
         "source": "claude"
       },
       {
         "name": "Scrum",
         "evidence": "work",
-        "years": 5.5,
+        "years": 5.0,
         "last_used": 2021,
-        "context": "Alpenblick Consulting, agile projects following Scrum",
+        "context": "SAP-Entwickler at Alpenblick Consulting, agile projects, 2016-2021",
         "source": "claude"
       },
       {
@@ -123,8 +116,16 @@
         "evidence": "listed",
         "years": null,
         "last_used": null,
-        "context": "Named in skills list",
+        "context": "Listed in Kenntnisse section",
         "source": "claude"
+      },
+      {
+        "name": "SAP",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
       }
     ]
   }

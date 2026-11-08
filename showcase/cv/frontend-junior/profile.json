@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-11-08T10:04:20+00:00",
+  "read_at": "2026-11-08T11:05:54+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
-  "cost_usd": 0.001239,
+  "prompt_version": "cv3",
+  "cost_usd": 0.001636,
   "notes": [],
   "profile": {
     "headline": "Junior Frontend Developer",
@@ -26,10 +26,10 @@
     "skills": [
       {
         "name": "JavaScript",
-        "evidence": "project",
-        "years": 2.0,
+        "evidence": "work",
+        "years": 1.0,
         "last_used": 2026,
-        "context": "Le Wagon bootcamp final project, React app, 2024",
+        "context": "Junior Frontend Developer at Elbkante Digital, 2025-present",
         "source": "claude"
       },
       {
@@ -51,17 +51,17 @@
       {
         "name": "HTML",
         "evidence": "work",
-        "years": 2.0,
+        "years": 1.0,
         "last_used": 2026,
-        "context": "Responsive layouts from Figma designs at Elbkante Digital",
+        "context": "Responsive layouts from Figma designs, 2025-present",
         "source": "claude"
       },
       {
         "name": "CSS",
         "evidence": "work",
-        "years": 2.0,
+        "years": 1.0,
         "last_used": 2026,
-        "context": "Responsive layouts from Figma designs at Elbkante Digital",
+        "context": "Responsive layouts from Figma designs, 2025-present",
         "source": "claude"
       },
       {
@@ -69,7 +69,7 @@
         "evidence": "work",
         "years": 1.0,
         "last_used": 2026,
-        "context": "Responsive layouts at Elbkante Digital, 2025-present",
+        "context": "Responsive layouts from Figma designs, 2025-present",
         "source": "claude"
       },
       {
@@ -85,7 +85,7 @@
         "evidence": "work",
         "years": 2.0,
         "last_used": 2026,
-        "context": "Code management at Elbkante Digital, 2025-present",
+        "context": "Elbkante Digital, 2025-present; bootcamp 2024",
         "source": "claude"
       },
       {
@@ -97,19 +97,19 @@
         "source": "claude"
       },
       {
-        "name": "Scrum",
-        "evidence": "work",
-        "years": 1.0,
-        "last_used": 2026,
-        "context": "Two-week sprints in team at Elbkante Digital",
-        "source": "claude"
-      },
-      {
         "name": "Figma",
         "evidence": "work",
         "years": 1.0,
         "last_used": 2026,
-        "context": "Implements layouts from Figma designs at Elbkante Digital",
+        "context": "Implemented layouts from Figma designs, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Scrum",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Scrum team with two-week sprints, 2025-present",
         "source": "claude"
       },
       {
@@ -117,15 +117,7 @@
         "evidence": "work",
         "years": 5.0,
         "last_used": 2024,
-        "context": "Freelance graphic designer, websites for small businesses, 2019-2024",
-        "source": "claude"
-      },
-      {
-        "name": "Node.js",
-        "evidence": "project",
-        "years": null,
-        "last_used": 2024,
-        "context": "Le Wagon bootcamp final project, Node.js API, team of four",
+        "context": "Freelance Graphic Designer, simple WordPress websites, 2019-2024",
         "source": "claude"
       },
       {
@@ -133,7 +125,15 @@
         "evidence": "education",
         "years": null,
         "last_used": 2024,
-        "context": "Le Wagon Web Development Bootcamp, REST APIs, 2024",
+        "context": "Le Wagon Web Development Bootcamp, REST APIs",
+        "source": "claude"
+      },
+      {
+        "name": "Node.js",
+        "evidence": "project",
+        "years": 0.5,
+        "last_used": 2024,
+        "context": "Team final project with Node.js API, Le Wagon 2024",
         "source": "claude"
       }
     ]

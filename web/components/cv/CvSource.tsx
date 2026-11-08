@@ -5,7 +5,7 @@ import { readPdf, type CvStatus, type ShowcaseItem } from "@/lib/cv";
 
 type Tab = "upload" | "paste" | "examples";
 
-// Step 1: the CV as text, from a PDF, pasted, or one of the example CVs.
+// The CV as text: from a PDF, pasted, or one of the example CVs; then read it.
 export function CvSource(props: {
   status: CvStatus | null;
   text: string;
@@ -58,15 +58,7 @@ export function CvSource(props: {
   }
 
   return (
-    <section className="card cv-step" aria-labelledby="cv-source-title">
-      <div className="card-head">
-        <div>
-          <span className="cv-step-number">1</span>
-          <h2 id="cv-source-title">Your CV</h2>
-          <p>Upload a PDF, paste the text, or try one of the example CVs. You can check and fix the text before it is read.</p>
-        </div>
-      </div>
-
+    <div className="cv-source">
       <div className="cv-tabs" role="tablist" aria-label="Where the CV comes from">
         {(
           [
@@ -129,9 +121,7 @@ export function CvSource(props: {
 
       {tab === "examples" && (
         <div id="cv-panel-examples" role="tabpanel" aria-labelledby="cv-tab-examples">
-          <p className="cv-muted">
-            Fictional people, each built to test one thing. Their saved reading is used, so loading one costs nothing.
-          </p>
+          <p className="cv-muted">Fictional people, each built to test one thing. Loading one costs nothing.</p>
           <ul className="cv-examples">
             {showcases.map((item) => (
               <li key={item.id}>
@@ -162,7 +152,7 @@ export function CvSource(props: {
         <textarea
           id="cv-text"
           value={text}
-          rows={tab === "paste" ? 16 : 8}
+          rows={tab === "paste" ? 12 : 5}
           placeholder="Paste your CV here…"
           spellCheck={false}
           onChange={(event) => onText(event.target.value, "pasted")}
@@ -210,7 +200,7 @@ export function CvSource(props: {
           {error}
         </p>
       )}
-    </section>
+    </div>
   );
 }
 

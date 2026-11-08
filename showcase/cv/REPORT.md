@@ -5,7 +5,7 @@ the CV expects and why; ✅ means the analysis agrees, ❌ means it does not.
 Profile checks test how the CV was read; match checks compare it with the open
 postings as of 2026-11-08, so they can change as the postings change.
 
-**94 of 94 checks pass.**
+**143 of 143 checks pass.**
 
 | Example | Target | Checks |
 |---|---|---|
@@ -14,10 +14,16 @@ postings as of 2026-11-08, so they can change as the postings change.
 | [Data engineer, 4.5 years, Berlin](#data-engineer-berlin) | data_engineer, BERLIN | 16 / 16 |
 | [Data scientist who wants to move to data engineering](#data-scientist-to-data-engineer) | data_engineer, all | 9 / 9 |
 | [DevOps engineer on Azure, German CV](#devops-german) | devops_engineer, all | 13 / 13 |
+| [Freelance full-stack developer with overlapping projects](#freelancer-overlapping) | fullstack_developer, all | 8 / 8 |
 | [Junior frontend developer after a career change](#frontend-junior) | frontend_developer, all | 11 / 11 |
 | [Senior system administrator, German CV](#it-admin-german) | it_administration, NORDRHEIN_WESTFALEN | 12 / 12 |
+| [IT security analyst, German CV](#it-security-german) | it_security, all | 8 / 8 |
+| [Principal architect with a long CV](#long-senior-architect) | software_engineer, HAMBURG | 9 / 9 |
+| [ML engineer with LLM and RAG experience](#ml-engineer-llm) | ml_engineer, all | 8 / 8 |
 | [Junior developer with an instruction hidden in the CV](#prompt-injection) | backend_developer, all | 8 / 8 |
 | [SAP development team lead, German CV](#sap-abap-lead) | sap_erp, BAYERN | 8 / 8 |
+| [Short CV without any dates](#skills-only-no-dates) | backend_developer, all | 8 / 8 |
+| [Computer science student, working student job](#student-werkstudent) | software_engineer, all | 8 / 8 |
 
 ## Senior Java backend engineer with B1 German
 
@@ -25,8 +31,8 @@ postings as of 2026-11-08, so they can change as the postings change.
 
 *Arash Karimi (fictional)*, CV in English. Strong technical fit, but most German postings ask for fluent German. The analysis should see that his skills match and that the language, not a framework, is what holds him back: German should rank as his most valuable thing to improve.
 
-Compared with 320 postings (Backend Developer, All regions): 17 at least a good match.
-Top gaps: German (fluent, C1) (+64), Test Automation (+5), Agile (+3), DevOps (+3), Python (+2).
+Compared with 320 postings (Backend Developer, All regions): 22 at least a good match.
+Top gaps: German (fluent, C1) (+70), Agile (+3), Python (+2), Jakarta EE (+2), JavaScript (+1).
 
 | | Check | Why | Result |
 |---|---|---|---|
@@ -37,9 +43,9 @@ Top gaps: German (fluent, C1) (+64), Test Automation (+5), Agile (+3), DevOps (+
 | ✅ | English is fluent | C1 is fluent. | fluent |
 | ✅ | finds Java, Spring, Kafka, PostgreSQL, Docker, Kubernetes, AWS, Jenkins, JUnit, Hibernate | All are named in his experience or skills ("Spring Boot" is the skill Spring). | all found |
 | ✅ | Kafka counted as work | He processes card transactions with Kafka in his current job. | work |
-| ✅ | backend_developer in the top 3 roles | His skills are a backend developer's skills. | top 3: backend_developer, fullstack_developer, devops_engineer |
+| ✅ | backend_developer in the top 3 roles | His skills are a backend developer's skills. | top 3: backend_developer, devops_engineer, fullstack_developer |
 | ✅ | Spring covered as have | Spring Boot is on the CV. | have |
-| ✅ | German (fluent, C1) in the top 3 gaps | His technical skills fit; the German level is what most postings ask for and he lacks. | top 3 gaps: German (fluent, C1), Test Automation, Agile |
+| ✅ | German (fluent, C1) in the top 3 gaps | His technical skills fit; the German level is what most postings ask for and he lacks. | top 3 gaps: German (fluent, C1), Agile, Python |
 | ✅ | Java is not a gap | He has it. | not a gap |
 
 ## Mechanical engineer who wants to move into software
@@ -115,8 +121,8 @@ Top gaps: ETL (+5), Data Modeling (+4), Data Warehouse (+3), Data Lake (+3), Doc
 
 *Murat Yılmaz (fictional)*, CV in German. A cloud platform engineer who knows Azure but not AWS. Tests partial credit across cloud platforms (Azure covers part of AWS), that products prove concepts (Terraform proves Infrastructure as Code, Argo CD proves GitOps), and two native languages.
 
-Compared with 375 postings (DevOps / Cloud Engineer, All regions): 228 at least a good match.
-Top gaps: Networking (+20), Ansible (+15), Java (+11), AWS (+7), Agile (+5).
+Compared with 375 postings (DevOps / Cloud Engineer, All regions): 224 at least a good match.
+Top gaps: Networking (+21), Ansible (+16), Java (+12), AWS (+9), Agile (+6).
 
 | | Check | Why | Result |
 |---|---|---|---|
@@ -127,12 +133,32 @@ Top gaps: Networking (+20), Ansible (+15), Java (+11), AWS (+7), Agile (+5).
 | ✅ | English is fluent | Verhandlungssicher is fluent. | fluent |
 | ✅ | finds Azure, Kubernetes, Docker, Helm, ArgoCD, Terraform, GitLab CI, Prometheus, Grafana, Loki, Python, Bash, Linux | All are named in his experience or skills ("Argo CD" is the skill ArgoCD). | all found |
 | ✅ | does not invent AWS, GCP, Ansible, Jenkins | The CV never names them. | none found |
-| ✅ | devops_engineer in the top 2 roles | His skills are DevOps and cloud skills. | top 2: devops_engineer, software_engineer |
+| ✅ | devops_engineer in the top 2 roles | His skills are DevOps and cloud skills. | top 2: devops_engineer, it_administration |
 | ✅ | AWS covered as substitute via Azure | Azure and AWS are cloud platforms of the same kind; Azure covers part of an AWS requirement. | substitute via Azure |
 | ✅ | Infrastructure as Code covered as have or proven | Terraform at work proves infrastructure as code. | have |
 | ✅ | CI/CD covered as have or proven | He builds CI/CD pipelines with GitLab CI. | have |
 | ✅ | Kubernetes is not a gap | He has it. | not a gap |
-| ✅ | share of good matches at least 20% | An experienced DevOps engineer with native German should fit a fair share of DevOps jobs. | 228 of 375 postings (61%) |
+| ✅ | share of good matches at least 20% | An experienced DevOps engineer with native German should fit a fair share of DevOps jobs. | 224 of 375 postings (60%) |
+
+## Freelance full-stack developer with overlapping projects
+
+<a id="freelancer-overlapping"></a>
+
+*Clara Schmidt (fictional)*, CV in German. A freelancer whose client projects overlap. Tests that overlapping months count once, that freelance work counts as experience like a job, and that a broad web stack is read as full-stack.
+
+Compared with 222 postings (Full-Stack Developer, All regions): 64 at least a good match.
+Top gaps: CI/CD (+21), Test Automation (+15), HTML (+13), CSS (+13), Kubernetes (+11).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | years of experience 9 to 9.6 | 08/2017 to 11/2026 without gaps is 112 months, 9.3 years; the overlap of two projects counts once. | 9.3 |
+| ✅ | seniority is senior | More than 5 years of web development. | senior |
+| ✅ | role is fullstack_developer | She builds both frontends (React, Angular, Vue.js) and backends (Node.js, Spring, Laravel). | fullstack_developer |
+| ✅ | finds TypeScript, React, Next.js, Angular, Vue.js, Node.js, NestJS, Java, Spring, PHP, Laravel, PostgreSQL, MySQL, Docker, AWS, Keycloak | All are named in her projects or skills. | all found |
+| ✅ | Angular counted as work | Freelance client work counts as work. | work |
+| ✅ | English is fluent | Verhandlungssicher is fluent. | fluent |
+| ✅ | fullstack_developer or frontend_developer or backend_developer in the top 2 roles | Her skills are web development skills. | top 2: fullstack_developer, frontend_developer |
+| ✅ | React is not a gap | She has it. | not a gap |
 
 ## Junior frontend developer after a career change
 
@@ -155,7 +181,7 @@ Top gaps: German (fluent, C1) (+3), Angular (+3), Java (+1), Docker (+1), Spring
 | ✅ | React counted as work | She builds features with React in her current job. | work |
 | ✅ | frontend_developer or fullstack_developer in the top 3 roles | Her skills are frontend skills. | top 3: frontend_developer, fullstack_developer, other_tech |
 | ✅ | Angular covered as substitute via React | React and Angular are frameworks for the same job, so React covers Angular partly. | substitute via React |
-| ✅ | JavaScript covered as have or proven | JavaScript is on the CV, and TypeScript used at work proves it; either way it is fully covered. | proven via TypeScript |
+| ✅ | JavaScript covered as have or proven | JavaScript is on the CV, and TypeScript used at work proves it; either way it is fully covered. | have |
 
 ## Senior system administrator, German CV
 
@@ -180,6 +206,67 @@ Top gaps: Ansible (+4), English (fluent, C1) (+3), ServiceNow (+2), Infrastructu
 | ✅ | it_administration in the top 2 roles | His skills are a system administrator's skills. | top 2: it_administration, devops_engineer |
 | ✅ | Virtualization covered as proven or have | VMware and Hyper-V at work prove virtualization. | proven via VMware |
 | ✅ | share of good matches at least 20% | An experienced administrator with native German should fit a fair share of admin jobs in his state. | 34 of 111 postings (31%) |
+
+## IT security analyst, German CV
+
+<a id="it-security-german"></a>
+
+*Felix Hartmann (fictional)*, CV in German. A security specialist with German terms and a mobile number written the German way. Tests that security concepts are found from descriptions (SIEM, penetration testing), that the German phone number is removed but the dates are kept, and that IT security is his best fit.
+
+Compared with 180 postings (IT Security, All regions): 39 at least a good match.
+Top gaps: English (fluent, C1) (+17), Cloud Computing (+6), Bash (+2), IEC 62443 (+2), Microservices (+2).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | role is it_security | He works in a security operations center. | it_security |
+| ✅ | seniority is mid or senior | About 7.2 years of IT work since 09/2019, the last 4.8 in security. | senior |
+| ✅ | years of experience 6.8 to 7.5 | 09/2019 to 11/2026 is 87 months; the apprenticeship is training. | 7.2 |
+| ✅ | finds Splunk, SIEM, Penetration Testing, ISO 27001, BSI IT-Grundschutz, Active Directory, Python, PowerShell, Firewalls, VPN | Named or clearly described in his experience. | all found |
+| ✅ | ISO 27001 counted as work or education | He worked on the ISO 27001 certification and holds a certificate. | work |
+| ✅ | English is good | gut (B2) is good. | good |
+| ✅ | it_security in the top 2 roles | His skills are security skills. | top 2: it_security, it_administration |
+| ✅ | IT Security covered as have or proven | His whole current job is IT security. | have |
+
+## Principal architect with a long CV
+
+<a id="long-senior-architect"></a>
+
+*Katharina Vogel (fictional)*, CV in English. A long, dense CV with 16 years of experience and around 50 skills. Tests that a long CV is read completely (no cut-off answer), that the PhD is studies and not work, that leading architects is read as lead, and that many skills keep their evidence.
+
+Compared with 74 postings (Software Engineer, Hamburg): 12 at least a good match.
+Top gaps: DevOps (+4), Git (+2), Selenium (+2), Generative AI (+2), Linux (+1).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | seniority is lead | She leads an architecture guild and led a team of architects. | lead |
+| ✅ | years of experience 15.8 to 16.4 | 10/2010 to 11/2026 is 194 months, 16.2 years; the doctorate is studies. | 16.2 |
+| ✅ | English is fluent | C2 is fluent. | fluent |
+| ✅ | French is basic | A2 is basic. | basic |
+| ✅ | finds Java, Kotlin, TypeScript, Go, Python, SQL, AWS, Azure, Kubernetes, OpenShift, Docker, Terraform, Helm, ArgoCD, PostgreSQL, Oracle Database, MongoDB, Redis, Kafka, RabbitMQ, Elasticsearch, React, Angular, Spring, JUnit, Cypress, SonarQube, Prometheus, Grafana, Jenkins, Scrum, SAFe, Kanban, TOGAF | All are named in her competencies or experience. | all found |
+| ✅ | finds Microservices, Event-Driven Architecture, Domain-Driven Design, REST, gRPC, GraphQL, OpenAPI, Software Architecture, TDD, GitOps | Named as competencies and described in her work. | all found |
+| ✅ | Kafka counted as work | She designed the move to Kafka-based microservices in her current job. | work |
+| ✅ | C++ counted as work or project or education | C++ appears only in her doctoral research prototypes, never in an industry job. | project |
+| ✅ | software_engineer or backend_developer or fullstack_developer or devops_engineer in the top 3 roles | Her skills cover software architecture, backend and platform work. | top 3: frontend_developer, devops_engineer, backend_developer |
+
+## ML engineer with LLM and RAG experience
+
+<a id="ml-engineer-llm"></a>
+
+*Aylin Demir (fictional)*, CV in English. The newest skills in the market (LLM, RAG, LangChain). Tests that these emerging skills are found, that the junior data science job counts towards experience, and that machine learning roles come out as her best fit.
+
+Compared with 202 postings (ML / AI Engineer, All regions): 87 at least a good match.
+Top gaps: Azure (+5), Computer Vision (+4), REST (+4), Test Automation (+4), Java (+3).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | role is ml_engineer or data_scientist | She builds and runs machine learning and LLM systems. | ml_engineer |
+| ✅ | seniority is mid | About 4.2 years since 10/2022, between 2 and 5 years. | mid |
+| ✅ | years of experience 3.8 to 4.5 | 10/2022 to 11/2026 is 50 months; both jobs are tech jobs. | 4.2 |
+| ✅ | finds Python, PyTorch, Hugging Face, LangChain, LlamaIndex, RAG, LLM, NLP, scikit-learn, FastAPI, Docker, Kubernetes, AWS, MLflow, GitHub Actions | All are named in her work or skills. | all found |
+| ✅ | RAG counted as work | She built a RAG assistant in her current job. | work |
+| ✅ | ml_engineer or data_scientist in the top 2 roles | Her skills are machine learning skills. | top 2: ml_engineer, data_scientist |
+| ✅ | Machine Learning covered as have or proven | PyTorch and scikit-learn at work prove machine learning. | have |
+| ✅ | Python is not a gap | She has it. | not a gap |
 
 ## Junior developer with an instruction hidden in the CV
 
@@ -218,5 +305,45 @@ Top gaps: Java (+2), Python (+2), SAP HCM (+1), REST (+1), CDS Views (+1).
 | ✅ | English is fluent | Verhandlungssicher is fluent. | fluent |
 | ✅ | finds ABAP, SAP S/4HANA, SAP Fiori, SAP BTP, SAP HANA, OData, SQL, Scrum, Jira | All are named in his experience or skills. | all found |
 | ✅ | sap_erp in the top 2 roles | His skills are SAP skills. | top 2: sap_erp, it_project_manager |
-| ✅ | SAP covered as have or proven | SAP S/4HANA and ABAP prove SAP. | have |
+| ✅ | SAP covered as have or proven | SAP S/4HANA and ABAP prove SAP. | proven via SAP S/4HANA |
 | ✅ | ABAP is not a gap | He has it. | not a gap |
+
+## Short CV without any dates
+
+<a id="skills-only-no-dates"></a>
+
+*Sam Example (fictional)*, CV in English. Many CVs found online are short and give no dates. Tests that years of experience stay unknown instead of being guessed, that the skills are still read with the right evidence, and that the comparison still works.
+
+Compared with 320 postings (Backend Developer, All regions): 2 at least a good match.
+Top gaps: German (fluent, C1) (+7), Java (+3), Event-Driven Architecture (+2), Kafka (+2), Agile (+1).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | role is backend_developer or devops_engineer or software_engineer | Backend services in Go and Python, run on Kubernetes. | backend_developer |
+| ✅ | seniority is unknown or mid | Without dates the level is unclear; "several companies" may suggest a professional. | unknown |
+| ✅ | years of experience stay unknown | The CV gives no dates, so the years must not be guessed. | unknown |
+| ✅ | finds Go, Python, Bash, gRPC, PostgreSQL, Redis, Docker, Kubernetes, Terraform, Linux, GitLab CI, Prometheus, Grafana | All are named in the skills list. | all found |
+| ✅ | Go counted as work or listed | Go is in the skills list and described as used at work, without dates. | work |
+| ✅ | German is basic | The CV says German basic. | basic |
+| ✅ | backend_developer or devops_engineer or software_engineer in the top 3 roles | His skills are backend and platform skills. | top 3: devops_engineer, data_engineer, data_analyst |
+| ✅ | German (fluent, C1) in the top 5 gaps | With basic German, the language should be one of the most valuable things to improve. | top 5 gaps: German (fluent, C1), Java, Event-Driven Architecture, Kafka, Agile |
+
+## Computer science student, working student job
+
+<a id="student-werkstudent"></a>
+
+*Paul Neumann (fictional)*, CV in English. A student who works part time. Tests that the working student job is not counted as professional years, that he is read as a student, and that teaching Java (tutor) and a seminar count as weaker evidence than the work he does.
+
+Compared with 437 postings (Software Engineer, All regions): 14 at least a good match.
+Top gaps: C++ (+2), Test Automation (+1), C# (+1), C (+1), .NET (+1).
+
+| | Check | Why | Result |
+|---|---|---|---|
+| ✅ | seniority is student | He is still studying; his only job is a working student job. | student |
+| ✅ | years of experience 0 to 0.5 | Working student jobs and tutoring are not counted as professional experience. | 0 |
+| ✅ | role is software_engineer or fullstack_developer or frontend_developer or backend_developer | He builds web features in React and small Python APIs. | fullstack_developer |
+| ✅ | English is fluent | C1 is fluent. | fluent |
+| ✅ | finds Python, Java, TypeScript, React, Flask, pytest, Jest, Docker, PostgreSQL, Kotlin, Android | All are named in his work, projects or skills. | all found |
+| ✅ | Kotlin counted as project | Kotlin appears only in a personal Android project. | project |
+| ✅ | React counted as work | He builds React features in his working student job. | work |
+| ✅ | does not invent AWS, Kubernetes, Spring | The CV never names them. | none found |

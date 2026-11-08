@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-11-08T10:04:32+00:00",
+  "read_at": "2026-11-08T11:06:35+00:00",
   "model": "claude-haiku-5-5",
-  "prompt_version": "cv2",
-  "cost_usd": 0.001587,
+  "prompt_version": "cv3",
+  "cost_usd": 0.001545,
   "notes": [],
   "profile": {
     "headline": "Senior Systemadministrator",
@@ -33,7 +33,7 @@
         "evidence": "work",
         "years": 7.5,
         "last_used": 2026,
-        "context": "Rheinwerk Versicherungsdienste, Domstadt IT-Service, 2018-heute",
+        "context": "Senior Systemadministrator at Rheinwerk, 2021-heute",
         "source": "claude"
       },
       {
@@ -41,7 +41,7 @@
         "evidence": "work",
         "years": 5.0,
         "last_used": 2026,
-        "context": "Rheinwerk Versicherungsdienste, hybrid operation, 2021-heute",
+        "context": "Senior Systemadministrator at Rheinwerk, Hybridbetrieb",
         "source": "claude"
       },
       {
@@ -49,7 +49,7 @@
         "evidence": "work",
         "years": 5.0,
         "last_used": 2026,
-        "context": "vSphere operation at Rheinwerk Versicherungsdienste, 2021-heute",
+        "context": "Senior Systemadministrator at Rheinwerk, vSphere with 250 servers",
         "source": "claude"
       },
       {
@@ -57,39 +57,39 @@
         "evidence": "work",
         "years": 2.5,
         "last_used": 2021,
-        "context": "Hyper-V hosts at Domstadt IT-Service, 2018-2021",
+        "context": "Systemadministrator at Domstadt IT-Service, 2018-2021",
         "source": "claude"
       },
       {
         "name": "Microsoft 365",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Introduced for 900 workstations at Rheinwerk",
-        "source": "claude"
-      },
-      {
-        "name": "Intune",
-        "evidence": "work",
-        "years": null,
-        "last_used": 2026,
-        "context": "Introduced for 900 workstations at Rheinwerk",
+        "context": "Senior Systemadministrator at Rheinwerk, rollout for 900 workstations",
         "source": "claude"
       },
       {
         "name": "Exchange",
         "evidence": "work",
-        "years": null,
-        "last_used": null,
-        "context": "Exchange migration at Rheinwerk Versicherungsdienste",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Senior Systemadministrator at Rheinwerk, Exchange migration",
+        "source": "claude"
+      },
+      {
+        "name": "Intune",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Senior Systemadministrator at Rheinwerk, introduced for 900 workstations",
         "source": "claude"
       },
       {
         "name": "Veeam",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Data backup and restore tests at Rheinwerk",
+        "context": "Senior Systemadministrator at Rheinwerk, data backup and restore tests",
         "source": "claude"
       },
       {
@@ -97,71 +97,87 @@
         "evidence": "work",
         "years": 7.5,
         "last_used": 2026,
-        "context": "Customer backup at Domstadt, data backup at Rheinwerk",
+        "context": "Systemadministrator at Rheinwerk and Domstadt, backup operations",
         "source": "claude"
       },
       {
         "name": "PowerShell",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Automation of recurring tasks at Rheinwerk",
+        "context": "Senior Systemadministrator at Rheinwerk, task automation",
         "source": "claude"
       },
       {
         "name": "Fortinet",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Firewall administration at Rheinwerk Versicherungsdienste",
+        "context": "Senior Systemadministrator at Rheinwerk, firewall management",
         "source": "claude"
       },
       {
         "name": "Firewalls",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Fortinet firewalls maintained at Rheinwerk Versicherungsdienste",
+        "context": "Senior Systemadministrator at Rheinwerk, Fortinet firewalls",
         "source": "claude"
       },
       {
         "name": "Cisco",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Cisco switches and VLANs at Rheinwerk Versicherungsdienste",
+        "context": "Senior Systemadministrator at Rheinwerk, Cisco switches and VLANs",
         "source": "claude"
       },
       {
         "name": "Networking",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Network administration with VLANs at Rheinwerk",
+        "context": "Senior Systemadministrator at Rheinwerk, VLANs and VPN",
         "source": "claude"
       },
       {
         "name": "VPN",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "VPN administration at Rheinwerk Versicherungsdienste",
+        "context": "Senior Systemadministrator at Rheinwerk, network access",
         "source": "claude"
       },
       {
         "name": "Monitoring",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Infrastructure monitoring with PRTG at Rheinwerk",
+        "context": "Senior Systemadministrator at Rheinwerk, infrastructure monitoring",
+        "source": "claude"
+      },
+      {
+        "name": "PRTG",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Senior Systemadministrator at Rheinwerk, infrastructure monitoring",
         "source": "claude"
       },
       {
         "name": "ITIL",
         "evidence": "work",
-        "years": null,
+        "years": 5.0,
         "last_used": 2026,
-        "context": "Incident and change processes at Rheinwerk, ITIL 4 Foundation",
+        "context": "Senior Systemadministrator at Rheinwerk, incident and change processes",
+        "source": "claude"
+      },
+      {
+        "name": "Azure",
+        "evidence": "education",
+        "years": null,
+        "last_used": 2024,
+        "context": "Microsoft Certified: Azure Administrator Associate, 2024",
         "source": "claude"
       },
       {
@@ -169,15 +185,7 @@
         "evidence": "education",
         "years": null,
         "last_used": 2023,
-        "context": "Linux basics course at VHS Köln, 2023",
-        "source": "claude"
-      },
-      {
-        "name": "Azure",
-        "evidence": "education",
-        "years": null,
-        "last_used": null,
-        "context": "Microsoft Certified Azure Administrator Associate, 2024",
+        "context": "Linux-Grundlagen course at VHS Köln, 2023",
         "source": "claude"
       }
     ]

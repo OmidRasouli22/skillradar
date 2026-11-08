@@ -2,208 +2,144 @@
 
 import { useState } from "react";
 import type { Origin } from "@/components/JobDialog";
+import { useCountUp } from "@/hooks/motion";
 import { BAND_LABEL, type Analysis, type Coverage, type Gap, type Match } from "@/lib/cv";
 import { count, day, percent } from "@/lib/format";
 
-const GAPS_FIRST = 8;
-const DEMAND_FIRST = 15;
-const MATCHES_FIRST = 10;
+const MATCHES_FIRST = 8;
 
-// Step 3: how the profile compares with the open postings of one role and region.
-export function CvResults(props: {
-  analysis: Analysis;
-  loading: boolean;
-  onRole: (role: string) => void;
-  onOpen: (refnr: string, origin: Origin) => void;
-}) {
-  const { analysis, loading, onRole, onOpen } = props;
+// The parts of the CV comparison, shown in the tabs of the CV panel.
+
+export function Summary({ analysis, whose, where }: { analysis: Analysis; whose: string; where: string }) {
   const s = analysis.summary;
-  const where = analysis.region === "all" ? "in Germany" : `in ${analysis.region_label}`;
-  const what = analysis.role === "all" ? "tech jobs" : `${analysis.role_label} jobs`;
   const bestRole = analysis.roles[0];
   const topGap = analysis.gaps[0];
-
-  if (s.scored === 0) {
-    return (
-      <div className="card">
-        <div className="state">
-          <strong>No postings to compare with</strong>
-          There are no open {what} {where} that name at least three skills. Choose another role or region.
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={loading ? "sections loading" : "sections"} aria-busy={loading}>
+    <>
       <div className="kpis cv-kpis">
-        <div className="kpi">
-          <div className="kpi-label">Good or strong matches</div>
-          <div className="kpi-value">{count(s.good_or_better)}</div>
-          <div className="kpi-hint">
-            of {count(s.scored)} {what} {where} ({percent(s.good_or_better / s.scored)})
-          </div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Typical match</div>
-          <div className="kpi-value">{s.median === null ? "–" : percent(s.median)}</div>
-          <div className="kpi-hint">median over these postings</div>
-        </div>
-        <div className="kpi">
+        <Tile label="Good or strong matches" value={s.good_or_better} hint={`of ${count(s.scored)} ${whose} jobs ${where}`} />
+        <Tile label="Typical match" value={s.median ?? 0} share hint="median over these postings" />
+        <div className="kpi" style={{ "--i": 2 } as React.CSSProperties}>
           <div className="kpi-label">Best-fitting role</div>
           <div className="kpi-value cv-kpi-text">{bestRole ? bestRole.label : "–"}</div>
-          <div className="kpi-hint">
-            {bestRole ? `${percent(bestRole.share)} of its postings ${where} are a good match` : ""}
-          </div>
+          <div className="kpi-hint">{bestRole ? `${percent(bestRole.share)} of its postings are a good match` : ""}</div>
         </div>
-        <div className="kpi">
+        <div className="kpi" style={{ "--i": 3 } as React.CSSProperties}>
           <div className="kpi-label">Learn next</div>
           <div className="kpi-value cv-kpi-text">{topGap ? topGap.name : "–"}</div>
           <div className="kpi-hint">
-            {topGap ? (topGap.gained ? `+${topGap.gained} postings become a good match` : "raises your match in many postings") : "no clear gap"}
+            {topGap ? (topGap.gained ? `+${topGap.gained} postings become a good match` : "lifts many matches a little") : "no clear gap"}
           </div>
         </div>
       </div>
-
-      <div className="cv-bandbar" aria-label="Postings by match">
-        {(["strong", "good", "partial", "weak"] as const).map((band) =>
-          s.bands[band] ? (
-            <span key={band} className={band} style={{ flexGrow: s.bands[band] }} title={`${BAND_LABEL[band]}: ${s.bands[band]}`}>
-              {s.bands[band] / s.scored >= 0.08 ? `${BAND_LABEL[band].split(" ")[0]} ${s.bands[band]}` : ""}
+      <div className="cv-bandbar" role="img" aria-label={bandText(analysis)}>
+        {(["strong", "good", "partial", "weak"] as const).map((b) =>
+          s.bands[b] ? (
+            <span key={b} className={b} style={{ flexGrow: s.bands[b] }} title={`${BAND_LABEL[b]}: ${s.bands[b]}`}>
+              {s.bands[b] / s.scored >= 0.09 ? `${BAND_LABEL[b].split(" ")[0]} ${s.bands[b]}` : ""}
             </span>
           ) : null,
         )}
       </div>
       {s.postings > s.scored && (
-        <p className="cv-muted cv-small">
-          {count(s.postings - s.scored)} more postings name fewer than three skills; they are not scored because one or two
-          skills say little about a fit.
+        <p className="cv-small">
+          {count(s.postings - s.scored)} postings name fewer than three skills and are not scored: one or two skills say
+          little about a fit.
         </p>
       )}
+    </>
+  );
+}
 
-      <div className="cv-grid">
-        <Gaps gaps={analysis.gaps} scored={s.scored} />
-        <RoleFit analysis={analysis} onRole={onRole} />
-      </div>
-      <Demand analysis={analysis} />
-      <Matches matches={analysis.matches} onOpen={onOpen} />
+function Tile({ label, value, hint, share = false }: { label: string; value: number; hint: string; share?: boolean }) {
+  const shown = useCountUp(value);
+  return (
+    <div className="kpi">
+      <div className="kpi-label">{label}</div>
+      <div className="kpi-value">{share ? percent(shown) : count(Math.round(shown))}</div>
+      <div className="kpi-hint">{hint}</div>
     </div>
   );
 }
 
-function Gaps({ gaps, scored }: { gaps: Gap[]; scored: number }) {
-  const [all, setAll] = useState(false);
-  const shown = all ? gaps : gaps.slice(0, GAPS_FIRST);
+function bandText(analysis: Analysis): string {
+  const b = analysis.summary.bands;
+  return `Strong ${b.strong}, good ${b.good}, partial ${b.partial}, weak ${b.weak}`;
+}
+
+export function Gaps({ gaps, scored, limit }: { gaps: Gap[]; scored: number; limit?: number }) {
+  const shown = limit ? gaps.slice(0, limit) : gaps;
+  if (gaps.length === 0) {
+    return <p className="cv-muted">Nothing stands out: no missing skill is asked for often enough here.</p>;
+  }
+  const most = Math.max(...gaps.map((g) => g.gained), 1);
   return (
-    <section className="card" aria-labelledby="cv-gaps-title">
-      <div className="card-head">
-        <div>
-          <h2 id="cv-gaps-title">What to learn next</h2>
-          <p>
-            Ranked by how many postings would become at least a good match if you learned the skill in a solid project,
-            not by how often it is asked.
-          </p>
-        </div>
-      </div>
-      {gaps.length === 0 ? (
-        <p className="cv-muted">Nothing stands out: no missing skill is asked for often enough here.</p>
-      ) : (
-        <ol className="cv-gaps">
-          {shown.map((gap, index) => (
-            <li key={gap.name}>
-              <span className="rank">{index + 1}</span>
-              <div>
-                <div className="cv-gap-head">
-                  <strong>{gap.name}</strong>
-                  <span className="cv-gap-gain">{gap.gained ? `+${gap.gained} good matches` : "small gains"}</span>
-                </div>
-                <div className="cv-gap-meta">
-                  {gap.kind === "language" ? (
-                    <>
-                      asked in {count(gap.postings)} of {count(scored)} postings · you have{" "}
-                      {gap.coverage.via ? gap.coverage.via : "none"}
-                    </>
-                  ) : (
-                    <>
-                      asked in {percent(gap.share)} of postings ({count(gap.required_postings)} require it)
-                      {gap.coverage.kind === "substitute" && gap.coverage.via ? ` · partly covered by your ${gap.coverage.via}` : ""}
-                    </>
-                  )}
-                </div>
-                {gap.builds_on.length > 0 && (
-                  <div className="cv-gap-builds">
-                    Builds on your {gap.builds_on.join(", ")}
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-      {gaps.length > GAPS_FIRST && (
-        <button type="button" className="more" onClick={() => setAll(!all)}>
-          {all ? "Show fewer" : `Show all ${gaps.length}`}
-        </button>
-      )}
-    </section>
+    <ol className="cv-gaps">
+      {shown.map((gap, index) => (
+        <li key={gap.name} style={{ "--i": index } as React.CSSProperties}>
+          <span className="rank">{index + 1}</span>
+          <div>
+            <div className="cv-gap-head">
+              <strong>{gap.name}</strong>
+              <span className="cv-gap-gain">{gap.gained ? `+${gap.gained}` : "small"}</span>
+            </div>
+            <span className="cv-gap-track" aria-hidden="true">
+              <span style={{ width: `${(gap.gained / most) * 100}%` }} />
+            </span>
+            <div className="cv-gap-meta">
+              {gap.kind === "language" ? (
+                <>
+                  asked in {count(gap.postings)} of {count(scored)} postings · you have {gap.coverage.via ?? "none"}
+                </>
+              ) : (
+                <>
+                  asked in {percent(gap.share)} of postings ({count(gap.required_postings)} require it)
+                  {gap.coverage.kind === "substitute" && gap.coverage.via ? ` · partly covered by your ${gap.coverage.via}` : ""}
+                </>
+              )}
+            </div>
+            {gap.builds_on.length > 0 && <div className="cv-gap-builds">Builds on your {gap.builds_on.join(", ")}</div>}
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
 
-function RoleFit({ analysis, onRole }: { analysis: Analysis; onRole: (role: string) => void }) {
-  const roles = analysis.roles.filter((r) => r.scored >= 5).slice(0, 10);
+export function RoleFit({ analysis, onRole }: { analysis: Analysis; onRole: (role: string) => void }) {
+  const roles = analysis.roles.filter((r) => r.scored >= 5).slice(0, 8);
+  if (roles.length === 0) return <p className="cv-muted">Too few postings here to compare roles.</p>;
   return (
-    <section className="card" aria-labelledby="cv-roles-title">
-      <div className="card-head">
-        <div>
-          <h2 id="cv-roles-title">Where you fit best</h2>
-          <p>
-            Share of each role&apos;s postings {analysis.region === "all" ? "in Germany" : `in ${analysis.region_label}`} that
-            are at least a good match. Choose a role to compare with it.
-          </p>
-        </div>
-      </div>
-      {roles.length === 0 ? (
-        <p className="cv-muted">Too few postings here to compare roles.</p>
-      ) : (
-        <ul className="bars clickable compact cv-roles">
-          {roles.map((role) => (
-            <li key={role.id}>
-              <button
-                type="button"
-                className={`bar-row${role.id === analysis.role ? " emphasis" : ""}`}
-                onClick={() => onRole(role.id)}
-                aria-pressed={role.id === analysis.role}
-                title={`${role.good_or_better} of ${role.scored} postings`}
-              >
-                <span className="name">{role.label}</span>
-                <span className="track">
-                  <span className="fill one" style={{ width: `${Math.max(role.share * 100, 1)}%` }} />
-                </span>
-                <span className="value">{percent(role.share)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    <ul className="bars clickable compact cv-roles">
+      {roles.map((role) => (
+        <li key={role.id}>
+          <button
+            type="button"
+            className={`bar-row${role.id === analysis.role ? " emphasis" : ""}`}
+            onClick={() => onRole(role.id)}
+            aria-pressed={role.id === analysis.role}
+            title={`${role.good_or_better} of ${role.scored} postings are a good match. Show this role.`}
+          >
+            <span className="name">{role.label}</span>
+            <span className="track">
+              <span className="fill one" style={{ width: `${Math.max(role.share * 100, 1)}%` }} />
+            </span>
+            <span className="value">{percent(role.share)}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function Demand({ analysis }: { analysis: Analysis }) {
-  const [all, setAll] = useState(false);
-  const rows = all ? analysis.demand : analysis.demand.slice(0, DEMAND_FIRST);
+export function Demand({ analysis }: { analysis: Analysis }) {
   const covered = analysis.demand.filter((d) => d.coverage.kind === "have" || d.coverage.kind === "proven").length;
   return (
-    <section className="card" aria-labelledby="cv-demand-title">
-      <div className="card-head">
-        <div>
-          <h2 id="cv-demand-title">The skills these postings ask for</h2>
-          <p>
-            You cover {covered} of the {analysis.demand.length} most asked skills. The bar is the share of postings that ask
-            for the skill; its color shows whether your CV covers it.
-          </p>
-        </div>
-      </div>
+    <>
+      <p className="cv-muted">
+        You cover <strong>{covered}</strong> of the {analysis.demand.length} skills these postings ask for most. The bar is
+        how many postings ask for the skill; its color, whether your CV covers it.
+      </p>
       <div className="legend">
         <span className="swatch">
           <i style={{ background: "var(--required)" }} />
@@ -219,7 +155,7 @@ function Demand({ analysis }: { analysis: Analysis }) {
         </span>
       </div>
       <ul className="bars cv-demand">
-        {rows.map((row) => (
+        {analysis.demand.map((row) => (
           <li key={row.skill} className="bar-row">
             <span className="name">{row.skill}</span>
             <span className="track">
@@ -230,35 +166,21 @@ function Demand({ analysis }: { analysis: Analysis }) {
           </li>
         ))}
       </ul>
-      {analysis.demand.length > DEMAND_FIRST && (
-        <button type="button" className="more" onClick={() => setAll(!all)}>
-          {all ? "Show fewer" : `Show all ${analysis.demand.length}`}
-        </button>
-      )}
-    </section>
+    </>
   );
 }
 
-function Matches({ matches, onOpen }: { matches: Match[]; onOpen: (refnr: string, origin: Origin) => void }) {
+export function Matches({ matches, onOpen }: { matches: Match[]; onOpen: (refnr: string, origin: Origin) => void }) {
   const [all, setAll] = useState(false);
   const shown = all ? matches : matches.slice(0, MATCHES_FIRST);
   return (
-    <section className="card" aria-labelledby="cv-matches-title">
-      <div className="card-head">
-        <div>
-          <h2 id="cv-matches-title">Your best matches</h2>
-          <p>
-            The open postings that fit your profile best. Each score is skills × language × seniority; open a posting to read
-            it.
-          </p>
-        </div>
-      </div>
+    <>
       <ul className="cv-matches">
-        {shown.map((m) => {
+        {shown.map((m, index) => {
           const missing = m.skills.filter((k) => k.required && k.coverage.kind === "missing").map((k) => k.skill);
-          const short = m.languages.filter((l) => m.parts.language < 1 && l.needed !== "not asked");
+          const short = m.parts.language < 1 ? m.languages : [];
           return (
-            <li key={m.refnr}>
+            <li key={m.refnr} style={{ "--i": Math.min(index, 10) } as React.CSSProperties}>
               <button
                 type="button"
                 className="cv-match"
@@ -282,11 +204,7 @@ function Matches({ matches, onOpen }: { matches: Match[]; onOpen: (refnr: string
                       .filter(Boolean)
                       .join(" · ")}
                   </div>
-                  <div className="cv-parts">
-                    <Part label="Skills" value={m.parts.skills} />
-                    <Part label="Language" value={m.parts.language} />
-                    <Part label="Seniority" value={m.parts.seniority} />
-                  </div>
+                  <Parts parts={m.parts} />
                   <div className="cv-match-skills">
                     {m.skills.map((k) => (
                       <span
@@ -319,28 +237,38 @@ function Matches({ matches, onOpen }: { matches: Match[]; onOpen: (refnr: string
           {all ? "Show fewer" : `Show all ${matches.length}`}
         </button>
       )}
-    </section>
+    </>
   );
 }
 
-function Part({ label, value }: { label: string; value: number }) {
+export function Parts({ parts }: { parts: Match["parts"] }) {
   return (
-    <span className="cv-part" title={`${label}: ${percent(value)}`}>
-      <span>{label}</span>
-      <span className="cv-part-track">
-        <span style={{ width: `${value * 100}%` }} />
-      </span>
-    </span>
+    <div className="cv-parts">
+      {(
+        [
+          ["Skills", parts.skills],
+          ["Language", parts.language],
+          ["Seniority", parts.seniority],
+        ] as [string, number][]
+      ).map(([label, value]) => (
+        <span key={label} className="cv-part" title={`${label}: ${percent(value)}`}>
+          <span>{label}</span>
+          <span className="cv-part-track">
+            <span style={{ width: `${value * 100}%` }} />
+          </span>
+        </span>
+      ))}
+    </div>
   );
 }
 
-function tone(coverage: Coverage): "have" | "partly" | "missing" {
+export function tone(coverage: Coverage): "have" | "partly" | "missing" {
   if (coverage.kind === "have" || coverage.kind === "proven") return "have";
   if (coverage.kind === "substitute") return "partly";
   return "missing";
 }
 
-function status(coverage: Coverage, evidence: string | null): string {
+export function status(coverage: Coverage, evidence: string | null): string {
   switch (coverage.kind) {
     case "have":
       return evidence === "work" ? "used at work" : evidence ? `you have it (${evidenceText(evidence)})` : "you have it";
