@@ -1,0 +1,39 @@
+title: Data scientist who wants to move to data engineering
+person: Mei Chen (fictional)
+language: English
+target: {role: data_engineer, region: all}
+story: >
+  She asks about a role that is not the one she has. The analysis should say honestly
+  that data science fits her better today, and name the data engineering basics she
+  lacks (pipelines, warehouses, orchestration) as the things to learn.
+checks:
+  - kind: role
+    values: [data_scientist, ml_engineer]
+    why: Her work is forecasting models, deep learning and statistics.
+  - kind: seniority
+    values: [mid]
+    why: About 3.6 years of work since 04/2023; the PhD is studies.
+  - kind: years
+    min: 3
+    max: 4.5
+    why: 04/2023 to today (11/2026) is about 3.6 years; the PhD is studies, which the prompt leaves out.
+  - kind: has
+    skills: [Python, R, SQL, Pandas, NumPy, scikit-learn, PyTorch, MLflow, Tableau, AWS, PostgreSQL]
+    why: All are named in her experience or skills.
+  - kind: has
+    skills: [Machine Learning, Deep Learning, Statistics]
+    why: Named in her skills and described in her work.
+  - kind: lacks
+    skills: [Airflow, Spark, dbt, Snowflake]
+    why: The CV never names them; they must not be added because she wants a data engineering job.
+  - kind: best_role
+    values: [data_scientist, ml_engineer, data_analyst]
+    top: 3
+    why: Her skills fit data science and analytics jobs better than data engineering jobs.
+  - kind: gap
+    skills: [Data Modeling, Data Warehouse, ETL, Airflow, Spark, dbt, Data Lake]
+    top: 5
+    why: These data engineering basics are asked for often and missing from her CV.
+  - kind: no_gap
+    skill: Python
+    why: She has it.

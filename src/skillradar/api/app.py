@@ -6,24 +6,31 @@
 /api/postings   open postings for a role and region, newest first
 /api/postings/{refnr}  one posting with the important parts marked
 /api/labels     the review page for the evaluation labels (see labeling.py)
-/api/health     pipeline health: freshness, runs, tests, Claude cost, coverage, scores
+/api/health     pipeline health: freshness, runs, tests, Claude cost, coverage
+/api/cv         the CV analysis (see cv.py)
 /               the page, built from web/ with `npm run build`
 /label          the review page
 /health         the health page
+/cv             the CV analysis page
 """
 
 from pathlib import Path
 from typing import Annotated
 
+import anthropic
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
+from skillradar.api.cv import ClientFactory, cv_router
 from skillradar.api.data import GoldData, NoData
 from skillradar.api.labeling import labeling_router
 from skillradar.api.labels import ALL, REGIONS, ROLES
 from skillradar.api.postings import REFNR
 from skillradar.config import DATA_DIR, PROJECT_ROOT
+from skillradar.cv.families import load_families
+from skillradar.cv.market import MarketCache
+from skillradar.cv.showcase import SHOWCASE_DIR
 from skillradar.evaluate.labels import LABELS_PATH, LabelStore
 from skillradar.health import build_health
 from skillradar.skills.taxonomy import load_taxonomy
@@ -31,7 +38,7 @@ from skillradar.transform.runner import serve_dir
 
 WEB_BUILD = PROJECT_ROOT / "web" / "out"
 # Pages besides the start page. The static build writes them as <name>.html.
-PAGES = ("label", "health")
+PAGES = ("label", "health", "cv")
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -46,7 +53,11 @@ SECURITY_HEADERS = {
 
 
 def create_app(
-    data_dir: Path = DATA_DIR, web_build: Path = WEB_BUILD, labels: Path = LABELS_PATH
+    data_dir: Path = DATA_DIR,
+    web_build: Path = WEB_BUILD,
+    labels: Path = LABELS_PATH,
+    showcases: Path = SHOWCASE_DIR,
+    make_client: ClientFactory = anthropic.Anthropic,
 ) -> FastAPI:
     taxonomy = load_taxonomy()
     gold = GoldData(serve_dir(data_dir), taxonomy)
@@ -107,6 +118,16 @@ def create_app(
         return build_health(data_dir)
 
     app.include_router(labeling_router(LabelStore(labels), data_dir, taxonomy))
+    app.include_router(
+        cv_router(
+            data_dir,
+            taxonomy,
+            load_families(taxonomy),
+            MarketCache(serve_dir(data_dir), taxonomy),
+            showcases,
+            make_client,
+        )
+    )
 
     for page in PAGES:
         if (web_build / f"{page}.html").exists():
@@ -124,7 +145,8 @@ def create_app(
 
 
 def _page_route(app: FastAPI, page: str, file: Path) -> None:
-    @app.get(f"/{page}", include_in_schema=False)
+    # HEAD too: the page's links ask with HEAD whether a page exists before they open it.
+    @app.api_route(f"/{page}", methods=["GET", "HEAD"], include_in_schema=False)
     def serve() -> FileResponse:
         return FileResponse(file)
 

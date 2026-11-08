@@ -1,0 +1,66 @@
+title: Data engineer, 4.5 years, Berlin
+person: Lena Hoffmann (fictional)
+language: English
+target: {role: data_engineer, region: BERLIN}
+story: >
+  A strong, typical data engineer: the modern data stack used at work for years, German
+  native. The reference case: the analysis should read her as a mid-level data engineer,
+  give credit for what she proves (AWS proves cloud computing), and not send her to learn
+  what she already has.
+checks:
+  - kind: role
+    values: [data_engineer]
+    why: Every job on the CV builds pipelines, warehouses and data models.
+  - kind: seniority
+    values: [mid]
+    why: About 4.5 years of professional work since 06/2022; the prompt calls 2 to 5 years mid.
+  - kind: years
+    min: 3.8
+    max: 5
+    why: 06/2022 to 11/2026 is 54 months, 4.5 years; the working student job is left out.
+  - kind: language
+    language: German
+    values: [native]
+    why: The CV says German native.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: The CV says English fluent (C1).
+  - kind: has
+    skills: [Python, SQL, Airflow, dbt, Snowflake, AWS, Docker, Terraform, Kafka, PostgreSQL, GitLab CI]
+    why: All are named in the experience or skills section.
+  - kind: has
+    skills: [Data Modeling, Data Warehouse, ETL, CI/CD]
+    why: General skills may come from descriptions; she designed a star schema for a sales warehouse and set up CI/CD.
+  - kind: lacks
+    skills: [Spark, Azure, Kubernetes, Databricks]
+    why: The CV never names them; a product the CV does not name must not be added.
+  - kind: evidence
+    skill: Airflow
+    values: [work]
+    why: She built 40+ Airflow DAGs in her current job.
+  - kind: evidence
+    skill: Kafka
+    values: [work]
+    why: She built a Kafka feed in her previous job.
+  - kind: best_role
+    values: [data_engineer]
+    top: 3
+    why: Her skills are a data engineer's skills, so data engineering should be among the best fits.
+  - kind: covered
+    skill: Cloud Computing
+    values: [proven, have]
+    why: AWS used at work proves cloud computing.
+  - kind: covered
+    skill: ETL
+    values: [have, proven]
+    why: She wrote ETL jobs and builds pipelines with Airflow and dbt.
+  - kind: no_gap
+    skill: Airflow
+    why: She already has it; it must not be suggested to learn.
+  - kind: no_gap
+    skill: dbt
+    why: She already has it; it must not be suggested to learn.
+  - kind: good_share
+    min: 0.2
+    why: A strong mid-level data engineer should be at least a good match for a fair share of data engineer jobs.

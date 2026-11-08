@@ -5,31 +5,25 @@
 /api/labels/{refnr}/marks    where the label's skills are in the text (POST, reads only)
 /api/labels/{refnr}          save a label as draft or verified (PUT)
 
-Only for the local page. The posting texts come from data/eval/texts.jsonl, never from
-the warehouse, and Claude's answer is never shown, so it can't sway the label.
-
-The page runs on this machine only, but any website open in the same browser could send
-requests to 127.0.0.1. So every request must name this server as its host (stops DNS
-rebinding), and writes must come from this page (Origin) as JSON, which a page on another
-site can't send without the server's permission.
+Only for the local page (see security.py). The posting texts come from
+data/eval/texts.jsonl, never from the warehouse, and Claude's answer is never shown, so it
+can't sway the label.
 """
 
 from collections.abc import Callable
 from pathlib import Path
 from typing import Literal, get_args
-from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import Field
 
 from skillradar.api.postings import REFNR, marks
+from skillradar.api.security import local_only, same_page_json
 from skillradar.evaluate.labels import Answer, Label, LabelError, LabelStore, texts_path
 from skillradar.extract.prompt import ROLES
 from skillradar.extract.schema import Language, Level, Remote, Seniority, SkillMention, Strict
 from skillradar.skills.taxonomy import Taxonomy
 from skillradar.storage import read_json_lines
-
-LOCAL_HOSTS = {"127.0.0.1", "localhost"}
 
 
 class SaveRequest(Strict):
@@ -40,20 +34,6 @@ class SaveRequest(Strict):
 
 class MarksRequest(Strict):
     skills: list[SkillMention] = Field(max_length=150)
-
-
-def local_only(request: Request) -> None:
-    host = request.headers.get("host", "")
-    if urlsplit(f"//{host}").hostname not in LOCAL_HOSTS:
-        raise HTTPException(status_code=403, detail="only for this computer")
-
-
-def same_page_json(request: Request) -> None:
-    origin = request.headers.get("origin")
-    if origin is not None and urlsplit(origin).hostname not in LOCAL_HOSTS:
-        raise HTTPException(status_code=403, detail="only from the local page")
-    if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
-        raise HTTPException(status_code=415, detail="send JSON")
 
 
 def labeling_router(store: LabelStore, data_dir: Path, taxonomy: Taxonomy) -> APIRouter:

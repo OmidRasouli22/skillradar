@@ -1,0 +1,52 @@
+title: Senior system administrator, German CV
+person: Jonas Becker (fictional)
+language: German
+target: {role: it_administration, region: NORDRHEIN_WESTFALEN}
+story: >
+  A CV written in German, with German words for skills (Netzwerke, Datensicherung). Tests
+  reading German, counting the apprenticeship as training rather than work, and that
+  products prove concepts: VMware proves virtualization, Veeam proves backup.
+checks:
+  - kind: role
+    values: [it_administration]
+    why: Eight years of running servers, networks and Microsoft 365.
+  - kind: seniority
+    values: [senior]
+    why: More than 5 years of work and "Senior" in the current title.
+  - kind: years
+    min: 7.5
+    max: 8.5
+    why: 09/2018 to today (11/2026) is about 8.2 years; the apprenticeship is training.
+  - kind: language
+    language: German
+    values: [native]
+    why: Muttersprache is native.
+  - kind: language
+    language: English
+    values: [good]
+    why: "gut (B2) is good."
+  - kind: has
+    skills: [Windows Server, Active Directory, Entra ID, VMware, Hyper-V, Microsoft 365, Intune, Exchange, Veeam, PowerShell, Fortinet, Cisco, ITIL]
+    why: All are named in his experience or skills.
+  - kind: has
+    skills: [Networking, Backup, VPN, Monitoring]
+    why: The CV describes them in German (Netzwerk, Datensicherung, VPN, Monitoring).
+  - kind: evidence
+    skill: ITIL
+    values: [work, education]
+    why: He works by ITIL processes and has the ITIL 4 Foundation certificate.
+  - kind: evidence
+    skill: Azure
+    values: [education]
+    why: Azure appears only as a certificate, never in a job.
+  - kind: best_role
+    values: [it_administration]
+    top: 2
+    why: His skills are a system administrator's skills.
+  - kind: covered
+    skill: Virtualization
+    values: [proven, have]
+    why: VMware and Hyper-V at work prove virtualization.
+  - kind: good_share
+    min: 0.2
+    why: An experienced administrator with native German should fit a fair share of admin jobs in his state.

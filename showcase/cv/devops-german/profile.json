@@ -1,0 +1,199 @@
+{
+  "read_at": "2026-11-08T10:04:10+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv2",
+  "cost_usd": 0.001352,
+  "notes": [
+    "Added 1 skill(s) found by keyword search: DevOps."
+  ],
+  "profile": {
+    "headline": "DevOps Engineer",
+    "role": "devops_engineer",
+    "seniority": "senior",
+    "years_experience": 5.2,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "Turkish",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Azure",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "DevOps Engineer at Hafenkante Software, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Built and run AKS platform for 60 microservices, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Infrastructure as Code",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Full infrastructure as code with Terraform, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Terraform",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Terraform modules for all teams, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "GitOps",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "GitOps deployments with Argo CD, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "ArgoCD",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Deployments with Argo CD and Helm charts, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Helm",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Helm charts for deployments, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "work",
+        "years": 5.5,
+        "last_used": 2026,
+        "context": "Container images at Hafenkante, first use 2020-2021",
+        "source": "claude"
+      },
+      {
+        "name": "GitLab CI",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "CI/CD pipelines at Hafenkante Software, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "CI/CD",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "CI/CD pipelines with GitLab CI, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Trivy",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Container security scans at Hafenkante, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Prometheus",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Monitoring and alerting at Hafenkante, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Grafana",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Monitoring dashboards at Hafenkante, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Loki",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Log management at Hafenkante, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Monitoring",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Monitoring and alerting at Hafenkante, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Microservices",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Platform for 60 microservices at Hafenkante",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 4.5,
+        "last_used": 2026,
+        "context": "Automation at Hafenkante Software, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Bash",
+        "evidence": "work",
+        "years": 5.5,
+        "last_used": 2026,
+        "context": "Scripts at Hafenkante Software, 2020-present",
+        "source": "claude"
+      },
+      {
+        "name": "Linux",
+        "evidence": "work",
+        "years": 5.5,
+        "last_used": 2026,
+        "context": "Linux server and Ubuntu administration, 2020-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in CV skills list",
+        "source": "claude"
+      },
+      {
+        "name": "DevOps",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      }
+    ]
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "read_at": "2026-11-08T10:04:48+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv2",
+  "cost_usd": 0.001368,
+  "notes": [
+    "Left out 2 skill(s) the CV does not name: BAPI, IDoc."
+  ],
+  "profile": {
+    "headline": "Teamleiter SAP-Entwicklung",
+    "role": "sap_erp",
+    "seniority": "lead",
+    "years_experience": 10.4,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "SAP S/4HANA",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, migration from SAP ECC, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "SAP ECC",
+        "evidence": "work",
+        "years": null,
+        "last_used": null,
+        "context": "Isartal Maschinenbau, migration from SAP ECC",
+        "source": "claude"
+      },
+      {
+        "name": "ABAP",
+        "evidence": "work",
+        "years": 9.5,
+        "last_used": 2026,
+        "context": "SAP developer Alpenblick 2016-2021, team lead Isartal 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "SAP Fiori",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, Fiori apps development, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "OData",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, OData services for Fiori apps",
+        "source": "claude"
+      },
+      {
+        "name": "SAP BTP",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, extensions using Cloud Application Programming Model",
+        "source": "claude"
+      },
+      {
+        "name": "SAP HANA",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, performance optimization on SAP HANA",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": null,
+        "last_used": 2026,
+        "context": "Isartal Maschinenbau, SQL performance optimization on HANA",
+        "source": "claude"
+      },
+      {
+        "name": "SAP",
+        "evidence": "work",
+        "years": 9.5,
+        "last_used": 2026,
+        "context": "SAP development roles at Alpenblick and Isartal Maschinenbau",
+        "source": "claude"
+      },
+      {
+        "name": "RFC",
+        "evidence": "work",
+        "years": null,
+        "last_used": 2021,
+        "context": "Alpenblick Consulting, interfaces via RFC",
+        "source": "claude"
+      },
+      {
+        "name": "Adobe Forms",
+        "evidence": "work",
+        "years": null,
+        "last_used": 2021,
+        "context": "Alpenblick Consulting, forms created with Adobe Forms",
+        "source": "claude"
+      },
+      {
+        "name": "Scrum",
+        "evidence": "work",
+        "years": 5.5,
+        "last_used": 2021,
+        "context": "Alpenblick Consulting, agile projects following Scrum",
+        "source": "claude"
+      },
+      {
+        "name": "Jira",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in skills list",
+        "source": "claude"
+      }
+    ]
+  }
+}

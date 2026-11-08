@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChartCard, Swatch, type Table } from "@/components/ChartCard";
 import { Heatmap, ScaleLegend } from "@/components/Heatmap";
@@ -13,7 +14,7 @@ import { SkillBars } from "@/components/SkillBars";
 import { StackedBars } from "@/components/StackedBars";
 import { StateTiles } from "@/components/StateTiles";
 import { TooltipProvider } from "@/components/Tooltip";
-import { getDashboard, getOverview, type Choice, type Dashboard, type Overview, type Part } from "@/lib/api";
+import { getDashboard, getOverview, PUBLIC_SITE, type Choice, type Dashboard, type Overview, type Part } from "@/lib/api";
 import { count, day, percent } from "@/lib/format";
 import { GERMAN, REMOTE, SENIORITY } from "@/lib/labels";
 
@@ -102,7 +103,15 @@ export default function Home() {
           <div className="brand">
             Skill<span>Radar</span>
           </div>
-          {overview && <div>Data as of {day(overview.as_of)}</div>}
+          <div className="top-right">
+            {overview && <span>Data as of {day(overview.as_of)}</span>}
+            {/* The CV analysis runs locally only; the public site has no server for it. */}
+            {!PUBLIC_SITE && (
+              <Link className="top-link" href="/cv">
+                Analyse your CV →
+              </Link>
+            )}
+          </div>
         </header>
 
         <section className="hero">

@@ -1,0 +1,89 @@
+{
+  "read_at": "2026-11-08T10:03:38+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv2",
+  "cost_usd": 0.001246,
+  "notes": [],
+  "profile": {
+    "headline": "Entwicklungsingenieurin Antriebstechnik",
+    "role": "other_tech",
+    "seniority": "unknown",
+    "years_experience": 0.0,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "good"
+      }
+    ],
+    "skills": [
+      {
+        "name": "CAD",
+        "evidence": "work",
+        "years": 8.5,
+        "last_used": 2026,
+        "context": "Konstrukteurin Filstal and Entwicklungsingenieurin Neckarwerk, 2017-heute",
+        "source": "claude"
+      },
+      {
+        "name": "FEM",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2026,
+        "context": "Berechnungen Getriebekomponenten, Neckarwerk Antriebe, 2020-heute",
+        "source": "claude"
+      },
+      {
+        "name": "MATLAB",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2026,
+        "context": "Simulation Antriebsstränge, Neckarwerk Antriebe, 2020-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Excel",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2026,
+        "context": "Auswertung Prüfstandsdaten, Neckarwerk Antriebe, 2020-heute",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Kleine Skripte Prüfstandsdaten, Neckarwerk seit 2025; Online-Kurs 2025",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "education",
+        "years": null,
+        "last_used": 2026,
+        "context": "Online-Kurs SQL Grundlagen, 20 Stunden, 2026",
+        "source": "claude"
+      },
+      {
+        "name": "SAP",
+        "evidence": "work",
+        "years": 2.5,
+        "last_used": 2020,
+        "context": "Stücklisten in SAP, Filstal Fördertechnik, 2017-2020",
+        "source": "claude"
+      },
+      {
+        "name": "FMEA",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2026,
+        "context": "Erstellung FMEA, Neckarwerk Antriebe, 2020-heute",
+        "source": "claude"
+      }
+    ]
+  }
+}

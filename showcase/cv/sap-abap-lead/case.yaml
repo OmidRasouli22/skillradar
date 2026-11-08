@@ -1,0 +1,36 @@
+title: SAP development team lead, German CV
+person: Tobias Wagner (fictional)
+language: German
+target: {role: sap_erp, region: BAYERN}
+story: >
+  A specialist field with its own skill names. Tests that leading a team is read as lead,
+  that SAP S/4HANA proves SAP, and that the best role is SAP / ERP.
+checks:
+  - kind: role
+    values: [sap_erp]
+    why: Ten years of SAP development.
+  - kind: seniority
+    values: [lead]
+    why: He leads a team of five developers (Teamleiter).
+  - kind: years
+    min: 9.5
+    max: 11
+    why: 07/2016 to today (11/2026) is about 10.3 years.
+  - kind: language
+    language: English
+    values: [fluent]
+    why: Verhandlungssicher is fluent.
+  - kind: has
+    skills: [ABAP, SAP S/4HANA, SAP Fiori, SAP BTP, SAP HANA, OData, SQL, Scrum, Jira]
+    why: All are named in his experience or skills.
+  - kind: best_role
+    values: [sap_erp]
+    top: 2
+    why: His skills are SAP skills.
+  - kind: covered
+    skill: SAP
+    values: [have, proven]
+    why: SAP S/4HANA and ABAP prove SAP.
+  - kind: no_gap
+    skill: ABAP
+    why: He has it.

@@ -1,0 +1,28 @@
+title: Mechanical engineer who wants to move into software
+person: Anna Schulz (fictional)
+language: German
+target: {role: software_engineer, region: all}
+story: >
+  An honest weak match. Eight years of engineering, but almost no software work. The
+  analysis should not inflate her fit: few software postings should be a good match,
+  and Python learned in a course should count as education, not work.
+checks:
+  - kind: role
+    values: [embedded_engineer, other_tech, software_engineer]
+    why: No role fits well; engineering tools point to embedded or other tech work.
+  - kind: seniority
+    values: [junior, unknown, student]
+    why: Her professional experience is in mechanical engineering, not IT, software or data.
+  - kind: has
+    skills: [MATLAB, CAD, Excel, Python, SQL, FMEA]
+    why: All are named in her CV.
+  - kind: evidence
+    skill: SQL
+    values: [education, listed]
+    why: SQL appears only as an online course and in the skills list.
+  - kind: lacks
+    skills: [Java, Git, Docker, C++]
+    why: The CV never names them.
+  - kind: good_share
+    max: 0.05
+    why: Without software experience she should be a good match for very few software jobs.

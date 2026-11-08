@@ -1,0 +1,195 @@
+{
+  "read_at": "2026-11-08T10:03:50+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv2",
+  "cost_usd": 0.001641,
+  "notes": [
+    "Added 1 skill(s) found by keyword search: DevOps."
+  ],
+  "profile": {
+    "headline": "Data Engineer",
+    "role": "data_engineer",
+    "seniority": "mid",
+    "years_experience": 4.5,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Airflow",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Data Engineer at Nordwind Commerce GmbH, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "dbt",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Data Engineer at Nordwind Commerce GmbH, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "Snowflake",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Data Engineer at Nordwind Commerce GmbH, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "Kafka",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Junior Data Engineer at Spreebahn Logistics AG, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Junior Data Engineer at Spreebahn Logistics AG, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "Pandas",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Skills list",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "work",
+        "years": 3.5,
+        "last_used": 2026,
+        "context": "ETL jobs at Spreebahn Logistics AG, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": 5.5,
+        "last_used": 2026,
+        "context": "Working Student BI and data engineering roles, 2020-present",
+        "source": "claude"
+      },
+      {
+        "name": "Bash",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Skills list",
+        "source": "claude"
+      },
+      {
+        "name": "Power BI",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2024,
+        "context": "Reports for operations team at Spreebahn, 2022-2024",
+        "source": "claude"
+      },
+      {
+        "name": "Excel",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2022,
+        "context": "Dashboards for controlling team at Spreebahn, 2020-2022",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "S3, Lambda, ECS pipelines at Nordwind, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Pipeline runtime at Nordwind Commerce GmbH, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "Terraform",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Infrastructure at Nordwind Commerce GmbH, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "GitLab CI",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "CI/CD for data platform at Nordwind, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Skills list",
+        "source": "claude"
+      },
+      {
+        "name": "ETL",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Load pipelines at Spreebahn and Nordwind, 2022-present",
+        "source": "claude"
+      },
+      {
+        "name": "Data Warehouse",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2026,
+        "context": "Warehouse loads at Spreebahn and Nordwind Commerce",
+        "source": "claude"
+      },
+      {
+        "name": "Data Modeling",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Star schema for sales warehouse at Nordwind, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "CI/CD",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Linting, dbt tests, deployments at Nordwind, 2024-present",
+        "source": "claude"
+      },
+      {
+        "name": "DevOps",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      }
+    ]
+  }
+}
