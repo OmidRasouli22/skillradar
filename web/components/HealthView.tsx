@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, PUBLIC_SITE, type Health, type Score } from "@/lib/api";
+import { getHealth, PUBLIC_SITE, type Health } from "@/lib/api";
 import { count, percent } from "@/lib/format";
 
 type State = Health["freshness"]["state"];
@@ -90,11 +90,6 @@ export function HealthView() {
             <Tests tests={health.tests} />
             <Claude claude={health.claude} />
           </div>
-          <div className="health-grid">
-            <Coverage coverage={health.coverage} />
-            <Layers layers={health.layers} />
-          </div>
-          <Evaluation evaluation={health.evaluation} />
         </>
       )}
 
@@ -293,143 +288,6 @@ function Claude({ claude }: { claude: Health["claude"] }) {
   );
 }
 
-function Coverage({ coverage }: { coverage: Health["coverage"] }) {
-  return (
-    <section className="card">
-      <div className="card-head">
-        <div>
-          <h2>Answers per week</h2>
-          <p>
-            Share of the postings open that week that have an answer from Claude. Postings that closed before Claude read
-            them never get one, so the first weeks are lower.
-          </p>
-        </div>
-      </div>
-      {!coverage || coverage.weeks.length === 0 ? (
-        <p className="note">The weekly history starts with the next build.</p>
-      ) : (
-        <div className="bars">
-          {coverage.weeks.map((week) => (
-            <div className="bar-row" key={week.week_start}>
-              <span className="name">
-                {weekLabel(week.week_start)}
-                {week.ended ? "" : " (so far)"}
-              </span>
-              <span className="track">
-                <span className="fill" style={{ width: `${Math.round(week.coverage * 100)}%` }} />
-              </span>
-              <span className="value">{percent(week.coverage)}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function Layers({ layers }: { layers: Health["layers"] }) {
-  if (!layers) return null;
-  const rows = [...Object.entries(layers.silver), ...Object.entries(layers.gold)];
-  return (
-    <section className="card">
-      <div className="card-head">
-        <div>
-          <h2>Data layers</h2>
-          <p>Raw downloads (bronze), clean tables (silver) and the tables behind the charts (gold).</p>
-        </div>
-      </div>
-      <div className="table-wrap">
-        <table>
-          <tbody>
-            {Object.entries(layers.bronze).map(([kind, info]) => (
-              <tr key={kind}>
-                <td>bronze {kind}</td>
-                <td>
-                  {count(info.files)} files, {info.megabytes} MB
-                </td>
-              </tr>
-            ))}
-            {rows.map(([table, rowsCount]) => (
-              <tr key={table}>
-                <td>
-                  <code>{table}</code>
-                </td>
-                <td>{count(rowsCount)} rows</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {rows.length === 0 && <p className="note">Table sizes appear after the next build.</p>}
-    </section>
-  );
-}
-
-function Evaluation({ evaluation }: { evaluation: Health["evaluation"] }) {
-  const verified = evaluation?.sample.verified ?? 0;
-  const size = evaluation?.sample.size ?? 0;
-  return (
-    <section className="card">
-      <div className="card-head">
-        <div>
-          <h2>How good are the answers?</h2>
-          <p>
-            A random sample of {size || 150} postings is labeled by hand and compared with Claude&apos;s answers and with a
-            simple keyword search. The range after each number is a 95% interval.
-          </p>
-        </div>
-      </div>
-      {!evaluation || evaluation.systems.length === 0 ? (
-        <p className="note">
-          Labels are being checked{size ? `: ${verified} of ${size} verified` : ""}. Scores appear here when the labels
-          are verified.
-        </p>
-      ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th />
-                <th>Skills found correctly (precision)</th>
-                <th>Skills found (recall)</th>
-                <th>F1</th>
-                <th>Role</th>
-                <th>Seniority</th>
-                <th>Home office</th>
-                <th>Required or not</th>
-              </tr>
-            </thead>
-            <tbody>
-              {evaluation.systems.map((system) => (
-                <tr key={system.id}>
-                  <td>{system.id === "keywords" ? "Keyword search" : "Claude"}</td>
-                  <td>{score(system.skills?.precision)}</td>
-                  <td>{score(system.skills?.recall)}</td>
-                  <td>{score(system.skills?.f1)}</td>
-                  <td>{score(system.fields.role)}</td>
-                  <td>{score(system.fields.seniority)}</td>
-                  <td>{score(system.fields.remote)}</td>
-                  <td>{score(system.fields.required)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function score(value: Score | undefined): string {
-  if (!value || value.value == null) return "–";
-  const range = value.low != null && value.high != null ? ` (${pct(value.low)}–${pct(value.high)})` : "";
-  return `${pct(value.value)}${range}`;
-}
-
-function pct(share: number): string {
-  return `${Math.round(share * 100)}%`;
-}
-
 function statusList(counts: Record<string, number>): string {
   const parts = Object.entries(counts).map(([status, n]) => `${n} ${status}`);
   return parts.length ? parts.join(", ") : "none";
@@ -455,9 +313,4 @@ function moment(iso: string): string {
     minute: "2-digit",
     timeZone: "Europe/Berlin",
   });
-}
-
-function weekLabel(iso: string): string {
-  const date = new Date(`${iso}T00:00:00Z`);
-  return `Week of ${date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}`;
 }

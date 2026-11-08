@@ -1,6 +1,5 @@
 """Run the dbt project in transform/ against the local data folder."""
 
-import json
 import os
 import re
 from pathlib import Path
@@ -9,10 +8,10 @@ import duckdb
 from dbt.cli.main import dbtRunner
 
 from skillradar.config import PROJECT_ROOT
-from skillradar.storage import atomic_write, make_private_dir
+from skillradar.storage import make_private_dir
 
 DBT_PROJECT_DIR = PROJECT_ROOT / "transform"
-TABLE_NAME = re.compile(r"(silver|gold)_[a-z0-9_]{1,60}")
+GOLD_TABLE = re.compile(r"gold_[a-z0-9_]{1,60}")
 
 
 class TransformError(Exception):
@@ -63,13 +62,8 @@ def build(data_dir: Path, select: str | None = None) -> None:
     export_gold(data_dir)
 
 
-def table_counts_path(data_dir: Path) -> Path:
-    """Rows per silver and gold table after the last build, for the health page."""
-    return serve_dir(data_dir) / "table_counts.json"
-
-
 def export_gold(data_dir: Path) -> None:
-    """Copy every gold table to a Parquet file, and count the rows of every table.
+    """Copy every gold table to a Parquet file.
 
     The web API reads these files and never opens the warehouse, so a running page can't
     block the daily build. Each file is written next to the old one and then renamed, so
@@ -87,17 +81,12 @@ def export_gold(data_dir: Path) -> None:
                 "where table_type = 'BASE TABLE' order by table_name"
             ).fetchall()
             # Names go into SQL below, so only plain dbt model names are used.
-            if TABLE_NAME.fullmatch(name)
+            if GOLD_TABLE.fullmatch(name)
         ]
-        counts = {}
         for table in tables:
-            sql = f'select count(*) from "{table}"'  # noqa: S608 - checked name
-            counts[table] = con.execute(sql).fetchone()[0]
-            if table.startswith("gold_"):
-                temp = folder / f".{table}.parquet.tmp"
-                con.execute(f"copy \"{table}\" to '{temp}' (format parquet)")
-                os.replace(temp, folder / f"{table}.parquet")
-    atomic_write(table_counts_path(data_dir), json.dumps(counts, indent=2).encode("utf-8"))
+            temp = folder / f".{table}.parquet.tmp"
+            con.execute(f"copy \"{table}\" to '{temp}' (format parquet)")
+            os.replace(temp, folder / f"{table}.parquet")
 
 
 def _check_path(path: Path) -> None:

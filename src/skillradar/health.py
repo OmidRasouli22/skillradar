@@ -1,9 +1,9 @@
 """The pipeline health page: is the data fresh, did the last runs and tests pass, what did
-Claude cost, how complete are the answers, and how good is the extraction.
+Claude cost and how many open postings have an answer.
 
 Everything comes from files the pipeline writes anyway: run logs, dbt's run_results.json,
-the Claude batch files, the gold Parquet files and the evaluation report. The warehouse is
-never opened, so the page can't block a build.
+the Claude batch files and the gold Parquet files. The warehouse is never opened, so the
+page can't block a build.
 
 The result is published on the public site, so it holds counts, dates and costs only:
 no file paths, no error texts and no batch ids.
@@ -18,12 +18,11 @@ from typing import Any
 
 import duckdb
 
-from skillradar.evaluate.cli import report_path
 from skillradar.extract import budget
 from skillradar.extract.prompt import PROMPT_VERSION
 from skillradar.extract.settings import LlmSettings, load_settings
 from skillradar.extract.store import ExtractionStore
-from skillradar.transform.runner import serve_dir, table_counts_path
+from skillradar.transform.runner import serve_dir
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +53,11 @@ def build_health(data_dir: Path, now: datetime | None = None) -> dict:
         "thresholds": {"fresh_hours": FRESH_HOURS, "late_hours": LATE_HOURS},
         "freshness": freshness(runs, now),
         "runs": runs[:RUNS_SHOWN],
-        "layers": _part("layers", lambda: layers(data_dir)),
         "tests": _part(
             "tests", lambda: dbt_results(data_dir / "dbt" / "target" / "run_results.json")
         ),
         "claude": _part("claude", lambda: claude(data_dir, now)),
         "coverage": _part("coverage", lambda: coverage(serve_dir(data_dir))),
-        "evaluation": _part("evaluation", lambda: evaluation(report_path(data_dir))),
     }
 
 
@@ -96,26 +93,6 @@ def freshness(runs: list[dict], now: datetime) -> dict:
     hours = (now - datetime.fromisoformat(last)).total_seconds() / 3600
     state = "fresh" if hours <= FRESH_HOURS else "late" if hours <= LATE_HOURS else "stale"
     return {"last_success": last, "hours": round(hours, 1), "state": state}
-
-
-def layers(data_dir: Path) -> dict:
-    bronze = data_dir / "bronze"
-    files = {}
-    for kind, pattern in (
-        ("search", "search/*/run_*.jsonl.gz"),
-        ("details", "details/*/run_*.jsonl"),
-        ("runs", "runs/run_*.json"),
-    ):
-        found = list(bronze.glob(pattern))
-        size = sum(path.stat().st_size for path in found)
-        files[kind] = {"files": len(found), "megabytes": round(size / 1_000_000, 1)}
-    counts = _read_json(table_counts_path(data_dir))
-    tables = counts if isinstance(counts, dict) else {}
-    return {
-        "bronze": files,
-        "silver": {k: v for k, v in sorted(tables.items()) if k.startswith("silver_")},
-        "gold": {k: v for k, v in sorted(tables.items()) if k.startswith("gold_")},
-    }
 
 
 def dbt_results(path: Path) -> dict | None:
@@ -187,74 +164,24 @@ def claude(data_dir: Path, now: datetime) -> dict:
 
 
 def coverage(folder: Path) -> dict | None:
-    """Open postings with an answer now, and per week (gold_meta and gold_weeks)."""
-    meta_file, weeks_file = folder / "gold_meta.parquet", folder / "gold_weeks.parquet"
+    """Open postings with an answer from Claude (gold_meta)."""
+    meta_file = folder / "gold_meta.parquet"
     if not meta_file.exists():
         return None
     with duckdb.connect() as con:
-        meta = con.execute(
+        # Plain numbers, so the result can be written as JSON.
+        as_of, open_postings, answered, tech = con.execute(
             "select as_of, open_postings::bigint, postings_with_answers::bigint, "
             "tech_postings::bigint from read_parquet(?)",
             [str(meta_file)],
         ).fetchone()
-        weeks = []
-        if weeks_file.exists():
-            weeks = con.execute(
-                # Plain numbers, so the result can be written as JSON.
-                "select week_start, week_ended, open_postings::bigint, tech_postings::bigint, "
-                "coverage::double from read_parquet(?) order by week_start",
-                [str(weeks_file)],
-            ).fetchall()
-    as_of, open_postings, answered, tech = meta
     return {
         "as_of": str(as_of) if as_of else None,
         "open_postings": open_postings,
         "with_answer": answered,
         "tech_postings": tech,
         "share": round(answered / open_postings, 4) if open_postings else None,
-        "weeks": [
-            {
-                "week_start": str(week),
-                "ended": ended,
-                "open_postings": open_,
-                "tech_postings": tech_,
-                "coverage": share,
-            }
-            for week, ended, open_, tech_, share in weeks
-        ],
     }
-
-
-def evaluation(path: Path) -> dict | None:
-    """The extraction's scores. Numbers from unchecked drafts are never shown."""
-    report = _read_json(path)
-    if not isinstance(report, dict):
-        return None
-    sample = report.get("sample", {})
-    summary: dict[str, Any] = {"generated_at": report.get("generated_at"), "sample": sample}
-    if report.get("includes_drafts") or not sample.get("verified"):
-        summary["systems"] = []
-        return summary
-    summary["labels"] = report.get("labels")
-    summary["systems"] = [
-        {
-            "id": system["id"],
-            "name": system["name"],
-            "postings": system["postings"],
-            "skills": _pick(system.get("skills"), ("precision", "recall", "f1")),
-            "fields": {
-                field: (system.get(field) or {}).get("accuracy")
-                for field in ("role", "seniority", "remote", "required")
-            },
-        }
-        for system in report.get("systems", [])
-        if system["id"] == "keywords" or system["id"].endswith("/counted")
-    ]
-    return summary
-
-
-def _pick(scores: dict | None, keys: tuple[str, ...]) -> dict | None:
-    return {key: scores[key] for key in keys} if scores else None
 
 
 def _batch_cost(settings: LlmSettings, answers: list[dict]) -> float | None:

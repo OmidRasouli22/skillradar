@@ -164,8 +164,6 @@ export async function getPosting(refnr: string, signal?: AbortSignal): Promise<P
 }
 
 // Pipeline health (src/skillradar/health.py). Numbers only, never paths or error texts.
-export type Score = { value: number | null; low?: number | null; high?: number | null } | null;
-
 export type Health = {
   generated_at: string;
   thresholds: { fresh_hours: number; late_hours: number };
@@ -184,11 +182,6 @@ export type Health = {
     failed_details: number | null;
     errors: number;
   }[];
-  layers: {
-    bronze: Record<string, { files: number; megabytes: number }>;
-    silver: Record<string, number>;
-    gold: Record<string, number>;
-  } | null;
   tests: {
     finished_at: string | null;
     seconds: number;
@@ -214,19 +207,6 @@ export type Health = {
     with_answer: number;
     tech_postings: number;
     share: number | null;
-    weeks: { week_start: string; ended: boolean; open_postings: number; tech_postings: number; coverage: number }[];
-  } | null;
-  evaluation: {
-    generated_at: string | null;
-    sample: { size?: number; todo?: number; draft?: number; verified?: number };
-    labels?: number;
-    systems: {
-      id: string;
-      name: string;
-      postings: number;
-      skills: { precision: Score; recall: Score; f1: Score } | null;
-      fields: Record<"role" | "seniority" | "remote" | "required", Score>;
-    }[];
   } | null;
 };
 
