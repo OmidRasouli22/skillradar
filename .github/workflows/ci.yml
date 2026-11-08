@@ -32,10 +32,29 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
-          enable-cache: true
 
+      # dbt's parser (dbt-core-experimental-parser) is only an sdist on PyPI: building it
+      # downloads a file from GitHub releases, which often times out. Packages built from
+      # source are kept in the cache, and an older cache is used when uv.lock changed, so
+      # the download is needed only when the parser's version changes.
+      - name: Cache folder
+        run: echo "UV_CACHE_DIR=$RUNNER_TEMP/uv-cache" >> "$GITHUB_ENV"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/uv-cache
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: uv-${{ runner.os }}-
+
+      # Three tries, in case the GitHub download is needed and times out once.
       - name: Install
-        run: uv sync --frozen
+        run: |
+          for attempt in 1 2 3; do
+            uv sync --frozen && exit 0
+            echo "::warning::install failed (try $attempt of 3)"
+            sleep $((attempt * 30))
+          done
+          exit 1
 
       - name: Lint
         run: uv run --frozen ruff check --output-format=github .
@@ -46,6 +65,12 @@ jobs:
       # The transform tests run the real dbt project on small test data.
       - name: Tests
         run: uv run --frozen pytest -ra
+
+      # Keep only what was built from source (like the dbt parser) for the next run;
+      # wheels from PyPI download quickly again.
+      - name: Trim the cache
+        if: always()
+        run: uv cache prune --ci
 
   web:
     name: Website
