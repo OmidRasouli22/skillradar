@@ -60,11 +60,11 @@ class Extraction(Strict):
     skills: list[SkillMention]
 
 
-def _enum(values: Any) -> dict[str, Any]:
+def enum_schema(values: Any) -> dict[str, Any]:
     return {"type": "string", "enum": list(get_args(values))}
 
 
-def _object(properties: dict[str, Any]) -> dict[str, Any]:
+def object_schema(properties: dict[str, Any]) -> dict[str, Any]:
     return {
         "type": "object",
         "properties": properties,
@@ -73,18 +73,20 @@ def _object(properties: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-OUTPUT_SCHEMA = _object(
+OUTPUT_SCHEMA = object_schema(
     {
-        "role": _enum(Role),
-        "seniority": _enum(Seniority),
-        "remote": _enum(Remote),
+        "role": enum_schema(Role),
+        "seniority": enum_schema(Seniority),
+        "remote": enum_schema(Remote),
         "languages": {
             "type": "array",
-            "items": _object({"language": _enum(Language), "level": _enum(Level)}),
+            "items": object_schema(
+                {"language": enum_schema(Language), "level": enum_schema(Level)}
+            ),
         },
         "skills": {
             "type": "array",
-            "items": _object({"name": {"type": "string"}, "required": {"type": "boolean"}}),
+            "items": object_schema({"name": {"type": "string"}, "required": {"type": "boolean"}}),
         },
     }
 )

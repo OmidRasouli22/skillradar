@@ -1,0 +1,50 @@
+title: Junior frontend developer after a career change
+person: Sofia Marques (fictional)
+language: English
+target: {role: frontend_developer, region: all}
+story: >
+  A junior with a bootcamp and 1.5 years of React work. Tests that design work is not
+  counted as IT experience, that React gives partial credit for Angular and Vue.js, and
+  that a project-only skill (Node.js) counts as project, not work.
+checks:
+  - kind: role
+    values: [frontend_developer]
+    why: Her only IT job is building web user interfaces.
+  - kind: seniority
+    values: [junior]
+    why: About 1.5 years of IT work since 06/2025; graphic design is not IT work.
+  - kind: years
+    min: 1
+    max: 2
+    why: 06/2025 to today (11/2026) is about 1.4 years; freelance design is left out.
+  - kind: language
+    language: German
+    values: [good]
+    why: The CV says German good (B2).
+  - kind: has
+    skills: [React, TypeScript, JavaScript, HTML, CSS, Tailwind CSS, Jest, Git, Scrum]
+    why: All are named in her job or skills list.
+  - kind: lacks
+    skills: [Angular, Vue.js, Next.js]
+    why: The CV never names them.
+  - kind: evidence
+    skill: Node.js
+    values: [project, education]
+    why: Node.js appears only in the bootcamp's final project.
+  - kind: evidence
+    skill: React
+    values: [work]
+    why: She builds features with React in her current job.
+  - kind: best_role
+    values: [frontend_developer, fullstack_developer]
+    top: 3
+    why: Her skills are frontend skills.
+  - kind: covered
+    skill: Angular
+    values: [substitute]
+    via: React
+    why: React and Angular are frameworks for the same job, so React covers Angular partly.
+  - kind: covered
+    skill: JavaScript
+    values: [have, proven]
+    why: JavaScript is on the CV, and TypeScript used at work proves it; either way it is fully covered.

@@ -29,6 +29,7 @@ The technical reference: every part, command and setting. For the short version,
 | Evaluation: sample, review page, report | done |
 | Evaluation: verify the 150 drafted labels | in progress |
 | Pipeline health page (local and public) | done |
+| CV gap analysis (local page, example CVs) | done |
 | Postgres export, hosting | planned |
 | Forecasting | planned |
 
@@ -40,6 +41,7 @@ config/search.yaml      search terms, cities, API settings
 config/skills.yaml      skill list: one name per skill, with category and other spellings
 config/llm.yaml         model, prices, monthly spending limit, daily on/off
 config/site.yaml        public website: on/off, git remote and branch
+config/skill_families.yaml  which skills prove or partly replace others (CV analysis)
 src/skillradar/         Python package
   config.py             typed loader for config/search.yaml
   ingestion/
@@ -61,9 +63,11 @@ src/skillradar/         Python package
                         daily step, quality numbers, silver table rows
   api/                  web API over the gold tables, and the command that starts the page
   evaluate/             labels, scores and the report for the extraction (eval/)
+  cv/                   CV analysis: read a CV, compare it with the postings, example CVs
   publish/              the public website: data files and the push to GitHub Pages
   storage.py            atomic writes, private folders, JSON lines
 web/                    the page (Next.js), built into static files in web/out
+showcase/cv/            example CVs with expected results, and REPORT.md
 transform/              dbt project
   models/staging/       read bronze JSON and run logs
   models/silver/        postings, locations, daily open postings, history, skills
@@ -279,6 +283,68 @@ repository. The page is left out of the public build.
   150 postings an accuracy of 80% is roughly ±6 points.
 
 The report goes to `data/eval/report.json`.
+
+## CV analysis
+
+A panel on the local start page, below the role and region filters (not on the public
+site, which has no server). Add a CV, check and fix what was read, and compare it with
+the open postings of the role and region chosen in the filters. Once a CV is loaded,
+every card in the job list shows its match, and a posting's view shows how the CV
+matches it: the score, its parts and the missing skills, like the "how you match" box on
+job sites. Job sites like Jobscan compare a CV with one job ad at a time; this compares
+it with every open posting, and ranks what to learn by the jobs it would open.
+
+```sh
+uv run skillradar-web                                      # the panel is on the start page
+uv run skillradar-cv read my_cv.pdf --out profile.json     # or on the command line
+uv run skillradar-cv match profile.json --role data_engineer --region BERLIN
+uv run skillradar-cv showcase                              # check the example CVs
+uv run skillradar-cv showcase --refresh                    # read them with Claude again (~$0.025)
+uv run skillradar-cv showcase --stale                      # only those read with an older prompt
+```
+
+**Reading.** A PDF becomes text with pypdf (at most 5 MB and 10 pages; ligatures like
+"ﬂ" are split, so "Airﬂow" is Airflow); the person can fix the text before it is read.
+The call to Claude is streamed with a 60-second stall limit, because a plain call
+sometimes hung for the SDK's full ten minutes. Emails, phone numbers, links and the name at the top are
+replaced before the text goes to Claude (Haiku, about $0.002 a CV, counted in the monthly
+limit). Claude returns a profile like a posting's answer: role, seniority, languages and
+skills, each skill with where it shows (work, project, course, only listed). Like posting
+answers, a product the CV does not name is dropped, and skills the keyword search finds
+but Claude missed are added as "only listed". Two things are left to code, because a
+language model gets them wrong: years of experience come from the jobs' dates (overlaps
+once, working student jobs and apprenticeships left out), and language names are mapped
+to the fixed list. A free "quick read" finds skill names by keyword only. Nothing about
+the CV is saved or logged.
+
+**Comparing** (`cv/match.py`). For each posting with at least three skills:
+`skills × language × seniority`. Skills is the covered weight of the posting's skills
+(required 1, nice to have 0.4). A CV skill counts 1.0 from work, 0.8 from a project, 0.7
+from a course, 0.6 when only listed, and 0.8 times that when last used five or more years
+ago. `config/skill_families.yaml` lists skills that prove a broader one (AWS proves Cloud
+Computing: full credit) and skills that partly replace each other (AWS for Azure: at most
+half). How much a substitute counts is learned from the postings: skills that appear with
+the same other skills count more (`cv/similarity.py`). The same likeness names the known
+skills a missing skill builds on. Language: 1 at the asked level, 0.7 one level short, 0.4
+more. Seniority: 1 at the level, 0.8 one step up, 0.9 one step down, less further. Bands:
+strong 70%+, good 50%+, partial 30%+.
+
+**What to learn next.** For each missing skill asked in at least 3 postings (and 1%): if
+the person learned it in a project (0.8), how many postings would become at least good?
+Reaching fluent German or English is checked the same way. The list is ranked by that
+number, not by how often a skill is asked.
+
+**Example CVs** (`showcase/cv`). Fifteen fictional people, each built to test one thing:
+a strong reference case, a senior with B1 German, a junior after a career change, German
+CVs, a role switch, a team lead, an honest weak match, a CV with a prompt injection, a
+working student, an ML engineer with LLM skills, a freelancer with overlapping projects,
+an IT security analyst, a CV without any dates and a long CV with 16 years and about 50
+skills. `tests/fixtures/cv_two_column.pdf` is a two-column CV printed by Chrome, to test
+reading real PDFs.
+Each `case.yaml` lists checks with the reason a person reading the CV would expect them.
+Profile checks run in the tests on Claude's saved reading (`profile.json`); match checks
+need today's postings and run in `skillradar-cv showcase`, which writes `REPORT.md`. On
+the page, loading an example shows its checks next to the results.
 
 ## Gold tables
 

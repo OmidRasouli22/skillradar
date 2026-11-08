@@ -1,0 +1,36 @@
+title: Short CV without any dates
+person: Sam Example (fictional)
+language: English
+target: {role: backend_developer, region: all}
+story: >
+  Many CVs found online are short and give no dates. Tests that years of experience stay
+  unknown instead of being guessed, that the skills are still read with the right
+  evidence, and that the comparison still works.
+checks:
+  - kind: role
+    values: [backend_developer, devops_engineer, software_engineer]
+    why: Backend services in Go and Python, run on Kubernetes.
+  - kind: seniority
+    values: [unknown, mid]
+    why: Without dates the level is unclear; "several companies" may suggest a professional.
+  - kind: no_years
+    why: The CV gives no dates, so the years must not be guessed.
+  - kind: has
+    skills: [Go, Python, Bash, gRPC, PostgreSQL, Redis, Docker, Kubernetes, Terraform, Linux, GitLab CI, Prometheus, Grafana]
+    why: All are named in the skills list.
+  - kind: evidence
+    skill: Go
+    values: [work, listed]
+    why: Go is in the skills list and described as used at work, without dates.
+  - kind: language
+    language: German
+    values: [basic]
+    why: The CV says German basic.
+  - kind: best_role
+    values: [backend_developer, devops_engineer, software_engineer]
+    top: 3
+    why: His skills are backend and platform skills.
+  - kind: gap
+    skill: German (fluent, C1)
+    top: 5
+    why: With basic German, the language should be one of the most valuable things to improve.

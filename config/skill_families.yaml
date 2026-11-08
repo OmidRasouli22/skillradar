@@ -1,0 +1,82 @@
+# How skills stand in for each other in the CV gap analysis. Every name must be a skill
+# name from config/skills.yaml; a test checks this.
+#
+# implies: a skill that proves a broader one. A CV with AWS has Cloud Computing, a CV
+#          with PostgreSQL has SQL. The broader skill counts as fully covered.
+#
+# families: skills that can largely replace each other, e.g. one cloud platform for
+#           another. A posting that asks for Azure is partly covered by AWS. How much
+#           is learned from the postings: skills that appear in the same kind of jobs
+#           count more (see skillradar.cv.similarity). Never more than half.
+#
+# Skills that only appear together (Python and SQL, Docker and Kubernetes) are not
+# listed here: knowing one does not mean knowing the other.
+
+implies:
+  Cloud Computing: [AWS, Azure, GCP, OpenStack]
+  Containers: [Docker, Kubernetes, OpenShift, Rancher]
+  Kubernetes: [OpenShift, Rancher]
+  Infrastructure as Code: [Terraform, Pulumi, Bicep, Ansible, Puppet]
+  CI/CD: [Jenkins, GitLab CI, GitHub Actions, Azure DevOps, ArgoCD]
+  GitOps: [ArgoCD]
+  SQL: [PostgreSQL, MySQL, MariaDB, Oracle Database, SQL Server, SQLite, DB2, SAP HANA, Snowflake, BigQuery, Redshift, DuckDB]
+  NoSQL: [MongoDB, Cassandra, DynamoDB, Cosmos DB, Neo4j, Redis]
+  Data Warehouse: [Snowflake, BigQuery, Redshift, Synapse, SAP BW]
+  Data Lake: [Delta Lake, Iceberg]
+  ETL: [Airflow, dbt, Talend, Informatica, SSIS, Azure Data Factory, AWS Glue, Dagster, Prefect, NiFi, Fivetran, Airbyte]
+  Machine Learning: [scikit-learn, XGBoost, PyTorch, TensorFlow, Keras]
+  Deep Learning: [PyTorch, TensorFlow, Keras]
+  MLOps: [MLflow, Kubeflow]
+  LLM: [LangChain, LlamaIndex]
+  Monitoring: [Prometheus, Grafana, Datadog, Splunk, Loki]
+  Virtualization: [VMware, Hyper-V, Proxmox, Citrix]
+  Backup: [Veeam]
+  Test Automation: [Selenium, Cypress, Playwright, Cucumber]
+  Shell Scripting: [Bash, PowerShell]
+  Firewalls: [Fortinet]
+  IAM: [Keycloak, Entra ID, Active Directory]
+  REST: [OpenAPI]
+  JavaScript: [TypeScript]
+  Windows: [Windows Server]
+  ERP: [SAP, SAP S/4HANA, Dynamics 365, Business Central]
+  SAP: [SAP S/4HANA, SAP BTP, SAP Fiori, ABAP]
+  RPA: [UiPath]
+  Agile: [Scrum, Kanban, SAFe]
+
+families:
+  - [AWS, Azure, GCP]
+  - [PostgreSQL, MySQL, MariaDB, Oracle Database, SQL Server, DB2, SQLite]
+  - [MongoDB, Cassandra, DynamoDB, Cosmos DB]
+  - [Elasticsearch, OpenSearch]
+  - [Snowflake, BigQuery, Redshift, Synapse, Databricks, Microsoft Fabric]
+  - [Airflow, Dagster, Prefect]
+  - [Talend, Informatica, SSIS, Azure Data Factory, AWS Glue, NiFi]
+  - [Fivetran, Airbyte]
+  - [Spark, Flink]
+  - [Kafka, Kinesis, RabbitMQ]
+  - [Pandas, Polars]
+  - [PyTorch, TensorFlow, Keras]
+  - [LangChain, LlamaIndex]
+  - [Power BI, Tableau, Qlik, Looker]
+  - [React, Angular, Vue.js, Svelte]
+  - [Django, Flask, FastAPI]
+  - [Express, NestJS]
+  - [Spring, Quarkus, Jakarta EE]
+  - [Laravel, Symfony]
+  - [Java, Kotlin, Scala]
+  - [Flutter, React Native]
+  - [Jenkins, GitLab CI, GitHub Actions, Azure DevOps]
+  - [Terraform, Pulumi, Bicep]
+  - [Ansible, Puppet]
+  - [Kubernetes, OpenShift, Rancher]
+  - [Prometheus, Datadog]
+  - [VMware, Hyper-V, Proxmox]
+  - [Selenium, Cypress, Playwright]
+  - [Git, SVN]
+  - [Maven, Gradle]
+  - [Nginx, Apache HTTP Server]
+  - [Dynamics 365, Business Central]
+  - [Microsoft 365, Google Workspace]
+  - [GitHub Copilot, Cursor, Claude Code, Codex]
+  - [Scrum, Kanban, SAFe]
+  - [Visual Studio, VS Code, Eclipse]

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getPostings, type PostingCard } from "@/lib/api";
-import { count, day } from "@/lib/format";
+import { band } from "@/lib/cv";
+import { count, day, percent } from "@/lib/format";
 import { label, REMOTE, SENIORITY } from "@/lib/labels";
 import type { Origin } from "./JobDialog";
 
@@ -15,8 +16,10 @@ export function JobList(props: {
   title: string;
   active: string | null;
   onOpen: (refnr: string, origin: Origin) => void;
+  // How well the CV matches each posting, when a CV is loaded (local page only).
+  scores?: Record<string, number>;
 }) {
-  const { role, region, title, active, onOpen } = props;
+  const { role, region, title, active, onOpen, scores } = props;
   const key = `${role}|${region}`;
   const [page, setPage] = useState<Page | null>(null);
   const [offset, setOffset] = useState<{ key: string; value: number }>({ key, value: 0 });
@@ -62,6 +65,14 @@ export function JobList(props: {
                   onOpen(job.refnr, { x: box.left, y: box.top, width: box.width, height: box.height });
                 }}
               >
+                {scores && (
+                  <span
+                    className={`job-match ${scores[job.refnr] === undefined ? "none" : band(scores[job.refnr])}`}
+                    title={scores[job.refnr] === undefined ? "Names too few skills to compare" : "How well your CV matches"}
+                  >
+                    {scores[job.refnr] === undefined ? "–" : percent(scores[job.refnr])}
+                  </span>
+                )}
                 <span className="job-title">{job.title}</span>
                 <span className="job-meta">
                   {[job.employer, job.city].filter(Boolean).join(" · ")}

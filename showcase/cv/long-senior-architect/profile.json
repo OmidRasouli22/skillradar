@@ -1,0 +1,423 @@
+{
+  "read_at": "2026-11-08T11:47:14+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.003127,
+  "notes": [
+    "Added 3 skill(s) found by keyword search: Docker, Jakarta EE, OpenShift."
+  ],
+  "profile": {
+    "headline": "Principal Software Architect",
+    "role": "backend_developer",
+    "seniority": "lead",
+    "years_experience": 16.2,
+    "languages": [
+      {
+        "language": "German",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      },
+      {
+        "language": "French",
+        "level": "basic"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Java",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2016,
+        "context": "Java EE and Spring development, Alsterwerk and Hanse, 2010-2016",
+        "source": "claude"
+      },
+      {
+        "name": "Kotlin",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Checkout services in Kotlin, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "TypeScript",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "React and TypeScript frontend, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Go",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "Python",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2013,
+        "context": "SQL and stored procedures on Oracle, Alsterwerk IT, 2010-2013",
+        "source": "claude"
+      },
+      {
+        "name": "C++",
+        "evidence": "project",
+        "years": 4.0,
+        "last_used": 2010,
+        "context": "Prototypes for database research, Universität Hamburg, 2006-2010",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "EKS platform at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Azure",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Hosting migrated to Azure, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Services on AWS EKS, Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Containers",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Containers on Azure Kubernetes Service, Nordlicht Commerce",
+        "source": "claude"
+      },
+      {
+        "name": "Terraform",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Platform standards at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Helm",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Platform standards at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "ArgoCD",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "GitOps with ArgoCD, Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "GitOps",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "GitOps setup, Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Checkout data, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Oracle Database",
+        "evidence": "work",
+        "years": 6.0,
+        "last_used": 2016,
+        "context": "Oracle Database in public sector and insurance projects, 2010-2016",
+        "source": "claude"
+      },
+      {
+        "name": "MongoDB",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Hanse Digital Services, 2013-2016",
+        "source": "claude"
+      },
+      {
+        "name": "Redis",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Checkout services, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Kafka",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Event-driven microservices with Kafka, Elbbrücke, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "RabbitMQ",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Asynchronous processing, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Elasticsearch",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Marketplace search, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "React",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Frontend architecture, Nordlicht Commerce, 2017-2021",
+        "source": "claude"
+      },
+      {
+        "name": "Angular",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Angular frontends, Hanse Digital Services, 2013-2016",
+        "source": "claude"
+      },
+      {
+        "name": "Spring",
+        "evidence": "work",
+        "years": 7.0,
+        "last_used": 2021,
+        "context": "Spring and Spring Boot, Hanse and Nordlicht, 2013-2021",
+        "source": "claude"
+      },
+      {
+        "name": "JUnit",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Test automation, Hanse Digital Services, 2013-2016",
+        "source": "claude"
+      },
+      {
+        "name": "Cypress",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Test automation, Hanse Digital Services, 2013-2016",
+        "source": "claude"
+      },
+      {
+        "name": "SonarQube",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Quality gates in Jenkins, Hanse Digital Services",
+        "source": "claude"
+      },
+      {
+        "name": "Jenkins",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "Quality gates in Jenkins, Hanse Digital Services",
+        "source": "claude"
+      },
+      {
+        "name": "Prometheus",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Observability, named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "Grafana",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Observability, named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "Microservices",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Target architecture at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Event-Driven Architecture",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Kafka-based architecture at Elbbrücke Logistics",
+        "source": "claude"
+      },
+      {
+        "name": "Domain-Driven Design",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "DDD workshops at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "API guidelines at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "gRPC",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Internal APIs at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "GraphQL",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "OpenAPI",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "API guidelines at Elbbrücke Logistics, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "Software Architecture",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2026,
+        "context": "Principal Software Architect, Elbbrücke, 2021-present",
+        "source": "claude"
+      },
+      {
+        "name": "TDD",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "Test Automation",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2016,
+        "context": "JUnit and Cypress, Hanse Digital Services, 2013-2016",
+        "source": "claude"
+      },
+      {
+        "name": "Scrum",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2013,
+        "context": "Developer in a Scrum team, Alsterwerk IT, 2010-2013",
+        "source": "claude"
+      },
+      {
+        "name": "SAFe",
+        "evidence": "work",
+        "years": 4.0,
+        "last_used": 2021,
+        "context": "Introduced SAFe for 8 teams, Nordlicht Commerce",
+        "source": "claude"
+      },
+      {
+        "name": "Kanban",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "Requirements Engineering",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in core competencies",
+        "source": "claude"
+      },
+      {
+        "name": "TOGAF",
+        "evidence": "education",
+        "years": null,
+        "last_used": 2018,
+        "context": "TOGAF 9 certificate, 2018",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      },
+      {
+        "name": "Jakarta EE",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      },
+      {
+        "name": "OpenShift",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "",
+        "source": "keyword"
+      }
+    ]
+  }
+}

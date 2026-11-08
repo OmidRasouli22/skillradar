@@ -1,0 +1,189 @@
+{
+  "read_at": "2026-11-08T10:49:20+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001924,
+  "notes": [],
+  "profile": {
+    "headline": "Senior Backend Engineer",
+    "role": "backend_developer",
+    "seniority": "senior",
+    "years_experience": 7.2,
+    "languages": [
+      {
+        "language": "Other",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      },
+      {
+        "language": "German",
+        "level": "basic"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Java",
+        "evidence": "work",
+        "years": 6.5,
+        "last_used": 2026,
+        "context": "Senior Backend Engineer at Lumen Payments, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Spring",
+        "evidence": "work",
+        "years": 6.5,
+        "last_used": 2026,
+        "context": "Spring Boot microservices at Lumen; Spring at Parsian, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "Hibernate",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2023,
+        "context": "Backend Developer at Parsian Software, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "REST APIs for payment microservices at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "OpenAPI",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "REST APIs described in OpenAPI at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Microservices",
+        "evidence": "work",
+        "years": 6.5,
+        "last_used": 2026,
+        "context": "Split monolith at Parsian; payment microservices at Lumen",
+        "source": "claude"
+      },
+      {
+        "name": "Event-Driven Architecture",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Card transaction processing at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Kafka",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "About 5 million card transaction events a day at Lumen",
+        "source": "claude"
+      },
+      {
+        "name": "PostgreSQL",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Schema design and query tuning at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "MySQL",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2023,
+        "context": "Maintained MySQL databases at Parsian, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "SQL",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2023,
+        "context": "Complex SQL reports at Parsian, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "Redis",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Caching at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Docker",
+        "evidence": "work",
+        "years": 6.5,
+        "last_used": 2026,
+        "context": "Introduced at Parsian; services on Docker at Lumen",
+        "source": "claude"
+      },
+      {
+        "name": "Kubernetes",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Services on Kubernetes (AWS EKS) at Lumen",
+        "source": "claude"
+      },
+      {
+        "name": "AWS",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "AWS EKS deployments at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "Jenkins",
+        "evidence": "work",
+        "years": 3.0,
+        "last_used": 2026,
+        "context": "Deployment pipelines at Lumen, 2023-present",
+        "source": "claude"
+      },
+      {
+        "name": "JUnit",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2023,
+        "context": "Automated tests at Parsian, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "Test Automation",
+        "evidence": "work",
+        "years": 3.3,
+        "last_used": 2023,
+        "context": "Automated tests introduced at Parsian, 2019-2023",
+        "source": "claude"
+      },
+      {
+        "name": "Maven",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in technical skills list",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "listed",
+        "years": null,
+        "last_used": null,
+        "context": "Named in technical skills list",
+        "source": "claude"
+      }
+    ]
+  }
+}

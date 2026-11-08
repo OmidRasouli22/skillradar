@@ -1,0 +1,141 @@
+{
+  "read_at": "2026-11-08T11:05:54+00:00",
+  "model": "claude-haiku-5-5",
+  "prompt_version": "cv3",
+  "cost_usd": 0.001636,
+  "notes": [],
+  "profile": {
+    "headline": "Junior Frontend Developer",
+    "role": "frontend_developer",
+    "seniority": "junior",
+    "years_experience": 1.5,
+    "languages": [
+      {
+        "language": "Portuguese",
+        "level": "native"
+      },
+      {
+        "language": "English",
+        "level": "fluent"
+      },
+      {
+        "language": "German",
+        "level": "good"
+      }
+    ],
+    "skills": [
+      {
+        "name": "JavaScript",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Junior Frontend Developer at Elbkante Digital, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "TypeScript",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Junior Frontend Developer at Elbkante Digital, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "React",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Junior Frontend Developer at Elbkante Digital, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "HTML",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Responsive layouts from Figma designs, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "CSS",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Responsive layouts from Figma designs, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Tailwind CSS",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Responsive layouts from Figma designs, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Jest",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Unit tests at Elbkante Digital, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Git",
+        "evidence": "work",
+        "years": 2.0,
+        "last_used": 2026,
+        "context": "Elbkante Digital, 2025-present; bootcamp 2024",
+        "source": "claude"
+      },
+      {
+        "name": "Jira",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Ticket tracking at Elbkante Digital, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Figma",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Implemented layouts from Figma designs, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "Scrum",
+        "evidence": "work",
+        "years": 1.0,
+        "last_used": 2026,
+        "context": "Scrum team with two-week sprints, 2025-present",
+        "source": "claude"
+      },
+      {
+        "name": "WordPress",
+        "evidence": "work",
+        "years": 5.0,
+        "last_used": 2024,
+        "context": "Freelance Graphic Designer, simple WordPress websites, 2019-2024",
+        "source": "claude"
+      },
+      {
+        "name": "REST",
+        "evidence": "education",
+        "years": null,
+        "last_used": 2024,
+        "context": "Le Wagon Web Development Bootcamp, REST APIs",
+        "source": "claude"
+      },
+      {
+        "name": "Node.js",
+        "evidence": "project",
+        "years": 0.5,
+        "last_used": 2024,
+        "context": "Team final project with Node.js API, Le Wagon 2024",
+        "source": "claude"
+      }
+    ]
+  }
+}
