@@ -146,3 +146,14 @@ def test_review_page_is_served(tmp_path):
     (page / "label.html").write_text("review")
     client = TestClient(create_app(tmp_path, web_build=page, labels=tmp_path / "l.jsonl"))
     assert client.get("/label").text == "review"
+
+
+def test_health_api_and_page(tmp_path):
+    page = tmp_path / "out"
+    page.mkdir()
+    (page / "index.html").write_text("start")
+    (page / "health.html").write_text("health page")
+    client = TestClient(create_app(tmp_path, web_build=page, labels=tmp_path / "l.jsonl"))
+    assert client.get("/health").text == "health page"
+    body = client.get("/api/health").json()
+    assert body["freshness"]["state"] == "stale" and body["runs"] == []

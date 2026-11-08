@@ -96,6 +96,9 @@ class TestCli:
         site = tmp_path / "site"
         assert (site / "index.html").exists() and (site / "_next" / "app.js").exists()
         assert (site / ".nojekyll").exists() and (site / "data" / "overview.json").exists()
+        health = json.loads((site / "data" / "health.json").read_text())
+        assert health["freshness"]["state"] == "stale"  # no run logs in this test
+        assert str(tmp_path) not in json.dumps(health)
         assert "not pushed" in capsys.readouterr().out
 
     def test_old_files_are_removed(self, tmp_path, page, monkeypatch):
