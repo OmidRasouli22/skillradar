@@ -1,0 +1,4 @@
+:HL["/skillradar/_next/static/chunks/1si4tj61iubhp.css","style"]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
+0:{"b":"F4aqCyWe86UMJspKFgrQf","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
